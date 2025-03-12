@@ -1,0 +1,124 @@
+
+.header {
+  background-color: #162F65;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  height: 45px;
+  padding: 0;
+}
+
+.home-button {
+  background-color: #162F65;
+  border-radius: 5px;
+  box-shadow: #162F65;
+  width: 100%;
+  height: auto;
+  color: white;
+  
+}
+
+/* Header - Place Logo & System Name on the Left */
+.logo-container {
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  float: left;
+  width: 35px;
+  height: auto;
+  margin-right: 8px;
+  margin-left: 10px;
+  border-radius: 50px;
+  margin-bottom: 4px;
+}
+
+.system-name {
+  margin-left: 5px;
+  margin-top: 5px;
+  font-size: 25px;
+  font-weight: bold;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Main Content */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* Login Form Container */
+.form-container {
+ 
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  border: 1px solid rgba(209, 213, 219, 0.3);
+  width: 90%;
+  max-width: 400px;
+  margin-top: 20px;
+  padding: 20px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  display: block; /* Fallback for older browsers */
+}
+
+/* School Logo inside the Form */
+.school-logo {
+  width: 90px;
+  height: auto;
+  border-radius: 50px;
+}
+
+/* Input fields */
+.form-control {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  text-align: left;
+}
+
+/* Ensure the form labels are aligned left */
+.form-label {
+  text-align: left;
+  display: block;
+  width: 100%;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .logo {
+    margin-bottom: 5px;
+    width: 40px;
+  }
+
+  .system-name {
+    font-size: 20px;
+  }
+
+  .form-container {
+    width: 100%;
+    padding: 15px;
+  }
+
+  .home-button {
+    width: 90%; /* Slightly smaller for better UI */
+  }
+}
+
