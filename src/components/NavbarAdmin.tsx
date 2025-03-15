@@ -7,10 +7,14 @@ export const NavbarAdmin = () => {
   return (
     <div className="admin-header">
       <div className="admin-navbar">
-        <img src={logoValid8} alt="Valid 8 logo" className="logo" />
-        <h1 className="page-name">Admin</h1>
-        <div className="admin-menu">
-          <ul>
+        {/* Left Section: Logo and Page Title */}
+        <div className="admin-navbar-left">
+          <img src={logoValid8} alt="Valid 8 logo" className="logo" />
+          <h1 className="admin-page-name">Admin</h1>
+        </div>
+        {/* Center Section: Navigation Links */}
+        <div className="admin-navbar-center">
+          <ul className="admin-menu">
             <li>
               <Link to="/admin_events" className="admin-navigation-link">
                 Events
@@ -26,19 +30,24 @@ export const NavbarAdmin = () => {
                 Manage Users
               </Link>
             </li>
-            <li>
-              <Link to="/admin_profile" className="admin-profile-link">
-                <img
-                  src={userprofile}
-                  alt="user profile"
-                  className="admin-userprofile"
-                />
-                Profile
-              </Link>
-            </li>
           </ul>
+        </div>
+        {/* Right Section: User Profile */}
+        <div className="admin-navbar-right">
+          <div className="admin-profile-container">
+            <Link to="/admin_profile" className="admin-profile-link">
+              <img
+                src={userprofile}
+                alt="user profile"
+                className="admin-userprofile"
+              />
+              Profile
+            </Link>
+          </div>
         </div>
       </div>
     </div>
   );
 };
+
+export default NavbarAdmin;

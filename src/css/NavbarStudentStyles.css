@@ -5,6 +5,15 @@
   height: 45px; /* Kept exactly 45px */
   display: flex;
   align-items: center;
+  justify-content: space-between; /* Distributes items: left, center, right */
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+/* Navbar Left Section */
+.navbar-left {
+  display: flex;
+  align-items: center;
 }
 
 /* Logo */
@@ -12,7 +21,7 @@
   width: 35px;
   height: auto;
   border-radius: 50px;
-  margin-right: 8px;
+  margin-right: 5px;
   margin-left: 10px;
   margin-bottom: 2px;
   margin-top: 4px;
@@ -20,39 +29,39 @@
 
 /* Page Title */
 .page-name {
+  margin-top: 10px;
   font-size: 25px;
   font-weight: bold;
   color: white;
   font-family: Arial, Helvetica, sans-serif;
   margin-right: auto;
-  margin-top: 5px;
-  margin-left: 5px;
+  margin-left: 2px;
+  text-align: center;
 }
 
-/* Navigation Menu */
-.student-menu {
-  margin-left: 15z0px;
+/* Navbar Center Section */
+.navbar-center {
+  flex-grow: 1;
   display: flex;
-  justify-content: center;
-  width: 100%;
-  margin-top: 12px;
+  justify-content: center; /* Centers navigation links */
 }
 
-/* List */
-ul {
+/* Navigation Menu (Center) */
+.nav-menu {
   display: flex;
   align-items: center;
   padding: 0;
 }
 
-ul li {
+.nav-menu li {
   list-style: none;
   margin: 0 15px;
-  margin-left: 20px;
+  margin-top: 10px;
 }
 
 /* Navigation Links */
-.navigation-link {
+.student-navigation-link {
+  margin-top: 5px;
   text-decoration: none;
   color: white;
   font-size: 12px;
@@ -62,27 +71,37 @@ ul li {
   transition: 0.3s ease;
 }
 
-.navigation-link:hover {
+.student-navigation-link:hover {
   color: yellow;
 }
 
-/* Keep clicked link highlighted */
-.navigation-link.active {
+.student-navigation-link.active {
   background-color: yellow;
   color: #162f65;
   font-weight: bold;
 }
 
-/* User Profile */
-.userprofile {
+/* Navbar Right Section */
+.navbar-right {
+  display: flex;
+  align-items: center;
+}
+
+/* User Profile Container */
+.student-profile-container {
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+/* User Profile Icon */
+.student-userprofile {
   width: 20px;
-  margin-left: 200px;
   margin-right: 5px;
-  margin-top: 0;
 }
 
 /* Profile Link */
-.profile-link {
+.student-profile-link {
   text-decoration: none;
   color: white;
   font-size: 12px;
@@ -92,52 +111,51 @@ ul li {
 /* ✅ Mobile Responsiveness */
 @media screen and (max-width: 768px) {
   .student-navbar {
-    flex-direction: column;
+    flex-direction: column; /* Stack sections vertically */
     align-items: center;
-    height: auto; /* Does NOT change the original height */
-    padding: 5px 0;
+    height: auto;
+    padding: 10px 0;
   }
 
-  .student-menu {
-    margin-left: 0; /* Centers the menu */
-    margin-top: 5px;
-  }
-
-  ul {
-    flex-direction: column;
+  .navbar-left,
+  .navbar-center,
+  .navbar-right {
+    width: 100%;
     text-align: center;
+    justify-content: center;
   }
 
-  ul li {
+  .nav-menu {
+  
+    flex-direction: column; /* Vertical list */
+  }
+
+  .nav-menu li {
+   
     margin: 5px 0;
   }
 
-  .navigation-link,
-  .profile-link {
+  .student-navigation-link,
+  .student-profile-link {
     font-size: 14px;
     display: block;
     width: 100%;
     text-align: center;
   }
 
-  .userprofile {
+  .student-userprofile {
     width: 30px;
-    margin-left: 0;
   }
 }
 
 /* ✅ Tablet Responsiveness */
 @media screen and (max-width: 1024px) {
-  .student-menu {
-    margin-left: 100px; /* Slight adjustment, but still keeps your spacing */
-  }
-
-  .navigation-link,
-  .profile-link {
+  .student-navigation-link,
+  .student-profile-link {
     font-size: 13px;
   }
 
-  .userprofile {
+  .student-userprofile {
     width: 25px;
   }
 }

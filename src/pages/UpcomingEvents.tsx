@@ -18,13 +18,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
         <NavbarStudent />
       )}
 
-      <h1>
-        {role === "student-ssg"
-          ? "SSG Upcoming Events"
-          : role === "student-ssg-eventorganizer"
-          ? "SSG & Event Organizer Upcoming Events"
-          : "Upcoming Events"}
-      </h1>
+      <h1>Upcoming Events</h1>
     </div>
   );
 };

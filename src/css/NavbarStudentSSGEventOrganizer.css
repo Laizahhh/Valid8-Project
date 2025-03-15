@@ -1,146 +1,165 @@
-/* Navbar */
-.student-ssg-eventorganizer-navbar{
-    background-color: #162f65;
-    width: 100%;
-    height: 45px; /* Kept exactly 45px */
-    display: flex;
-    align-items: center;
-  }
-  
-  /* Logo */
-  .logo {
-    width: 35px;
-    height: auto;
-    border-radius: 50px;
-    margin-right: 8px;
-    margin-left: 10px;
-    margin-bottom: 2px;
-    margin-top: 4px;
-  }
-  
-  /* Page Title */
-  .student-ssg-eventorganizer-page-name {
-    font-size: 12px;
-    font-weight: bold;
-    color: white;
-    font-family: Arial, Helvetica, sans-serif;
-    margin-right: auto;
-    margin-top: 5px;
-    margin-left: 5px;
-  }
-  
-  /* Navigation Menu */
-  .student-ssg-eventorganizer-menu {
-    margin-left: 10px;
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-top: 12px;
-  }
-  
-  /* List */
-  ul {
-    display: flex;
-    align-items: center;
-    padding: 0;
-  }
-  
-  ul li {
-    list-style: none;
-    margin: 0 15px;
-    margin-left: 5px;
-  }
-  
-  /* Navigation Links */
-  .student-ssg-eventorganizer-navigation-link {
-    text-decoration: none;
-    color: white;
-    font-size: 12px;
-    font-family: Arial, Helvetica, sans-serif;
-    padding: 5px 10px;
-    border-radius: 5px;
-    transition: 0.3s ease;
-  }
-  
-  .student-ssg-eventorganizer-navigation-link:hover {
-    color: yellow;
-  }
-  
-  /* Keep clicked link highlighted */
-  .student-ssg-eventorganizer-navigation-link.active {
-    background-color: yellow;
-    color: #162f65;
-    font-weight: bold;
-  }
-  
-  /* User Profile */
-  .student-ssg-eventorganizer-userprofile {
-    width: 20px;
-    margin-left: 10px;
-    margin-right: 5px;
-    margin-top: 0;
-  }
-  
-  /* Profile Link */
-  .student-ssg-eventorganizer-profile-link {
-    text-decoration: none;
-    color: white;
-    font-size: 12px;
-    font-family: Arial, Helvetica, sans-serif;
-  }
-  
+/* Container for the entire header – ensures fixed height */
+.studentssg-eventorganizer-header {
+  width: 100%;
+  background-color: #162f65;
+  box-sizing: border-box;
+  overflow: hidden;
+}
 
-  
-  /* ✅ Mobile Responsiveness */
-  @media screen and (max-width: 768px) {
-    .student-navbar {
-      flex-direction: column;
-      align-items: center;
-      height: auto; /* Does NOT change the original height */
-      padding: 5px 0;
-    }
-  
-    .student-menu {
-      margin-left: 0; /* Centers the menu */
-      margin-top: 5px;
-    }
-  
-    ul {
-      flex-direction: column;
-      text-align: center;
-    }
-  
-    ul li {
-      margin: 5px 0;
-    }
-  
-    .navigation-link,
-    .profile-link {
-      font-size: 14px;
-      display: block;
-      width: 100%;
-      text-align: center;
-    }
-  
-    .userprofile {
-      width: 30px;
-      margin-left: 0;
-    }
+/* StudentSSGEventOrganizer Navbar */
+.studentssg-eventorganizer-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  height: 45px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Navbar Left Section */
+.studentssg-eventorganizer-navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+/* Logo */
+.studentssg-eventorganizer-navbar .logo {
+  width: 35px;
+  height: auto;
+  border-radius: 50px;
+  margin-right: 8px;
+  margin-left: 10px;
+}
+
+/* Page Title */
+.studentssg-eventorganizer-page-name {
+  font-family: Arial, Helvetica, sans-serif;
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  margin-right: auto;
+  margin-left: 2px;
+  text-align: center;
+}
+
+/* Navbar Center Section */
+.studentssg-eventorganizer-navbar-center {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Navigation Menu */
+.studentssg-eventorganizer-menu {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  flex-wrap: nowrap;
+}
+
+.studentssg-eventorganizer-menu li {
+  list-style: none;
+  margin: 0 10px;
+}
+
+/* Navigation Links */
+.studentssg-eventorganizer-navigation-link {
+  text-decoration: none;
+  color: white;
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: 0.3s ease;
+}
+
+.studentssg-eventorganizer-navigation-link:hover {
+  color: yellow;
+}
+
+.studentssg-eventorganizer-navigation-link.active {
+  background-color: yellow;
+  color: #162f65;
+  font-weight: bold;
+}
+
+/* Navbar Right Section */
+.studentssg-eventorganizer-navbar-right {
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+/* User Profile */
+.studentssg-eventorganizer-userprofile {
+  width: 20px;
+  margin-right: 5px;
+}
+
+/* Profile Link */
+.studentssg-eventorganizer-profile-link {
+  text-decoration: none;
+  color: white;
+  font-size: 12px;
+}
+
+/* ✅ RESPONSIVE DESIGN */
+
+/* Tablet View */
+@media screen and (max-width: 1024px) {
+  .studentssg-eventorganizer-navbar {
+    flex-direction: column; 
+    height: auto;  
+    padding: 10px 0;
   }
-  
-  /* ✅ Tablet Responsiveness */
-  @media screen and (max-width: 1024px) {
-    .student-menu {
-      margin-left: 100px; /* Slight adjustment, but still keeps your spacing */
-    }
-  
-    .navigation-link,
-    .profile-link {
-      font-size: 13px;
-    }
-  
-    .userprofile {
-      width: 25px;
-    }
+
+  .studentssg-eventorganizer-navbar-left,
+  .studentssg-eventorganizer-navbar-center,
+  .studentssg-eventorganizer-navbar-right {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
   }
-  
+
+  .studentssg-eventorganizer-menu {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .studentssg-eventorganizer-menu li {
+    margin: 5px 0;
+  }
+
+  .studentssg-eventorganizer-navigation-link {
+    width: 100%;
+    text-align: center;
+    padding: 8px 0;
+  }
+}
+
+/* Mobile View */
+@media screen and (max-width: 768px) {
+  .studentssg-eventorganizer-navbar {
+    flex-direction: column;
+    height: auto;
+    padding: 10px 0;
+  }
+
+  .studentssg-eventorganizer-menu {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .studentssg-eventorganizer-menu li {
+    margin: 5px 0;
+  }
+
+  .studentssg-eventorganizer-navigation-link {
+    width: 100%;
+    text-align: center;
+    padding: 8px 0;
+  }
+}

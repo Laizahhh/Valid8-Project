@@ -18,13 +18,7 @@ export const EventsAttended: React.FC<EventsAttendedProps> = ({ role }) => {
         <NavbarStudent />
       )}
 
-      <h1>
-        {role === "student-ssg"
-          ? "SSG Events Attended"
-          : role === "student-ssg-eventorganizer"
-          ? "SSG & Event Organizer Events Attended"
-          : "Events Attended"}
-      </h1>
+      <h1>Events Attended</h1>
     </div>
   );
 };

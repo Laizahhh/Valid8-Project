@@ -1,10 +1,6 @@
 import { NavbarAdmin } from "../components/NavbarAdmin";
 
-interface ReportsProps {
-  role: string;
-}
-
-export const Reports: React.FC<ReportsProps> = ({ role }) => {
+export const Reports: React.FC = () => {
   return (
     <div>
       {/* Admin Navbar Only */}
