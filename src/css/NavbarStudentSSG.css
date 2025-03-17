@@ -57,7 +57,7 @@
 
 .studentssg-menu li {
   list-style: none;
-  margin: 0 15px;
+  margin: 0 5px;
   /* You can adjust margins as needed */
 }
 
@@ -74,17 +74,21 @@
 }
 
 .studentssg-navigation-link:hover {
-  color: yellow;
+  background-color: rgba(0, 0, 0, 0.1); /* Faded gray effect */
+  border-radius: 5px;
 }
 
 .studentssg-navigation-link.active {
-  background-color: yellow;
-  color: #162f65;
-  font-weight: bold;
+  background-color: rgba(0, 0, 0, 0.1); /* Faded gray effect */
+  border-radius: 5px;
+  color: #ffffff; /* Ensure text stays white for visibility */
+  font-weight: bold; /* Emphasize active state */
 }
 
 /* Navbar Right Section */
-.studentssg-navbar-right {
+.studentssg-navbar-right:hover {
+  background-color: rgba(0, 0, 0, 0.1); /* Faded gray effect */
+  border-radius: 5px;
   display: flex;
   align-items: center;
 }

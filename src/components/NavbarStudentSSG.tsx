@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
 import "../css/NavbarStudentSSG.css";
 import userprofile from "../assets/images/userprofile.png";
@@ -14,70 +14,89 @@ export const NavbarStudentSSG = () => {
             Student <br /> Officer
           </h1>
         </div>
+
         {/* Center Section: Navigation Links */}
         <div className="studentssg-navbar-center">
           <ul className="studentssg-menu">
             <li>
-              <Link
+              <NavLink
                 to="/studentssg_home"
-                className="studentssg-navigation-link"
+                className={({ isActive }) =>
+                  `studentssg-navigation-link ${isActive ? "active" : ""}`
+                }
               >
                 Home
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/studentssg_upcoming_events"
-                className="studentssg-navigation-link"
+                className={({ isActive }) =>
+                  `studentssg-navigation-link ${isActive ? "active" : ""}`
+                }
               >
                 Upcoming Events
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/studentssg_events_attended"
-                className="studentssg-navigation-link"
+                className={({ isActive }) =>
+                  `studentssg-navigation-link ${isActive ? "active" : ""}`
+                }
               >
                 Events Attended
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/studentssg_events"
-                className="studentssg-navigation-link"
+                className={({ isActive }) =>
+                  `studentssg-navigation-link ${isActive ? "active" : ""}`
+                }
               >
                 Events
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/studentssg_attendance"
-                className="studentssg-navigation-link"
+                className={({ isActive }) =>
+                  `studentssg-navigation-link ${isActive ? "active" : ""}`
+                }
               >
                 Attendance
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/studentssg_records"
-                className="studentssg-navigation-link"
+                className={({ isActive }) =>
+                  `studentssg-navigation-link ${isActive ? "active" : ""}`
+                }
               >
                 Records
-              </Link>
+              </NavLink>
             </li>
           </ul>
         </div>
+
         {/* Right Section: User Profile */}
         <div className="studentssg-navbar-right">
           <div className="studentssg-profile-container">
-            <Link to="/studentssg_profile" className="studentssg-profile-link">
+            <NavLink
+              to="/studentssg_profile"
+              className={({ isActive }) =>
+                `studentssg-profile-link ${isActive ? "active" : ""}`
+              }
+            >
               <img
                 src={userprofile}
                 alt="user profile"
                 className="studentssg-userprofile"
               />
               Profile
-            </Link>
+            </NavLink>
           </div>
         </div>
       </div>

@@ -1,10 +1,11 @@
 import { NavbarStudentSSG } from "../components/NavbarStudentSSG";
-
+import { Welcome } from "../pages/Welcome";
+("../pages/Welcome");
 export const StudentSsgDashboard = () => {
   return (
     <div>
       <NavbarStudentSSG />
-      <h1>Welcome to Valid8</h1>
+      <Welcome />
     </div>
   );
 };

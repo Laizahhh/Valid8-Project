@@ -72,19 +72,26 @@
 }
 
 .student-navigation-link:hover {
-  color: yellow;
+  background-color: rgba(0, 0, 0, 0.1); /* Faded gray effect */
+  border-radius: 5px;
 }
 
 .student-navigation-link.active {
-  background-color: yellow;
-  color: #162f65;
-  font-weight: bold;
+  background-color: rgba(0, 0, 0, 0.1); /* Faded gray effect */
+  border-radius: 5px;
+  color: #ffffff; /* Ensure text stays white for visibility */
+  font-weight: bold; /* Emphasize active state */
 }
 
 /* Navbar Right Section */
 .navbar-right {
   display: flex;
   align-items: center;
+}
+
+.navbar-right:hover{
+  background-color: rgba(0, 0, 0, 0.1); /* Faded gray effect */
+  border-radius: 5px;
 }
 
 /* User Profile Container */

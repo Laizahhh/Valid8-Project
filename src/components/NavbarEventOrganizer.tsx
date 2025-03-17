@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
 import "../css/NavbarEventOrganizer.css";
 import userprofile from "../assets/images/userprofile.png";
@@ -12,41 +12,51 @@ export const NavbarEventOrganizer = () => {
           <img src={logoValid8} alt="Valid 8 logo" className="logo" />
           <h1 className="event-organizer-page-name">Event Organizer</h1>
         </div>
+
         {/* Center Section: Navigation Links */}
         <div className="event-organizer-navbar-center">
           <ul className="event-organizer-menu">
             <li>
-              <Link
+              <NavLink
                 to="/event_organizer_home"
-                className="event-organizer-navigation-link"
+                className={({ isActive }) =>
+                  `event-organizer-navigation-link ${isActive ? "active" : ""}`
+                }
               >
                 Home
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/event_organizer_create_event"
-                className="event-organizer-navigation-link"
+                className={({ isActive }) =>
+                  `event-organizer-navigation-link ${isActive ? "active" : ""}`
+                }
               >
                 Create Event
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/event_organizer_manage_event"
-                className="event-organizer-navigation-link"
+                className={({ isActive }) =>
+                  `event-organizer-navigation-link ${isActive ? "active" : ""}`
+                }
               >
                 Manage Event
-              </Link>
+              </NavLink>
             </li>
           </ul>
         </div>
+
         {/* Right Section: User Profile */}
         <div className="event-organizer-navbar-right">
           <div className="event-organizer-profile-container">
-            <Link
+            <NavLink
               to="/event_organizer_profile"
-              className="event-organizer-profile-link"
+              className={({ isActive }) =>
+                `event-organizer-profile-link ${isActive ? "active" : ""}`
+              }
             >
               <img
                 src={userprofile}
@@ -54,7 +64,7 @@ export const NavbarEventOrganizer = () => {
                 className="event-organizer-userprofile"
               />
               Profile
-            </Link>
+            </NavLink>
           </div>
         </div>
       </div>

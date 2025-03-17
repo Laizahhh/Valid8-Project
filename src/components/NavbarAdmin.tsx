@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
 import "../css/NavbarAdmin.css";
 import userprofile from "../assets/images/userprofile.png";
@@ -12,37 +12,59 @@ export const NavbarAdmin = () => {
           <img src={logoValid8} alt="Valid 8 logo" className="logo" />
           <h1 className="admin-page-name">Admin</h1>
         </div>
+
         {/* Center Section: Navigation Links */}
         <div className="admin-navbar-center">
           <ul className="admin-menu">
             <li>
-              <Link to="/admin_events" className="admin-navigation-link">
+              <NavLink
+                to="/admin_events"
+                className={({ isActive }) =>
+                  `admin-navigation-link ${isActive ? "active" : ""}`
+                }
+              >
                 Events
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link to="/admin_reports" className="admin-navigation-link">
+              <NavLink
+                to="/admin_reports"
+                className={({ isActive }) =>
+                  `admin-navigation-link ${isActive ? "active" : ""}`
+                }
+              >
                 Reports
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link to="/admin_manage_users" className="admin-navigation-link">
+              <NavLink
+                to="/admin_manage_users"
+                className={({ isActive }) =>
+                  `admin-navigation-link ${isActive ? "active" : ""}`
+                }
+              >
                 Manage Users
-              </Link>
+              </NavLink>
             </li>
           </ul>
         </div>
+
         {/* Right Section: User Profile */}
         <div className="admin-navbar-right">
           <div className="admin-profile-container">
-            <Link to="/admin_profile" className="admin-profile-link">
+            <NavLink
+              to="/admin_profile"
+              className={({ isActive }) =>
+                `admin-profile-link ${isActive ? "active" : ""}`
+              }
+            >
               <img
                 src={userprofile}
                 alt="user profile"
                 className="admin-userprofile"
               />
               Profile
-            </Link>
+            </NavLink>
           </div>
         </div>
       </div>

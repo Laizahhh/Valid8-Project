@@ -1,2 +1,2 @@
-const API_URL = "http://20.0.0.1:5000/api/auth"; // Correct IP address for backend
+const API_URL = "http://192.168.4.244:8080/api"; // Correct backend IP + Port
 export default API_URL;

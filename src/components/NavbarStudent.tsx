@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
 import "../css/NavbarStudentStyles.css";
 import userprofile from "../assets/images/userprofile.png";
@@ -12,43 +12,59 @@ export const NavbarStudent = () => {
           <img src={logoValid8} alt="Valid 8 logo" className="logo" />
           <h1 className="page-name">Student</h1>
         </div>
+
         {/* Center Section: Navigation Links */}
         <div className="navbar-center">
           <ul className="nav-menu">
             <li>
-              <Link to="/student_home" className="student-navigation-link">
+              <NavLink
+                to="/student_home"
+                className={({ isActive }) =>
+                  `student-navigation-link ${isActive ? "active" : ""}`
+                }
+              >
                 Home
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/student_upcoming_events"
-                className="student-navigation-link"
+                className={({ isActive }) =>
+                  `student-navigation-link ${isActive ? "active" : ""}`
+                }
               >
                 Upcoming Events
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/student_events_attended"
-                className="student-navigation-link"
+                className={({ isActive }) =>
+                  `student-navigation-link ${isActive ? "active" : ""}`
+                }
               >
                 Events Attended
-              </Link>
+              </NavLink>
             </li>
           </ul>
         </div>
+
         {/* Right Section: User Profile */}
         <div className="navbar-right">
           <div className="student-profile-container">
-            <Link to="/student_profile" className="student-profile-link">
+            <NavLink
+              to="/student_profile"
+              className={({ isActive }) =>
+                `student-profile-link ${isActive ? "active" : ""}`
+              }
+            >
               <img
                 src={userprofile}
                 alt="user profile"
                 className="student-userprofile"
               />
               Profile
-            </Link>
+            </NavLink>
           </div>
         </div>
       </div>

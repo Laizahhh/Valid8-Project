@@ -1,0 +1,147 @@
+/* Profile Container */
+.profile-container {
+  width: 80%;
+  max-width: 340px;
+  background-color: #f0f4f8;
+  border: 2px solid #162f65;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  text-align: center;
+  margin: 60px auto;
+}
+
+
+/* User Profile Image */
+.profile-container img {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 15px;
+}
+
+/* Profile Text Styling */
+.profile-container h1 {
+  font-size: 24px;
+  color: #162f65;
+  margin-bottom: 10px;
+}
+
+.profile-container h2 {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.profile-container h3 {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* Logout Button Styling */
+.profile-container .logout-btn {
+  background-color: #162f65;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 0px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.profile-container .logout-btn:hover {
+  background-color: #0f2450;
+}
+
+/* Logout Button Image */
+.profile-container .logout {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+  margin-top: 12px;
+}
+
+/* Confirmation Popup */
+.confirm-popup {
+  background-color: rgba(0, 0, 0, 0.8); /* Dark overlay for full-page effect */
+  color: #fff; /* White text for readability */
+  border: 2px solid #162f65;
+  border-radius: 12px;
+  width: 100%;
+  height: 100vh; /* Full screen height */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: fixed; /* Covers the entire screen */
+  top: 0;
+  left: 0;
+  z-index: 9999;
+}
+
+/* Confirmation Message */
+.confirm-popup p {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+/* Confirmation Buttons */
+.confirm-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.confirm-buttons .yes-button {
+  background-color: #fff;
+  color: #162f65;
+  border: 2px solid #162f65;
+  border-radius: 5px;
+  padding: 5px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.confirm-buttons .yes-button:hover {
+  background-color: gray; /* Light grey hover effect */
+}
+
+.confirm-buttons .no-button {
+  background-color: #162f65; /* Red for 'No' */
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.confirm-buttons .no-button:hover {
+  background-color: gray;
+}
+
+/* ✅ Responsive Design */
+@media (max-width: 768px) {
+  .profile-container {
+      width: 90%;
+      padding: 20px;
+  }
+
+  .profile-container img {
+      width: 80px;
+      height: 80px;
+  }
+
+  .profile-container h1 {
+      font-size: 20px;
+  }
+
+  .profile-container h2,
+  .profile-container h3 {
+      font-size: 14px;
+  }
+
+  .confirm-popup p {
+      font-size: 18px; /* Adjust text size for smaller screens */
+  }
+}

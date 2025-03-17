@@ -63,7 +63,7 @@
 
 .studentssg-eventorganizer-menu li {
   list-style: none;
-  margin: 0 10px;
+  margin: 0 5px;
 }
 
 /* Navigation Links */
@@ -78,20 +78,28 @@
 }
 
 .studentssg-eventorganizer-navigation-link:hover {
-  color: yellow;
+  background-color: rgba(0, 0, 0, 0.1); /* Faded gray effect */
+  border-radius: 5px;
 }
 
 .studentssg-eventorganizer-navigation-link.active {
-  background-color: yellow;
-  color: #162f65;
-  font-weight: bold;
+  background-color: rgba(0, 0, 0, 0.1); /* Faded gray effect */
+  border-radius: 5px;
+  color: #ffffff; /* Ensure text stays white for visibility */
+  font-weight: bold; /* Emphasize active state */
 }
 
-/* Navbar Right Section */
-.studentssg-eventorganizer-navbar-right {
+.studentssg-eventorganizer-navbar-right{
   margin-right: 10px;
   display: flex;
   align-items: center;
+}
+
+/* Navbar Right Section */
+.studentssg-eventorganizer-navbar-right:hover {
+  background-color: rgba(0, 0, 0, 0.1); /* Faded gray effect */
+  border-radius: 5px;
+ 
 }
 
 /* User Profile */

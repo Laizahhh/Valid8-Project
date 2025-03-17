@@ -49,7 +49,7 @@
 
 /* Navigation Menu (Center) */
 .ssg-menu {
-  margin-top: 5px;
+  margin-top: 10px;
   display: flex;
   align-items: center;
   padding: 0;
@@ -73,19 +73,26 @@
 }
 
 .ssg-navigation-link:hover {
-  color: yellow;
+  background-color: rgba(0, 0, 0, 0.1); /* Faded gray effect */
+  border-radius: 5px;
 }
 
 .ssg-navigation-link.active {
-  background-color: yellow;
-  color: #162f65;
-  font-weight: bold;
+  background-color: rgba(0, 0, 0, 0.1); /* Faded gray effect */
+  border-radius: 5px;
+  color: #ffffff; /* Ensure text stays white for visibility */
+  font-weight: bold; /* Emphasize active state */
 }
 
 /* Navbar Right Section */
 .ssg-navbar-right {
   display: flex;
   align-items: center;
+}
+
+.ssg-navbar-right:hover{
+  background-color: rgba(0, 0, 0, 0.1); /* Faded gray effect */
+  border-radius: 5px;
 }
 
 /* User Profile Container */

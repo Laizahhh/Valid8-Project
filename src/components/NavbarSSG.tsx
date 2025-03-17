@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
 import "../css/NavbarSSG.css";
 import userprofile from "../assets/images/userprofile.png";
@@ -14,42 +14,69 @@ export const NavbarSSG = () => {
             SSG <br /> Officer
           </h1>
         </div>
+
         {/* Center Section: Navigation Links */}
         <div className="ssg-navbar-center">
           <ul className="ssg-menu">
             <li>
-              <Link to="/ssg_home" className="ssg-navigation-link">
+              <NavLink
+                to="/ssg_home"
+                className={({ isActive }) =>
+                  `ssg-navigation-link ${isActive ? "active" : ""}`
+                }
+              >
                 Home
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link to="/ssg_events" className="ssg-navigation-link">
+              <NavLink
+                to="/ssg_events"
+                className={({ isActive }) =>
+                  `ssg-navigation-link ${isActive ? "active" : ""}`
+                }
+              >
                 Events
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link to="/ssg_attendance" className="ssg-navigation-link">
+              <NavLink
+                to="/ssg_attendance"
+                className={({ isActive }) =>
+                  `ssg-navigation-link ${isActive ? "active" : ""}`
+                }
+              >
                 Attendance
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link to="/ssg_records" className="ssg-navigation-link">
+              <NavLink
+                to="/ssg_records"
+                className={({ isActive }) =>
+                  `ssg-navigation-link ${isActive ? "active" : ""}`
+                }
+              >
                 Records
-              </Link>
+              </NavLink>
             </li>
           </ul>
         </div>
+
         {/* Right Section: User Profile */}
         <div className="ssg-navbar-right">
           <div className="ssg-profile-container">
-            <Link to="/ssg_profile" className="ssg-profile-link">
+            <NavLink
+              to="/ssg_profile"
+              className={({ isActive }) =>
+                `ssg-profile-link ${isActive ? "active" : ""}`
+              }
+            >
               <img
                 src={userprofile}
                 alt="user profile"
                 className="ssg-userprofile"
               />
               Profile
-            </Link>
+            </NavLink>
           </div>
         </div>
       </div>

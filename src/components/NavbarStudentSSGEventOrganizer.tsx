@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom"; // ✅ Changed from Link to NavLink
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
 import "../css/NavbarStudentSSGEventOrganizer.css";
 import userprofile from "../assets/images/userprofile.png";
@@ -14,81 +14,119 @@ export const NavbarStudentSSGEventOrganizer = () => {
             Student <br /> Officer <br /> Organizer
           </h1>
         </div>
+
         {/* Center Section: Navigation Links */}
         <div className="studentssg-eventorganizer-navbar-center">
           <ul className="studentssg-eventorganizer-menu">
             <li>
-              <Link
+              <NavLink
                 to="/student_ssg_eventorganizer_home"
-                className="studentssg-eventorganizer-navigation-link"
+                className={({ isActive }) =>
+                  isActive
+                    ? "studentssg-eventorganizer-navigation-link active"
+                    : "studentssg-eventorganizer-navigation-link"
+                }
               >
                 Home
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/student_ssg_eventorganizer_upcoming_events"
-                className="studentssg-eventorganizer-navigation-link"
+                className={({ isActive }) =>
+                  isActive
+                    ? "studentssg-eventorganizer-navigation-link active"
+                    : "studentssg-eventorganizer-navigation-link"
+                }
               >
                 Upcoming Events
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/student_ssg_eventorganizer_events_attended"
-                className="studentssg-eventorganizer-navigation-link"
+                className={({ isActive }) =>
+                  isActive
+                    ? "studentssg-eventorganizer-navigation-link active"
+                    : "studentssg-eventorganizer-navigation-link"
+                }
               >
                 Events Attended
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/student_ssg_eventorganizer_events"
-                className="studentssg-eventorganizer-navigation-link"
+                className={({ isActive }) =>
+                  isActive
+                    ? "studentssg-eventorganizer-navigation-link active"
+                    : "studentssg-eventorganizer-navigation-link"
+                }
               >
                 Events
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/student_ssg_eventorganizer_attendance"
-                className="studentssg-eventorganizer-navigation-link"
+                className={({ isActive }) =>
+                  isActive
+                    ? "studentssg-eventorganizer-navigation-link active"
+                    : "studentssg-eventorganizer-navigation-link"
+                }
               >
                 Attendance
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/student_ssg_eventorganizer_records"
-                className="studentssg-eventorganizer-navigation-link"
+                className={({ isActive }) =>
+                  isActive
+                    ? "studentssg-eventorganizer-navigation-link active"
+                    : "studentssg-eventorganizer-navigation-link"
+                }
               >
                 Records
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/student_ssg_eventorganizer_create_event"
-                className="studentssg-eventorganizer-navigation-link"
+                className={({ isActive }) =>
+                  isActive
+                    ? "studentssg-eventorganizer-navigation-link active"
+                    : "studentssg-eventorganizer-navigation-link"
+                }
               >
                 Create Event
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/student_ssg_eventorganizer_manage_event"
-                className="studentssg-eventorganizer-navigation-link"
+                className={({ isActive }) =>
+                  isActive
+                    ? "studentssg-eventorganizer-navigation-link active"
+                    : "studentssg-eventorganizer-navigation-link"
+                }
               >
                 Manage Event
-              </Link>
+              </NavLink>
             </li>
           </ul>
         </div>
+
         {/* Right Section: User Profile */}
         <div className="studentssg-eventorganizer-navbar-right">
           <div className="studentssg-eventorganizer-profile-container">
-            <Link
+            <NavLink
               to="/student_ssg_eventorganizer_profile"
-              className="studentssg-eventorganizer-profile-link"
+              className={({ isActive }) =>
+                isActive
+                  ? "studentssg-eventorganizer-profile-link active"
+                  : "studentssg-eventorganizer-profile-link"
+              }
             >
               <img
                 src={userprofile}
@@ -96,7 +134,7 @@ export const NavbarStudentSSGEventOrganizer = () => {
                 className="studentssg-eventorganizer-userprofile"
               />
               Profile
-            </Link>
+            </NavLink>
           </div>
         </div>
       </div>
