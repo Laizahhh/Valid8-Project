@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { FaHome, FaCalendarAlt, FaClipboardCheck } from "react-icons/fa";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
 import "../css/NavbarStudentStyles.css";
 import userprofile from "../assets/images/userprofile.png";
@@ -16,34 +17,40 @@ export const NavbarStudent = () => {
         {/* Center Section: Navigation Links */}
         <div className="navbar-center">
           <ul className="nav-menu">
-            <li>
+            <li title="Home">
               <NavLink
                 to="/student_home"
                 className={({ isActive }) =>
-                  `student-navigation-link ${isActive ? "active" : ""}`
+                  isActive
+                    ? "student-navigation-link active"
+                    : "student-navigation-link"
                 }
               >
-                Home
+                <FaHome />
               </NavLink>
             </li>
-            <li>
+            <li title="Upcoming Events">
               <NavLink
                 to="/student_upcoming_events"
                 className={({ isActive }) =>
-                  `student-navigation-link ${isActive ? "active" : ""}`
+                  isActive
+                    ? "student-navigation-link active"
+                    : "student-navigation-link"
                 }
               >
-                Upcoming Events
+                <FaCalendarAlt />
               </NavLink>
             </li>
-            <li>
+            <li title="Events Attended">
               <NavLink
                 to="/student_events_attended"
                 className={({ isActive }) =>
-                  `student-navigation-link ${isActive ? "active" : ""}`
+                  isActive
+                    ? "student-navigation-link active"
+                    : "student-navigation-link"
                 }
               >
-                Events Attended
+                <FaClipboardCheck />
               </NavLink>
             </li>
           </ul>
@@ -55,15 +62,17 @@ export const NavbarStudent = () => {
             <NavLink
               to="/student_profile"
               className={({ isActive }) =>
-                `student-profile-link ${isActive ? "active" : ""}`
+                isActive
+                  ? "student-navigation-link active"
+                  : "student-navigation-link"
               }
+              title="Profile"
             >
               <img
                 src={userprofile}
                 alt="user profile"
                 className="student-userprofile"
               />
-              Profile
             </NavLink>
           </div>
         </div>

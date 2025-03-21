@@ -1,0 +1,118 @@
+.upcoming-header {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.upcoming-events.container.small-container {
+  width: 100%;
+  padding: 0;
+  margin: 0 auto;
+}
+
+h3 {
+  padding-top: 10px;
+  text-align: center;
+  padding-bottom: 5px;
+  margin-bottom: 15px;
+}
+
+.upcoming-events-table {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Aligns content (including search box) to the left */
+  width: 100%;
+  padding-left: 0px; /* Adjust to match table padding */
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 1000px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid #162f65;
+  border-radius: 8px;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+th {
+  background-color: #162f65;
+  color: white;
+  text-align: center;
+  width: 25%;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+tr:hover {
+  background-color: #ddd;
+}
+
+/* Search Box aligned with Table */
+.search-upcoming {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+  margin: 20px 0; /* Aligns with table */
+}
+
+.search-input {
+  padding: 8px 12px 8px 30px;
+  width: 100%;
+  border: 2px solid #162f65;
+  border-radius: 5px;
+  outline: none;
+  text-align: left;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+}
+
+th.date {
+  text-align: center;
+}
+
+td.date {
+  text-align: left;
+}
+
+th.location {
+  text-align: center;
+}
+
+td.location {
+  text-align: left;
+}
+
+th.eventname {
+  text-align: center;
+}
+
+td.eventname {
+  text-align: left;
+}
+
+th.status {
+  text-align: center;
+}
+
+td.status {
+  text-align: left;
+}

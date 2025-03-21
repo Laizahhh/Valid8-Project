@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { FaHome, FaPlusCircle, FaClipboardList } from "react-icons/fa";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
 import "../css/NavbarEventOrganizer.css";
 import userprofile from "../assets/images/userprofile.png";
@@ -16,34 +17,40 @@ export const NavbarEventOrganizer = () => {
         {/* Center Section: Navigation Links */}
         <div className="event-organizer-navbar-center">
           <ul className="event-organizer-menu">
-            <li>
+            <li title="Home">
               <NavLink
                 to="/event_organizer_home"
                 className={({ isActive }) =>
-                  `event-organizer-navigation-link ${isActive ? "active" : ""}`
+                  isActive
+                    ? "event-organizer-navigation-link active"
+                    : "event-organizer-navigation-link"
                 }
               >
-                Home
+                <FaHome />
               </NavLink>
             </li>
-            <li>
+            <li title="Create Event">
               <NavLink
                 to="/event_organizer_create_event"
                 className={({ isActive }) =>
-                  `event-organizer-navigation-link ${isActive ? "active" : ""}`
+                  isActive
+                    ? "event-organizer-navigation-link active"
+                    : "event-organizer-navigation-link"
                 }
               >
-                Create Event
+                <FaPlusCircle />
               </NavLink>
             </li>
-            <li>
+            <li title="Manage Event">
               <NavLink
                 to="/event_organizer_manage_event"
                 className={({ isActive }) =>
-                  `event-organizer-navigation-link ${isActive ? "active" : ""}`
+                  isActive
+                    ? "event-organizer-navigation-link active"
+                    : "event-organizer-navigation-link"
                 }
               >
-                Manage Event
+                <FaClipboardList />
               </NavLink>
             </li>
           </ul>
@@ -55,15 +62,17 @@ export const NavbarEventOrganizer = () => {
             <NavLink
               to="/event_organizer_profile"
               className={({ isActive }) =>
-                `event-organizer-profile-link ${isActive ? "active" : ""}`
+                isActive
+                  ? "event-organizer-navigation-link active"
+                  : "event-organizer-navigation-link"
               }
+              title="Profile"
             >
               <img
                 src={userprofile}
                 alt="user profile"
                 className="event-organizer-userprofile"
               />
-              Profile
             </NavLink>
           </div>
         </div>

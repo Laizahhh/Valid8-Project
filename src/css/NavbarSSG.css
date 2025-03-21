@@ -1,16 +1,23 @@
-/* SSG Navbar (Desktop) */
-.ssg-navbar {
-  background-color: #162f65;
+/* Container for the entire header */
+.ssg-header {
   width: 100%;
-  height: 45px; /* Kept exactly 45px on desktop */
+  background-color: #162f65;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* SSG Navbar */
+.ssg-navbar {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Distributes left, center, right */
+  justify-content: space-between;
   padding: 0 15px;
+  height: 45px;
+  width: 100%;
   box-sizing: border-box;
 }
 
-/* Navbar Left Section */
+/* Left Section: Logo & Page Title */
 .ssg-navbar-left {
   display: flex;
   align-items: center;
@@ -21,164 +28,70 @@
   width: 35px;
   height: auto;
   border-radius: 50px;
-  margin-right: 8px;
-  margin-left: 10px;
-  margin-bottom: 2px;
-  margin-top: 4px;
+  margin-right: 5px;
 }
 
-/* SSG Page Title */
+/* Page Title */
 .ssg-page-name {
+  font-family: Arial, Helvetica, sans-serif;
   margin-top: 10px;
   font-size: 20px;
   font-weight: bold;
   color: white;
-  font-family: Arial, Helvetica, sans-serif;
-  margin-right: auto;
-  margin-left: 5px;
   text-align: center;
 }
 
-/* Navbar Center Section */
-.ssg-navbar-center {
-  flex-grow: 1;
-  display: flex;
-  justify-content: center; /* Centers navigation links */
-  align-items: center;
-}
-
-/* Navigation Menu (Center) */
+/* Navigation Icons */
 .ssg-menu {
-  margin-top: 10px;
   display: flex;
   align-items: center;
+  gap: 15px;
   padding: 0;
+  margin-top: 10px;
 }
 
 .ssg-menu li {
   list-style: none;
-  margin: 0 15px;
-  /* You can adjust margin-left if needed; here it's kept simple */
 }
 
 /* Navigation Links */
 .ssg-navigation-link {
   text-decoration: none;
   color: white;
-  font-size: 12px;
-  font-family: Arial, Helvetica, sans-serif;
-  padding: 5px 10px;
-  border-radius: 5px;
-  transition: 0.3s ease;
+  font-size: 20px;
+  transition: transform 0.3s ease;
 }
 
+/* Hover Effect */
 .ssg-navigation-link:hover {
-  background-color: rgba(0, 0, 0, 0.1); /* Faded gray effect */
-  border-radius: 5px;
+  transform: scale(1.1);
 }
 
+/* Active Link Styling */
 .ssg-navigation-link.active {
-  background-color: rgba(0, 0, 0, 0.1); /* Faded gray effect */
+  background-color: rgba(0, 0, 0, 0.2);
   border-radius: 5px;
-  color: #ffffff; /* Ensure text stays white for visibility */
-  font-weight: bold; /* Emphasize active state */
+  color: #ffffff;
+  font-weight: bold;
+  padding: 10px;
 }
 
-/* Navbar Right Section */
-.ssg-navbar-right {
-  display: flex;
-  align-items: center;
-}
-
-.ssg-navbar-right:hover{
-  background-color: rgba(0, 0, 0, 0.1); /* Faded gray effect */
-  border-radius: 5px;
-}
-
-/* User Profile Container */
-.ssg-profile-container {
-  display: flex;
-  align-items: center;
-  margin-left: auto; /* Push profile to the far right */
-  margin-right: 10px;
-}
-
-/* User Profile Icon */
+/* User Profile */
 .ssg-userprofile {
   width: 20px;
-  margin-right: 5px;
 }
 
-/* Profile Link */
-.ssg-profile-link {
-  text-decoration: none;
-  color: white;
-  font-size: 12px;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* ✅ Mobile Responsiveness */
-@media screen and (max-width: 768px) {
-  .ssg-navbar {
-    flex-direction: column; /* Stack sections vertically */
-    align-items: center;
-    justify-content: center;
-    height: auto;        /* Dynamic height */
-    min-height: 45px;    /* But never less than 45px */
-    padding: 10px 0;
-    width: 100%;
-  }
-  
-  /* Make each section take full width and center content */
-  .ssg-navbar-left,
-  .ssg-navbar-center,
-  .ssg-navbar-right {
-    width: 100%;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .ssg-menu {
-    flex-direction: column; /* Vertical list */
-    text-align: center;
-    width: 100%;
-  }
-  
-  .ssg-menu li {
-    margin: 5px 0;
-  }
-  
-  .ssg-navigation-link,
-  .ssg-profile-link {
-    font-size: 14px;
-    display: block;
-    width: 100%;
-    text-align: center;
-  }
-  
-  .ssg-userprofile {
-    width: 30px;
-    margin-left: 0;
-  }
-}
-
-/* ✅ Tablet Responsiveness */
+/* Responsive Design */
 @media screen and (max-width: 1024px) {
-  .ssg-navbar-left,
-  .ssg-navbar-center,
-  .ssg-navbar-right {
-    width: 100%;
-    justify-content: center;
-    align-items: center;
+  .ssg-menu {
+    gap: 10px;
+    flex-wrap: nowrap;
   }
-  
-  .ssg-navigation-link,
-  .ssg-profile-link {
-    font-size: 13px;
-  }
-  
-  .ssg-userprofile {
-    width: 25px;
+}
+
+@media screen and (max-width: 768px) {
+  .ssg-menu {
+    gap: 8px;
+    flex-wrap: nowrap;
   }
 }

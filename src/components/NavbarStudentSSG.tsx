@@ -1,4 +1,12 @@
 import { NavLink } from "react-router-dom";
+import {
+  FaHome,
+  FaCalendarAlt,
+  FaClipboardCheck,
+  FaRegListAlt,
+  FaCheckCircle,
+  FaClipboard,
+} from "react-icons/fa";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
 import "../css/NavbarStudentSSG.css";
 import userprofile from "../assets/images/userprofile.png";
@@ -18,64 +26,76 @@ export const NavbarStudentSSG = () => {
         {/* Center Section: Navigation Links */}
         <div className="studentssg-navbar-center">
           <ul className="studentssg-menu">
-            <li>
+            <li title="Home">
               <NavLink
                 to="/studentssg_home"
                 className={({ isActive }) =>
-                  `studentssg-navigation-link ${isActive ? "active" : ""}`
+                  isActive
+                    ? "studentssg-navigation-link active"
+                    : "studentssg-navigation-link"
                 }
               >
-                Home
+                <FaHome />
               </NavLink>
             </li>
-            <li>
+            <li title="Upcoming Events">
               <NavLink
                 to="/studentssg_upcoming_events"
                 className={({ isActive }) =>
-                  `studentssg-navigation-link ${isActive ? "active" : ""}`
+                  isActive
+                    ? "studentssg-navigation-link active"
+                    : "studentssg-navigation-link"
                 }
               >
-                Upcoming Events
+                <FaCalendarAlt />
               </NavLink>
             </li>
-            <li>
+            <li title="Events Attended">
               <NavLink
                 to="/studentssg_events_attended"
                 className={({ isActive }) =>
-                  `studentssg-navigation-link ${isActive ? "active" : ""}`
+                  isActive
+                    ? "studentssg-navigation-link active"
+                    : "studentssg-navigation-link"
                 }
               >
-                Events Attended
+                <FaClipboardCheck />
               </NavLink>
             </li>
-            <li>
+            <li title="Events">
               <NavLink
                 to="/studentssg_events"
                 className={({ isActive }) =>
-                  `studentssg-navigation-link ${isActive ? "active" : ""}`
+                  isActive
+                    ? "studentssg-navigation-link active"
+                    : "studentssg-navigation-link"
                 }
               >
-                Events
+                <FaRegListAlt />
               </NavLink>
             </li>
-            <li>
+            <li title="Attendance">
               <NavLink
                 to="/studentssg_attendance"
                 className={({ isActive }) =>
-                  `studentssg-navigation-link ${isActive ? "active" : ""}`
+                  isActive
+                    ? "studentssg-navigation-link active"
+                    : "studentssg-navigation-link"
                 }
               >
-                Attendance
+                <FaCheckCircle />
               </NavLink>
             </li>
-            <li>
+            <li title="Records">
               <NavLink
                 to="/studentssg_records"
                 className={({ isActive }) =>
-                  `studentssg-navigation-link ${isActive ? "active" : ""}`
+                  isActive
+                    ? "studentssg-navigation-link active"
+                    : "studentssg-navigation-link"
                 }
               >
-                Records
+                <FaClipboard />
               </NavLink>
             </li>
           </ul>
@@ -87,15 +107,17 @@ export const NavbarStudentSSG = () => {
             <NavLink
               to="/studentssg_profile"
               className={({ isActive }) =>
-                `studentssg-profile-link ${isActive ? "active" : ""}`
+                isActive
+                  ? "studentssg-navigation-link active"
+                  : "studentssg-navigation-link"
               }
+              title="Profile"
             >
               <img
                 src={userprofile}
                 alt="user profile"
                 className="studentssg-userprofile"
               />
-              Profile
             </NavLink>
           </div>
         </div>
