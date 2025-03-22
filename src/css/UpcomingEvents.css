@@ -65,6 +65,7 @@ tr:hover {
   width: 100%;
   max-width: 300px;
   margin: 20px 0; /* Aligns with table */
+  margin-left: 70px;
 }
 
 .search-input {

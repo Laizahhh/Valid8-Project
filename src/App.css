@@ -25,14 +25,15 @@
   align-items: center;
 }
 
-.logo {
+.logo-home {
   float: left;
   width: 35px;
   height: auto;
-  margin-right: 8px;
+  margin-right: 5px;
   margin-left: 10px;
   border-radius: 50px;
   margin-bottom: 4px;
+  margin-top: 4px;
 }
 
 .system-name {

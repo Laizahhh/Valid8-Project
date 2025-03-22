@@ -8,7 +8,7 @@ export const HomeContainer = () => {
         {/* Header Section */}
         <header className="header">
           <div className="logo-container">
-            <img src={logoValid8} alt="Valid8 Logo" className="logo" />
+            <img src={logoValid8} alt="Valid8 Logo" className="logo-home" />
             <h1 className="system-name">Valid8</h1>
           </div>
         </header>
