@@ -185,41 +185,87 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
                         ))}
                       </select>
                     </td>
-                    {["timeIn", "checkpoint", "timeOut"].map((field) => (
-                      <td key={field}>
-                        <button className="btn btn-warning btn-sm">
-                          <FaRegSmileBeam className="face-scan-icon" /> Face
-                          Scan
-                        </button>
-                        <input
-                          type="text"
-                          placeholder="Student ID"
-                          value={event.studentId}
-                          onChange={(e) =>
-                            handleChange(index, "studentId", e.target.value)
-                          }
-                        />
-                        <input
-                          type="time"
-                          value={event[field as keyof AttendanceRecord]}
-                          onChange={(e) =>
-                            handleChange(
-                              index,
-                              field as keyof AttendanceRecord,
-                              e.target.value
-                            )
-                          }
-                        />
-                        <td className="submit-column">
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => handleSubmit(index)}
-                          >
-                            Submit
-                          </button>
-                        </td>
-                      </td>
-                    ))}
+                    {/* Time In */}
+                    <td className="time-row">
+                      <button className="btn btn-warning btn-sm">
+                        <FaRegSmileBeam className="face-scan-icon" /> Face Scan
+                      </button>
+                      <input
+                        type="text"
+                        placeholder="Student ID"
+                        value={event.studentId}
+                        onChange={(e) =>
+                          handleChange(index, "studentId", e.target.value)
+                        }
+                      />
+                      <input
+                        type="time"
+                        value={event.timeIn}
+                        onChange={(e) =>
+                          handleChange(index, "timeIn", e.target.value)
+                        }
+                      />
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => handleSubmit(index)}
+                      >
+                        Submit
+                      </button>
+                    </td>
+                    {/* Checkpoint */}
+                    <td className="time-row">
+                      <button className="btn btn-warning btn-sm">
+                        <FaRegSmileBeam className="face-scan-icon" /> Face Scan
+                      </button>
+                      <input
+                        type="text"
+                        placeholder="Student ID"
+                        value={event.studentId}
+                        onChange={(e) =>
+                          handleChange(index, "studentId", e.target.value)
+                        }
+                      />
+                      <input
+                        type="time"
+                        value={event.checkpoint}
+                        onChange={(e) =>
+                          handleChange(index, "checkpoint", e.target.value)
+                        }
+                      />
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => handleSubmit(index)}
+                      >
+                        Submit
+                      </button>
+                    </td>
+                    {/* Time Out */}
+                    <td className="time-row">
+                      <button className="btn btn-warning btn-sm">
+                        <FaRegSmileBeam className="face-scan-icon" /> Face Scan
+                      </button>
+                      <input
+                        type="text"
+                        placeholder="Student ID"
+                        value={event.studentId}
+                        onChange={(e) =>
+                          handleChange(index, "studentId", e.target.value)
+                        }
+                      />
+                      <input
+                        type="time"
+                        value={event.timeOut}
+                        onChange={(e) =>
+                          handleChange(index, "timeOut", e.target.value)
+                        }
+                      />
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => handleSubmit(index)}
+                      >
+                        Submit
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}

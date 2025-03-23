@@ -168,6 +168,35 @@
     margin-bottom: 3px;
 }
 
+.attendance-table select {
+    border-radius: 5px; /* Adjust the radius as needed */
+    padding: 5px;
+    border: 1px solid #ccc;
+    background-color: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Style for dropdowns */
+.attendance-table select,
+.attendance-table input {
+    border-radius: 5px; /* Adjust the radius as needed */
+    padding: 5px;
+    border: 1px solid #ccc;
+    background-color: white;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+}
+
+/* Ensure input focus effect is smooth */
+.attendance-table input:focus,
+.attendance-table select:focus {
+    border-color: #162f65; /* Highlight border on focus */
+    box-shadow: 0 0 5px rgba(22, 47, 101, 0.3);
+}
+
+
 /* Responsive Design */
 @media screen and (max-width: 768px) {
     .attendance-section {

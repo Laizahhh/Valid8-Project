@@ -47,6 +47,12 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [editIndex, setEditIndex] = useState<number | null>(null);
 
+  const [isCancelModalOpen, setCancelModalOpen] = useState(false);
+  const [cancelIndex, setCancelIndex] = useState<number | null>(null);
+
+  const [isCompleteModalOpen, setCompleteModalOpen] = useState(false);
+  const [completeIndex, setCompleteIndex] = useState<number | null>(null);
+
   const filteredEvents = events.filter((event) =>
     event.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -134,14 +140,20 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
                     <button
                       className="btn btn-success btn-sm"
                       disabled={event.status !== "Upcoming"}
-                      onClick={() => updateEventStatus(index, "Completed")}
+                      onClick={() => {
+                        setCompleteIndex(index);
+                        setCompleteModalOpen(true);
+                      }}
                     >
-                      <AiFillCheckCircle /> Complete
+                      <AiFillCheckCircle /> Completed
                     </button>
                     <button
                       className="btn btn-danger btn-sm"
                       disabled={event.status !== "Upcoming"}
-                      onClick={() => updateEventStatus(index, "Canceled")}
+                      onClick={() => {
+                        setCancelIndex(index);
+                        setCancelModalOpen(true);
+                      }}
                     >
                       <AiFillCloseCircle /> Cancel
                     </button>
@@ -187,24 +199,92 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
               className="modal-buttons"
               style={{
                 display: "flex",
-                justifyContent: "space-between",
-                width: "100%",
+                justifyContent: "center",
+                gap: "20px",
+                marginTop: "10px",
+              }}
+            >
+              <button className="btn btn-secondary" onClick={closeEditModal}>
+                Cancel
+              </button>
+              <button className="btn btn-primary" onClick={saveEditedEvent}>
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {isCancelModalOpen && cancelIndex !== null && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <p>Are you sure you want to cancel this event?</p>
+            <div
+              className="modal-buttons"
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "20px",
                 marginTop: "10px",
               }}
             >
               <button
-                className="btn btn-secondary"
-                onClick={closeEditModal}
-                style={{ alignSelf: "flex-start" }}
+                className="btn btn-danger"
+                onClick={() => {
+                  updateEventStatus(cancelIndex, "Canceled");
+                  setCancelModalOpen(false);
+                  setCancelIndex(null);
+                }}
               >
-                Cancel
+                Yes
               </button>
               <button
-                className="btn btn-primary"
-                onClick={saveEditedEvent}
-                style={{ alignSelf: "flex-end" }}
+                className="btn btn-secondary"
+                onClick={() => {
+                  setCancelModalOpen(false);
+                  setCancelIndex(null);
+                }}
               >
-                Save
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Complete Confirmation Modal */}
+      {isCompleteModalOpen && completeIndex !== null && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <p>Are you sure this event is completed?</p>
+            <div
+              className="modal-buttons"
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "20px",
+                marginTop: "10px",
+              }}
+            >
+              <button
+                className="btn btn-success"
+                onClick={() => {
+                  updateEventStatus(completeIndex, "Completed");
+                  setCompleteModalOpen(false);
+                  setCompleteIndex(null);
+                }}
+              >
+                Yes
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  setCompleteModalOpen(false);
+                  setCompleteIndex(null);
+                }}
+              >
+                No
               </button>
             </div>
           </div>
