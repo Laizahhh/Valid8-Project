@@ -52,9 +52,15 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
   );
 
   const openEditModal = (event: Event, index: number) => {
-    setEditingEvent({ ...event }); // Create a new copy of the event
+    setEditingEvent({ ...event });
     setEditIndex(index);
     setEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setEditingEvent(null);
+    setEditIndex(null);
   };
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,7 +74,7 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
       const updatedEvents = [...events];
       updatedEvents[editIndex] = editingEvent;
       setEvents(updatedEvents);
-      setEditModalOpen(false);
+      closeEditModal();
     }
   };
 
@@ -89,7 +95,7 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
       <div className="manage-events container small-container">
         <h3>Manage Event</h3>
 
-        <div className="search-upcoming">
+        <div className="search-manage-event">
           <input
             type="search"
             placeholder="Search events..."
@@ -104,7 +110,7 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
           <table>
             <thead>
               <tr>
-                <th className="event">Event</th>
+                <th className="manage-event">Event</th>
                 <th className="date">Date</th>
                 <th className="location">Location</th>
                 <th className="status">Status</th>
@@ -152,48 +158,53 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
         </div>
       </div>
 
-      {/* Edit Event Modal */}
-      {isEditModalOpen && editingEvent && (
+      {/* Edit Modal */}
+      {isEditModalOpen && (
         <div className="modal-overlay">
-          <div className="modal">
-            <h4>Edit Event</h4>
-            <label>Event Name</label>
+          <div className="modal-container">
+            <h3>Edit Event</h3>
             <input
               type="text"
               name="name"
-              value={editingEvent.name}
+              value={editingEvent?.name || ""}
               onChange={handleEditChange}
+              placeholder="Event Name"
             />
-
-            <label>Date</label>
             <input
               type="date"
               name="date"
-              value={editingEvent.date}
+              value={editingEvent?.date || ""}
               onChange={handleEditChange}
             />
-
-            <label>Location</label>
             <input
               type="text"
               name="location"
-              value={editingEvent.location}
+              value={editingEvent?.location || ""}
               onChange={handleEditChange}
+              placeholder="Event Location"
             />
-
-            {/* Status is no longer editable */}
-            <label>Status</label>
-            <input type="text" value={editingEvent.status} readOnly />
-
-            <div className="modal-buttons">
+            <div
+              className="modal-buttons"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+                marginTop: "10px",
+              }}
+            >
               <button
                 className="btn btn-secondary"
-                onClick={() => setEditModalOpen(false)}
+                onClick={closeEditModal}
+                style={{ alignSelf: "flex-start" }}
               >
                 Cancel
               </button>
-              <button className="btn btn-primary" onClick={saveEditedEvent}>
-                Save Changes
+              <button
+                className="btn btn-primary"
+                onClick={saveEditedEvent}
+                style={{ alignSelf: "flex-end" }}
+              >
+                Save
               </button>
             </div>
           </div>
