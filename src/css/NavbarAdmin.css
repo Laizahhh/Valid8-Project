@@ -105,63 +105,16 @@
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* ✅ Mobile Responsiveness */
-@media screen and (max-width: 768px) {
-  .admin-navbar {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: auto;
-    padding: 10px 0;
-    width: 100%;
-  }
-
-  .admin-navbar-left,
-  .admin-navbar-center,
-  .admin-navbar-right {
-    width: 100%;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
-  }
-
+@media screen and (max-width: 1024px) {
   .admin-menu {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .admin-menu li {
-    margin: 5px 0;
-  }
-
-  .admin-navigation-link,
-  .admin-profile-link {
-    font-size: 14px;
-    display: block;
-    width: 100%;
-    text-align: center;
-  }
-
-  .admin-userprofile {
-    width: 30px;
+    gap: 10px;
+    flex-wrap: nowrap;
   }
 }
 
-/* ✅ Tablet Responsiveness */
-@media screen and (max-width: 1024px) {
-  .admin-navbar-left,
-  .admin-navbar-center,
-  .admin-navbar-right {
-    justify-content: center;
-    align-items: center;
-  }
-
-  .admin-navigation-link,
-  .admin-profile-link {
-    font-size: 13px;
-  }
-
-  .admin-userprofile {
-    width: 25px;
+@media screen and (max-width: 768px) {
+  .admin-menu {
+    gap: 8px;
+    flex-wrap: nowrap;
   }
 }

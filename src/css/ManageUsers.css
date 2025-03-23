@@ -1,0 +1,109 @@
+/* Search & Add User Button Wrapper */
+.manage-users-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+  
+/* Search Box */
+.search-manage-user {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    max-width: 200px;
+    margin-left: 58px;
+}
+
+
+  
+/* Add User Button */
+.add-user-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background-color: #f0ad4e;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s ease;
+    margin-right: 100px;
+}
+  
+.add-user-btn:hover {
+    background-color: #ec971f;
+}
+
+
+/* Table Container - Center on Desktop */
+.manage-users-table {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    max-width: 1000px; /* Adjust based on your design */
+    border-collapse: collapse;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid #162f65;
+    border-radius: 8px;
+    margin: auto; /* Ensures centering */
+}
+
+/* Ensure table text is properly aligned */
+th, td {
+    text-align: center;
+    padding: 12px;
+    border: 1px solid #ddd;
+}
+
+th.manageusers-name, th.manageusers-email, th.manageusers-role, th.manageusers-actions{
+    text-align: center;
+
+}
+
+  
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+    .manage-users-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .search-manage-user {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .add-user-btn {
+        width: 100%;
+        justify-content: center;
+        margin-right: 0;
+    }
+}
+
+@media (max-width: 768px){
+    .manage-users-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .search-manage-user {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .add-user-btn {
+        width: 100%;
+        justify-content: center;
+        margin-right: 0;
+    }
+}
