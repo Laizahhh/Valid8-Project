@@ -5,6 +5,7 @@ import NavbarStudentSSGEventOrganizer from "../components/NavbarStudentSSGEventO
 import { NavbarSSG } from "../components/NavbarSSG";
 import search_logo from "../assets/images/search_logo.png";
 import "../css/Attendance.css"; // Ensure this CSS file exists
+import { FaRegSmileBeam } from "react-icons/fa"; // Face Scan Icon
 
 interface AttendanceProps {
   role: string;
@@ -128,7 +129,7 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
           >
             <thead>
               <tr>
-                <th>Event Name</th>
+                <th>Event</th>
                 <th>Date</th>
                 <th>Location</th>
                 <th>Year Level</th>
@@ -186,8 +187,9 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
                     </td>
                     {["timeIn", "checkpoint", "timeOut"].map((field) => (
                       <td key={field}>
-                        <button className="btn btn-success btn-sm">
-                          Face Scan
+                        <button className="btn btn-warning btn-sm">
+                          <FaRegSmileBeam className="face-scan-icon" /> Face
+                          Scan
                         </button>
                         <input
                           type="text"

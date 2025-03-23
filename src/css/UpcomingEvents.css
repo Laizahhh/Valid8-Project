@@ -63,7 +63,7 @@ tr:hover {
   align-items: center;
   position: relative;
   width: 100%;
-  max-width: 300px;
+  max-width: 200px;
   margin: 20px 0; /* Aligns with table */
   margin-left: 70px;
 }
@@ -117,3 +117,18 @@ th.status {
 td.status {
   text-align: left;
 }
+
+@media (max-width: 768px) {
+  .search-upcoming {
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+}
+
+@media screen and (max-width: 1024px){
+  .search-upcoming {
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+}
+

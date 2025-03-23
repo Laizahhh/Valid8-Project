@@ -14,15 +14,15 @@
     margin-bottom: 15px;
 }
 
-/* Search Box (Copied Design) */
+/* Search Box */
 .attendance-search {
     display: flex;
     align-items: center;
     position: relative;
     width: 100%;
-    max-width: 300px;
-    margin: 20px 0; /* Matches table alignment */
-    margin-left: 0px; /* Left-aligned */
+    max-width: 200px;
+    margin: 20px 0;
+    margin-left: 0px;
 }
 
 .attendance-search-input {
@@ -43,18 +43,18 @@
     height: 16px;
 }
 
-/* Table Container - Enables Scrolling on Small Screens */
+/* Table Container */
 .attendance-table-container {
     width: 100%;
-    overflow-x: auto; /* Enables horizontal scrolling */
-    white-space: nowrap; /* Prevents content from wrapping */
+    overflow-x: auto;
+    white-space: nowrap;
 }
 
 /* Table */
 .attendance-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 700px; /* Ensures table does not shrink too much */
+    min-width: 700px;
     max-width: 10000px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border: 2px solid #162f65;
@@ -66,7 +66,7 @@
     padding: 10px;
     text-align: center;
     border: 1px solid #ddd;
-    vertical-align: middle; /* Aligns content vertically */
+    vertical-align: middle;
 }
 
 .attendance-table th {
@@ -78,15 +78,14 @@
 .attendance-table .time-column {
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Centers items vertically */
+    justify-content: center;
     align-items: center;
-    gap: 5px; /* Adds spacing between stacked items */
+    gap: 5px;
 }
 
-/* Style for each stacked item */
 .attendance-table .face-scan {
     font-weight: bold;
-    color: #162f65; /* Matches header color */
+    color: #162f65;
 }
 
 .attendance-table .student-id {
@@ -97,10 +96,9 @@
 .attendance-table .time {
     font-size: 14px;
     font-weight: bold;
-    color: #28a745; /* Green for time */
+    color: #28a745;
 }
 
-/* Inputs inside the columns */
 .attendance-table .time-column input,
 .attendance-table .time-column select {
     width: 100%;
@@ -117,49 +115,58 @@
 }
 
 /* Buttons */
-.btn-success {
-    background-color: #28a745;
-    color: white;
-    border: none;
+.btn-success,
+.btn-primary {
+    background-color: transparent;
+    color: #28a745;
+    border: 2px solid #28a745;
     padding: 6px 10px;
     cursor: pointer;
     border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 .btn-success:hover {
-    background-color: #218838;
+    background-color: #28a745;
+    color: white;
 }
 
 .btn-primary {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 6px 10px;
-    cursor: pointer;
-    border-radius: 4px;
+    color: #007bff;
+    border: 2px solid #007bff;
 }
 
 .btn-primary:hover {
-    background-color: #0056b3;
+    background-color: #007bff;
+    color: white;
 }
 
 /* Ensure buttons inside the table are centered */
 .attendance-table td {
-    text-align: center; /* Centers inline elements like buttons */
+    text-align: center;
 }
 
-/* Ensure buttons are centered within their column */
 .attendance-table .submit-column {
-    text-align: center; /* Center aligns content */
+    text-align: center;
+    border-style: none;
+    margin-left: 0px;
 }
 
 .attendance-table .submit-column button {
-    display: block; /* Make the button a block element */
-    margin: auto; /* Centers horizontally */
-    padding: 8px 12px;
+    border-style: none;
+    display: block;
+    margin: auto;
+    padding: 6px 10px;
     font-size: 14px;
+    margin-right: 205px;
 }
 
+.face-scan-icon {
+    margin-right: 1px;
+    font-size: 14px;
+    vertical-align: middle;
+    margin-bottom: 3px;
+}
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {
@@ -169,12 +176,12 @@
     }
 
     .attendance-search {
-        margin-left: 20px;
-        max-width: 250px;
+        margin-left: 0; /* Aligns search box to the left */
+        justify-content: flex-start; /* Ensures left alignment */
     }
 
     .attendance-table-container {
-        overflow-x: auto; /* Allows horizontal scrolling */
+        overflow-x: auto;
     }
 
     .attendance-table th,
@@ -191,6 +198,8 @@
     .attendance-search-input {
         width: 80%;
     }
+
+    
 }
 
 @media screen and (max-width: 480px) {
@@ -199,9 +208,8 @@
     }
 
     .attendance-search {
-        flex-direction: column;
-        align-items: flex-start;
-        margin-left: 10px;
+        margin-left: 0; /* Keeps it left-aligned on smaller screens */
+        align-items: flex-start; /* Stacks elements properly */
     }
 
     .attendance-search-input {
@@ -214,7 +222,7 @@
     }
 
     .attendance-table {
-        min-width: 600px; /* Prevents table from shrinking too much */
+        min-width: 600px;
     }
 
     .attendance-table th,

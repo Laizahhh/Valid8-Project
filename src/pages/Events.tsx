@@ -79,7 +79,7 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
           <table>
             <thead>
               <tr>
-                <th className="eventname">Event Name</th>
+                <th className="eventname">Event</th>
                 <th className="date">Date</th>
                 <th className="location">Location</th>
                 <th className="status">Status</th>

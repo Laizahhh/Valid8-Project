@@ -89,6 +89,11 @@
   margin-right: 0px;
 }
 
+.d-block w-100{
+  width: 35px;
+  height: auto;
+}
+
 /* RESPONSIVENESS */
 @media screen and (max-width: 1024px) {
   .nav-menu {
