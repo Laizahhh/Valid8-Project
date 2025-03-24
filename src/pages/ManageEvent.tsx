@@ -124,45 +124,48 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
               </tr>
             </thead>
             <tbody>
-              {filteredEvents.map((event, index) => (
-                <tr key={index}>
-                  <td>{event.name}</td>
-                  <td>{event.date}</td>
-                  <td>{event.location}</td>
-                  <td>{event.status}</td>
-                  <td className="button-group">
-                    <button
-                      className="btn btn-info btn-sm"
-                      onClick={() => openEditModal(event, index)}
-                    >
-                      <AiFillEdit /> Edit
-                    </button>
-                    <button
-                      className="btn btn-success btn-sm"
-                      disabled={event.status !== "Upcoming"}
-                      onClick={() => {
-                        setCompleteIndex(index);
-                        setCompleteModalOpen(true);
-                      }}
-                    >
-                      <AiFillCheckCircle /> Completed
-                    </button>
-                    <button
-                      className="btn btn-danger btn-sm"
-                      disabled={event.status !== "Upcoming"}
-                      onClick={() => {
-                        setCancelIndex(index);
-                        setCancelModalOpen(true);
-                      }}
-                    >
-                      <AiFillCloseCircle /> Cancel
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filteredEvents.length === 0 && (
+              {filteredEvents.length > 0 ? (
+                filteredEvents.map((event, index) => (
+                  <tr key={index}>
+                    <td>{event.name}</td>
+                    <td>{event.date}</td>
+                    <td>{event.location}</td>
+                    <td>{event.status}</td>
+                    <td className="button-group">
+                      <button
+                        className="btn btn-info btn-sm"
+                        onClick={() => openEditModal(event, index)}
+                      >
+                        <AiFillEdit /> Edit
+                      </button>
+                      <button
+                        className="btn btn-success btn-sm"
+                        disabled={event.status !== "Upcoming"}
+                        onClick={() => {
+                          setCompleteIndex(index);
+                          setCompleteModalOpen(true);
+                        }}
+                      >
+                        <AiFillCheckCircle /> Completed
+                      </button>
+                      <button
+                        className="btn btn-danger btn-sm"
+                        disabled={event.status !== "Upcoming"}
+                        onClick={() => {
+                          setCancelIndex(index);
+                          setCancelModalOpen(true);
+                        }}
+                      >
+                        <AiFillCloseCircle /> Cancel
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
-                  <td colSpan={5}>No matching events found.</td>
+                  <td colSpan={5} className="no-events">
+                    No matching events found.
+                  </td>
                 </tr>
               )}
             </tbody>

@@ -70,6 +70,68 @@ th.manageusers-name, th.manageusers-email, th.manageusers-role, th.manageusers-a
 
 }
 
+/* Dropdown Wrapper */
+.dropdown-wrapper {
+    position: relative;
+}
+
+/* Dropdown Button */
+.dropdown-btn {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+/* Ensure the checkbox is beside the role text */
+/* Ensure checkboxes and text are left-aligned */
+/* Dropdown Content - Ensure full left alignment */
+.dropdown-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Ensure everything aligns left */
+    position: absolute;
+    left: 0; /* Make sure it starts from the leftmost part */
+    width: 100%;
+    background: white;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    margin-top: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    
+}
+
+/* Ensure checkboxes and text are fully left-aligned */
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Left-align items */
+    gap: 5px; /* Maintain small spacing */
+    padding: 8px;
+    cursor: pointer;
+    width: 100%; /* Take full width for proper alignment */
+}
+
+/* Ensure checkbox is aligned with text */
+.dropdown-item input[type="checkbox"] {
+    margin: 0;
+    padding: 0;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
+
+/* Make sure role text is not pushed to the right */
+
+
+
   
 /* Responsive Adjustments */
 @media (max-width: 1024px) {
