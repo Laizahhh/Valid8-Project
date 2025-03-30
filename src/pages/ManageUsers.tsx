@@ -156,6 +156,7 @@ export const ManageUsers: React.FC = () => {
             />
 
             {/* Role Dropdown */}
+            {/* Role Dropdown */}
             <div className="form-group dropdown-wrapper">
               <div className="dropdown">
                 <button
@@ -171,13 +172,38 @@ export const ManageUsers: React.FC = () => {
                   <span className="icon">{roleDropdownOpen ? "▲" : "▼"}</span>
                 </button>
                 {roleDropdownOpen && (
-                  <div className="dropdown-content">
+                  <div
+                    className="dropdown-content"
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      padding: "5px",
+                      backgroundColor: "white",
+                      border: "1px solid #ccc",
+                      borderRadius: "5px",
+                      marginTop: "5px",
+                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                    }}
+                  >
                     {availableRoles.map((role) => (
-                      <label key={role} className="dropdown-item">
+                      <label
+                        key={role}
+                        className="dropdown-item"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          padding: "6px 12px",
+                          cursor: "pointer",
+                          width: "100%",
+                        }}
+                      >
                         <input
                           type="checkbox"
                           checked={editedUser.role.includes(role)}
                           onChange={() => toggleRoleSelection(role)}
+                          style={{ marginRight: "5px" }}
                         />
                         {role}
                       </label>

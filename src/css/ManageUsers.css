@@ -4,24 +4,44 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
+    padding: 0 20px; /* Consistent padding on both sides */
 }
-  
-/* Search Box */
+
+/* Search Box - Aligned to the Left on All Devices */
 .search-manage-user {
     display: flex;
     align-items: center;
     position: relative;
     width: 100%;
-    max-width: 200px;
-    margin-left: 58px;
+    max-width: 200px; /* Consistent size across devices */
+    margin: 8px 0;
 }
 
+/* Search Input Box */
+.search-input {
+    padding: 8px 12px 8px 30px;
+    width: 100%;
+    border: 2px solid #162f65;
+    border-radius: 5px;
+    outline: none;
+    text-align: left;
+}
 
-  
+/* Search Icon inside the Input */
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+}
+
 /* Add User Button */
 .add-user-btn {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 5px;
     background-color: #f0ad4e;
     color: white;
@@ -31,13 +51,13 @@
     cursor: pointer;
     font-size: 14px;
     transition: background 0.3s ease;
-    margin-right: 100px;
+    margin-left: auto; /* Pushes the button to the right edge */
+    min-width: 130px; /* Ensures consistent size */
 }
-  
+
 .add-user-btn:hover {
     background-color: #ec971f;
 }
-
 
 /* Table Container - Center on Desktop */
 .manage-users-table {
@@ -50,12 +70,12 @@
 
 table {
     width: 100%;
-    max-width: 1000px; /* Adjust based on your design */
+    max-width: 1000px;
     border-collapse: collapse;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border: 2px solid #162f65;
     border-radius: 8px;
-    margin: auto; /* Ensures centering */
+    margin: auto;
 }
 
 /* Ensure table text is properly aligned */
@@ -65,9 +85,8 @@ th, td {
     border: 1px solid #ddd;
 }
 
-th.manageusers-name, th.manageusers-email, th.manageusers-role, th.manageusers-actions{
+th.manageusers-name, th.manageusers-email, th.manageusers-role, th.manageusers-actions {
     text-align: center;
-
 }
 
 /* Dropdown Wrapper */
@@ -88,15 +107,14 @@ th.manageusers-name, th.manageusers-email, th.manageusers-role, th.manageusers-a
     justify-content: space-between;
     align-items: center;
 }
-/* Ensure the checkbox is beside the role text */
-/* Ensure checkboxes and text are left-aligned */
+
 /* Dropdown Content - Ensure full left alignment */
 .dropdown-content {
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Ensure everything aligns left */
+    align-items: flex-start;
     position: absolute;
-    left: 0; /* Make sure it starts from the leftmost part */
+    left: 0;
     width: 100%;
     background: white;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
@@ -105,22 +123,20 @@ th.manageusers-name, th.manageusers-email, th.manageusers-role, th.manageusers-a
     max-height: 200px;
     overflow-y: auto;
     z-index: 100;
-    
 }
 
-/* Ensure checkboxes and text are fully left-aligned */
+/* Dropdown Item - Align Left */
 .dropdown-item {
     display: flex;
     align-items: center;
-    justify-content: flex-start; /* Left-align items */
-    gap: 8px; /* Maintain a consistent gap between checkbox and text */
+    justify-content: flex-start;
+    gap: 8px;
     padding: 6px 12px;
     cursor: pointer;
-    width: 100%; /* Take full width for proper alignment */
-    box-sizing: border-box; /* Prevent padding from affecting width */
+    width: 100%;
+    box-sizing: border-box;
 }
 
-/* Ensure checkbox is aligned with text */
 .dropdown-item input[type="checkbox"] {
     margin: 0;
     padding: 0;
@@ -133,45 +149,44 @@ th.manageusers-name, th.manageusers-email, th.manageusers-role, th.manageusers-a
     margin: 0;
     padding: 0;
     font-size: 14px;
-    line-height: 1.2; /* Ensure vertical alignment */
+    line-height: 1.2;
 }
 
-
-
-  
 /* Responsive Adjustments */
 @media (max-width: 1024px) {
     .manage-users-header {
-        flex-direction: column;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
         gap: 10px;
+        padding: 0 10px;
     }
 
     .search-manage-user {
-        width: 100%;
-        justify-content: center;
+        max-width: 200px; /* Keep consistent size */
+        margin-left: 0;
     }
 
     .add-user-btn {
-        width: 100%;
-        justify-content: center;
-        margin-right: 0;
+        min-width: 130px;
     }
 }
 
-@media (max-width: 768px){
+@media (max-width: 768px) {
     .manage-users-header {
         flex-direction: column;
         gap: 10px;
+        padding: 0 5px;
     }
 
     .search-manage-user {
-        width: 100%;
+        max-width: 200px;
         justify-content: center;
     }
 
     .add-user-btn {
         width: 100%;
+        max-width: 250px; /* Keep consistent size */
         justify-content: center;
-        margin-right: 0;
     }
 }

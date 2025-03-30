@@ -97,8 +97,17 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
                 type="button"
                 className="dropdown-btn"
                 onClick={() => setSSGDropdownOpen(!ssgDropdownOpen)}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
               >
-                <span>Select Officers</span>
+                <span>
+                  {selectedSSGOfficers.length > 0
+                    ? selectedSSGOfficers.join(", ")
+                    : "Select Officers"}
+                </span>
                 <span className="icon">{ssgDropdownOpen ? "▲" : "▼"}</span>
               </button>
               {ssgDropdownOpen && (
@@ -132,8 +141,17 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
                 type="button"
                 className="dropdown-btn"
                 onClick={() => setProgramDropdownOpen(!programDropdownOpen)}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
               >
-                <span>Select Programs</span>
+                <span>
+                  {selectedPrograms.length > 0
+                    ? selectedPrograms.join(", ")
+                    : "Select Programs"}
+                </span>
                 <span className="icon">{programDropdownOpen ? "▲" : "▼"}</span>
               </button>
               {programDropdownOpen && (
