@@ -1,5 +1,10 @@
 import { NavLink } from "react-router-dom";
-import { FaRegListAlt, FaClipboard, FaCheckCircle } from "react-icons/fa";
+import {
+  FaHome,
+  FaRegListAlt,
+  FaClipboard,
+  FaCheckCircle,
+} from "react-icons/fa";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
 import "../css/NavbarAdmin.css";
 import userprofile from "../assets/images/userprofile.png";
@@ -10,13 +15,23 @@ export const NavbarAdmin = () => {
       <div className="admin-navbar">
         {/* Left Section: Logo and Page Name */}
         <div className="admin-navbar-left">
-          <img src={logoValid8} alt="Valid 8 logo" className="logo" />
+          <img src={logoValid8} alt="Valid8 logo" className="logo" />
           <h1 className="admin-page-name">Admin</h1>
         </div>
 
         {/* Center Section: Navigation Links */}
         <div className="admin-navbar-center">
           <ul className="admin-menu">
+            <li title="Home">
+              <NavLink
+                to="/admin_home"
+                className={({ isActive }) =>
+                  `admin-navigation-link ${isActive ? "active" : ""}`
+                }
+              >
+                <FaHome />
+              </NavLink>
+            </li>
             <li title="Events">
               <NavLink
                 to="/admin_events"

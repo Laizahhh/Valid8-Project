@@ -113,10 +113,11 @@ th.manageusers-name, th.manageusers-email, th.manageusers-role, th.manageusers-a
     display: flex;
     align-items: center;
     justify-content: flex-start; /* Left-align items */
-    gap: 5px; /* Maintain small spacing */
-    padding: 8px;
+    gap: 8px; /* Maintain a consistent gap between checkbox and text */
+    padding: 6px 12px;
     cursor: pointer;
     width: 100%; /* Take full width for proper alignment */
+    box-sizing: border-box; /* Prevent padding from affecting width */
 }
 
 /* Ensure checkbox is aligned with text */
@@ -128,7 +129,12 @@ th.manageusers-name, th.manageusers-email, th.manageusers-role, th.manageusers-a
     vertical-align: middle;
 }
 
-/* Make sure role text is not pushed to the right */
+.dropdown-item label {
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1.2; /* Ensure vertical alignment */
+}
 
 
 

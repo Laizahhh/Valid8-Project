@@ -21,9 +21,9 @@ h3 {
 .upcoming-events-table {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Aligns content (including search box) to the left */
+  align-items: center;
   width: 100%;
-  padding-left: 0px; /* Adjust to match table padding */
+  padding-left: 0px;
 }
 
 table {
@@ -64,7 +64,7 @@ tr:hover {
   position: relative;
   width: 100%;
   max-width: 200px;
-  margin: 20px 0; /* Aligns with table */
+  margin: 20px 0;
   margin-left: 70px;
 }
 
@@ -125,10 +125,29 @@ td.status {
   }
 }
 
-@media screen and (max-width: 1024px){
+@media screen and (max-width: 1024px) {
   .search-upcoming {
     margin-left: 0;
     justify-content: flex-start;
+  }
+}
+
+/* Fix specifically for iPad Mini in portrait mode */
+@media screen and (device-width: 768px) and (orientation: portrait) {
+  table {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    display: block !important;
+    white-space: nowrap !important;
+  }
+
+  th, td {
+    padding: 33px !important;
+    font-size: 14px !important;
+    word-wrap: break-word !important;
+    white-space: normal !important;
   }
 }
 

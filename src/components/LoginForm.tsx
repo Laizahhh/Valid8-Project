@@ -1,11 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { login } from "../api/authApi"; // Import login function
 
 const LoginForm = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [rememberMe, setRememberMe] = useState<boolean>(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Load remembered email if available
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -21,6 +31,12 @@ const LoginForm = () => {
       // Store user info and token
       localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("token", userData.token);
+
+      if (rememberMe) {
+        localStorage.setItem("rememberedEmail", email);
+      } else {
+        localStorage.removeItem("rememberedEmail");
+      }
 
       // Role-based redirection
       if (userData.roles.includes("admin")) {
@@ -49,6 +65,10 @@ const LoginForm = () => {
         error.response?.data?.message || "Login failed! Check credentials."
       );
     }
+  };
+
+  const handleForgotPassword = () => {
+    navigate(`/forgot-password?email=${encodeURIComponent(email)}`);
   };
 
   return (
@@ -81,6 +101,36 @@ const LoginForm = () => {
             maxLength={30}
           />
         </div>
+
+        {/* Remember Me & Forgot Password */}
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <div className="form-check">
+            <input
+              type="checkbox"
+              className="form-check-input"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            <label
+              className="form-check-label"
+              htmlFor="rememberMe"
+              style={{ fontSize: "0.85rem" }}
+            >
+              Remember Me
+            </label>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleForgotPassword}
+            className="btn btn-link text-primary p-0"
+            style={{ fontSize: "0.85rem", textDecoration: "none" }}
+          >
+            Forgot Password?
+          </button>
+        </div>
+
         <button type="submit" className="home-button">
           Login
         </button>

@@ -1,4 +1,15 @@
+/* Import Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
+/* Global Styles */
+* {
+  font-family: 'Poppins', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Header */
 .header {
   background-color: #162F65;
   display: flex;
@@ -8,6 +19,7 @@
   padding: 0;
 }
 
+/* Home Button */
 .home-button {
   background-color: #162F65;
   border-radius: 5px;
@@ -15,12 +27,11 @@
   width: 100%;
   height: auto;
   color: white;
-  
+  font-weight: 600;
 }
 
-/* Header - Place Logo & System Name on the Left */
+/* Header - Logo & System Name */
 .logo-container {
-  margin-top: 0;
   display: flex;
   align-items: center;
 }
@@ -29,48 +40,61 @@
   float: left;
   width: 35px;
   height: auto;
-  margin-right: 5px;
-  margin-left: 10px;
+  margin: 2px 5px 2px 10px;
   border-radius: 50px;
-  margin-bottom: 4px;
-  margin-top: 4px;
 }
 
 .system-name {
-  margin-left: 5px;
-  margin-top: 10px;
-  font-size: 25px;
-  font-weight: bold;
+  font-size: 24px;
+  font-weight: 700;
   color: white;
-  font-family: Arial, Helvetica, sans-serif;
+  text-transform: uppercase;
 }
 
-/* Main Content */
-.main-content {
+/* University Information (Above Login Form) */
+.university-info {
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
+  margin-bottom: 15px;
+}
+
+/* University Name */
+.university-name {
+  font-size: 26px;
+  font-weight: 700;
+  color: #162F65;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 5px;
+}
+
+/* System Title */
+.system-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #444;
+}
+
+/* Campus Location */
+.campus-location {
+  font-size: 16px;
+  color: #666;
+  font-style: italic;
 }
 
 /* Login Form Container */
 .form-container {
- 
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.5);
   border-radius: 12px;
   border: 1px solid rgba(209, 213, 219, 0.3);
   width: 90%;
   max-width: 400px;
-  margin-top: 35px;
+  margin-top: 20px;
   padding: 20px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   text-align: center;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  display: block; /* Fallback for older browsers */
 }
 
 /* School Logo inside the Form */
@@ -80,33 +104,69 @@
   border-radius: 50px;
 }
 
-/* Input fields */
+/* Input Fields */
 .form-control {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
   text-align: left;
+  font-size: 14px;
 }
 
-/* Ensure the form labels are aligned left */
+/* Form Labels */
 .form-label {
   text-align: left;
   display: block;
   width: 100%;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+/* Main Content Section */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+/* Home Page Background */
+.home-page {
+  position: relative;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+/* Add an Overlay to Control Transparency */
+.home-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.1); /* Adjust transparency */
+  z-index: 0;
 }
 
 /* Responsive Adjustments */
-@media (max-width: 768px) {
+@media screen and (max-width: 1024px) {
   .header {
     flex-direction: column;
     align-items: center;
     text-align: center;
-  }
-
-  .logo {
-    margin-bottom: 5px;
-    width: 40px;
   }
 
   .system-name {
@@ -116,10 +176,57 @@
   .form-container {
     width: 100%;
     padding: 15px;
+    margin-top: 0;
   }
 
-  .home-button {
-    width: 90%; /* Slightly smaller for better UI */
+  .university-info {
+    margin-top: -35px;
+    padding-top: 0;
   }
 }
 
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .system-name {
+    font-size: 20px;
+  }
+
+  .form-container {
+    width: 100%;
+    padding: 15px;
+    margin-top: 0;
+  }
+
+  .university-info {
+    margin-top: -80px;
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .system-name {
+    font-size: 20px;
+  }
+
+  .form-container {
+    width: 100%;
+    padding: 15px;
+    margin-top: 0;
+  }
+
+  .university-info {
+    margin-top: -60px;
+    padding-top: 5px;
+  }
+}

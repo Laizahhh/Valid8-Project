@@ -3,6 +3,7 @@ import {
   AiFillEdit,
   AiFillCheckCircle,
   AiFillCloseCircle,
+  AiOutlineSync,
 } from "react-icons/ai";
 import { NavbarEventOrganizer } from "../components/NavbarEventOrganizer";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
@@ -53,6 +54,14 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
   const [isCompleteModalOpen, setCompleteModalOpen] = useState(false);
   const [completeIndex, setCompleteIndex] = useState<number | null>(null);
 
+  const [isUpcomingModalOpen, setUpcomingModalOpen] = useState(false);
+  const [upcomingIndex, setUpcomingIndex] = useState<number | null>(null);
+
+  const [isOngoingModalOpen, setOngoingModalOpen] = useState(false);
+  const [ongoingIndex, setOngoingIndex] = useState<number | null>(null);
+
+  const [activeButtons, setActiveButtons] = useState<string[]>([]);
+
   const filteredEvents = events.filter((event) =>
     event.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -88,6 +97,11 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
     const updatedEvents = [...events];
     updatedEvents[index].status = newStatus;
     setEvents(updatedEvents);
+
+    // Update the active button for the specific event
+    const updatedActiveButtons = [...activeButtons];
+    updatedActiveButtons[index] = newStatus;
+    setActiveButtons(updatedActiveButtons);
   };
 
   return (
@@ -133,14 +147,46 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
                     <td>{event.status}</td>
                     <td className="button-group">
                       <button
-                        className="btn btn-info btn-sm"
+                        className={`btn btn-primary btn-sm ${
+                          activeButtons[index] === "Edit" ? "btn-clicked" : ""
+                        }`}
                         onClick={() => openEditModal(event, index)}
                       >
                         <AiFillEdit /> Edit
                       </button>
                       <button
-                        className="btn btn-success btn-sm"
-                        disabled={event.status !== "Upcoming"}
+                        className={`btn btn-info btn-sm ${
+                          activeButtons[index] === "Upcoming"
+                            ? "btn-clicked"
+                            : ""
+                        }`}
+                        onClick={() => {
+                          setUpcomingIndex(index);
+                          setUpcomingModalOpen(true);
+                        }}
+                      >
+                        <AiFillEdit /> Upcoming
+                      </button>
+                      <button
+                        className={`btn btn-warning btn-sm ${
+                          activeButtons[index] === "Ongoing"
+                            ? "btn-clicked"
+                            : ""
+                        }`}
+                        onClick={() => {
+                          setOngoingIndex(index);
+                          setOngoingModalOpen(true);
+                        }}
+                      >
+                        <AiOutlineSync /> Ongoing
+                      </button>
+
+                      <button
+                        className={`btn btn-success btn-sm ${
+                          activeButtons[index] === "Completed"
+                            ? "btn-clicked"
+                            : ""
+                        }`}
                         onClick={() => {
                           setCompleteIndex(index);
                           setCompleteModalOpen(true);
@@ -149,8 +195,11 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
                         <AiFillCheckCircle /> Completed
                       </button>
                       <button
-                        className="btn btn-danger btn-sm"
-                        disabled={event.status !== "Upcoming"}
+                        className={`btn btn-danger btn-sm ${
+                          activeButtons[index] === "Canceled"
+                            ? "btn-clicked"
+                            : ""
+                        }`}
                         onClick={() => {
                           setCancelIndex(index);
                           setCancelModalOpen(true);
@@ -218,11 +267,87 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
         </div>
       )}
 
+      {/* Upcoming Confirmation Modal */}
+      {isUpcomingModalOpen && upcomingIndex !== null && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <p>Are you sure you want to mark this event as upcoming?</p>
+            <div
+              className="modal-buttons"
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "20px",
+                marginTop: "10px",
+              }}
+            >
+              <button
+                className="btn btn-info"
+                onClick={() => {
+                  updateEventStatus(upcomingIndex, "Upcoming");
+                  setUpcomingModalOpen(false);
+                  setUpcomingIndex(null);
+                }}
+              >
+                Yes
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  setUpcomingModalOpen(false);
+                  setUpcomingIndex(null);
+                }}
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ongoing Confirmation Modal */}
+      {isOngoingModalOpen && ongoingIndex !== null && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <p>Are you sure you want to mark this event as ongoing?</p>
+            <div
+              className="modal-buttons"
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "20px",
+                marginTop: "10px",
+              }}
+            >
+              <button
+                className="btn btn-warning"
+                onClick={() => {
+                  updateEventStatus(ongoingIndex, "Ongoing");
+                  setOngoingModalOpen(false);
+                  setOngoingIndex(null);
+                }}
+              >
+                Yes
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  setOngoingModalOpen(false);
+                  setOngoingIndex(null);
+                }}
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Cancel Confirmation Modal */}
       {isCancelModalOpen && cancelIndex !== null && (
         <div className="modal-overlay">
           <div className="modal-container">
-            <p>Are you sure you want to cancel this event?</p>
+            <p>Are you sure you want to mark this event as canceled?</p>
             <div
               className="modal-buttons"
               style={{
@@ -260,7 +385,7 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
       {isCompleteModalOpen && completeIndex !== null && (
         <div className="modal-overlay">
           <div className="modal-container">
-            <p>Are you sure this event is completed?</p>
+            <p>Are you sure you want to mark this event as completed?</p>
             <div
               className="modal-buttons"
               style={{
