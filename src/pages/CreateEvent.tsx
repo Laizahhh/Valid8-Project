@@ -17,7 +17,12 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
   const [programDropdownOpen, setProgramDropdownOpen] = useState(false);
 
   const ssgOfficers = ["Officer 1", "Officer 2", "Officer 3"];
-  const programs = ["Program A", "Program B", "Program C"];
+  const programs = [
+    "BS Computer Engineering",
+    "BS Civil Engineering",
+    "BS Electronics Engineering",
+    "BS Electrical Engineering",
+  ];
 
   // Function to reset all form fields
   const resetForm = () => {

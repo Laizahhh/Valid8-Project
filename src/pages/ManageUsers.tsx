@@ -18,9 +18,19 @@ export const ManageUsers: React.FC = () => {
   const [users, setUsers] = useState(sampleUsers);
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+  const [addUserModalOpen, setAddUserModalOpen] = useState(false);
+
   const [editedUser, setEditedUser] = useState({
     name: "",
     email: "",
+    role: [] as string[],
+  });
+
+  const [newUser, setNewUser] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
     role: [] as string[],
   });
 
@@ -50,13 +60,32 @@ export const ManageUsers: React.FC = () => {
     setDeleteIndex(null);
   };
 
-  // Toggle role selection
-  const toggleRoleSelection = (role: string) => {
-    setEditedUser((prevUser) => {
-      const newRoles = prevUser.role.includes(role)
-        ? prevUser.role.filter((r) => r !== role)
-        : [...prevUser.role, role];
-      return { ...prevUser, role: newRoles };
+  const toggleRoleSelection = (
+    role: string,
+    roles: string[],
+    setRoles: (updatedRoles: string[]) => void
+  ) => {
+    const newRoles = roles.includes(role)
+      ? roles.filter((r) => r !== role)
+      : [...roles, role];
+    setRoles(newRoles);
+  };
+
+  const handleAddUser = () => {
+    const fullName = `${newUser.firstName} ${newUser.lastName}`;
+    const newUserObject = {
+      name: fullName,
+      email: newUser.email,
+      role: newUser.role,
+    };
+    setUsers([...users, newUserObject]);
+    setAddUserModalOpen(false);
+    setNewUser({
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      role: [],
     });
   };
 
@@ -79,7 +108,10 @@ export const ManageUsers: React.FC = () => {
             <img src={search_logo} alt="search" className="search-icon" />
           </div>
 
-          <button className="btn btn-warning add">
+          <button
+            className="btn btn-warning add"
+            onClick={() => setAddUserModalOpen(true)}
+          >
             <AiOutlineUserAdd /> Add New User
           </button>
         </div>
@@ -133,6 +165,138 @@ export const ManageUsers: React.FC = () => {
         </div>
       </div>
 
+      {/* Add User Modal */}
+      {addUserModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <h3>Add New User</h3>
+            <input
+              type="text"
+              placeholder="First Name"
+              required
+              value={newUser.firstName}
+              onChange={(e) =>
+                setNewUser({ ...newUser, firstName: e.target.value })
+              }
+            />
+            <input
+              type="text"
+              placeholder="Last Name"
+              required
+              value={newUser.lastName}
+              onChange={(e) =>
+                setNewUser({ ...newUser, lastName: e.target.value })
+              }
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={newUser.email}
+              required
+              onChange={(e) =>
+                setNewUser({ ...newUser, email: e.target.value })
+              }
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={newUser.password}
+              required
+              onChange={(e) =>
+                setNewUser({ ...newUser, password: e.target.value })
+              }
+            />
+            <div
+              className="form-group dropdown-wrapper"
+              style={{ margin: "10px 0" }}
+            >
+              <div className="dropdown" style={{ position: "relative" }}>
+                <button
+                  type="button"
+                  className="dropdown-btn"
+                  onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    margin: "5px 0",
+                    backgroundColor: "#f8f9fa",
+                    border: "1px solid #ced4da",
+                    borderRadius: "4px",
+                    textAlign: "left",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  <span>
+                    {newUser.role.length > 0
+                      ? newUser.role.join(", ")
+                      : "Select Roles"}
+                  </span>
+                  <span className="icon">{roleDropdownOpen ? "▲" : "▼"}</span>
+                </button>
+                {roleDropdownOpen && (
+                  <div
+                    className="dropdown-content"
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: "0",
+                      width: "100%",
+                      maxHeight: "150px",
+                      overflowY: "auto",
+                      backgroundColor: "#fff",
+                      border: "1px solid #ced4da",
+                      borderRadius: "4px",
+                      zIndex: 10,
+                    }}
+                  >
+                    {availableRoles.map((role) => (
+                      <label
+                        key={role}
+                        className="dropdown-item"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          padding: "8px",
+                          cursor: "pointer",
+                          backgroundColor: "#f8f9fa",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={newUser.role.includes(role)}
+                          onChange={() =>
+                            toggleRoleSelection(role, newUser.role, (roles) =>
+                              setNewUser({ ...newUser, role: roles })
+                            )
+                          }
+                          style={{ marginRight: "8px" }}
+                        />
+                        {role}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="button-group">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setAddUserModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button className="btn btn-primary" onClick={handleAddUser}>
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Edit User Modal */}
       {editIndex !== null && (
         <div className="modal-overlay">
@@ -155,7 +319,6 @@ export const ManageUsers: React.FC = () => {
               placeholder="Email"
             />
 
-            {/* Role Dropdown */}
             {/* Role Dropdown */}
             <div className="form-group dropdown-wrapper">
               <div className="dropdown">
@@ -202,7 +365,14 @@ export const ManageUsers: React.FC = () => {
                         <input
                           type="checkbox"
                           checked={editedUser.role.includes(role)}
-                          onChange={() => toggleRoleSelection(role)}
+                          onChange={() =>
+                            toggleRoleSelection(
+                              role,
+                              editedUser.role,
+                              (roles) =>
+                                setEditedUser({ ...editedUser, role: roles })
+                            )
+                          }
                           style={{ marginRight: "5px" }}
                         />
                         {role}
