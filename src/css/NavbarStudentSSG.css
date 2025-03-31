@@ -76,7 +76,7 @@
   border-radius: 5px;     /* Slightly larger rounded corners */
   color: #ffffff;         /* Ensures text remains visible */
   font-weight: bold;      /* Emphasize active state */
-  padding: 13px 12px;      /* Increase padding for a larger clickable area */
+  padding: 12px 12px;      /* Increase padding for a larger clickable area */
 }
 
 
@@ -96,4 +96,35 @@
     gap: 8px; /* Tighter spacing for smaller devices */
     flex-wrap: nowrap;
   }
+}
+
+@media screen and (max-width: 480px) {
+  .studentssg-menu {
+    gap: 6px; /* Tighter spacing for smaller devices */
+    flex-wrap: nowrap;
+  }
+
+  .studentssg-page-name {
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-right: auto;
+    margin-left: 0px;
+    text-align: center;
+  }
+
+  .studentssg-navbar .logo {
+    width: 30px;
+    height: auto;
+    border-radius: 50px;
+    margin-right: 5px;
+    margin-left: 0px;
+    margin-bottom: 2px;
+    margin-top: 4px;
+  }
+  
+
+  
 }

@@ -73,7 +73,7 @@ const LoginForm = () => {
 
   return (
     <div className="container mt-4">
-      <h4>User Login</h4>
+      <h4 className="userlogin">User Login</h4>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <label className="form-label">Email</label>
@@ -115,7 +115,7 @@ const LoginForm = () => {
             <label
               className="form-check-label"
               htmlFor="rememberMe"
-              style={{ fontSize: "0.85rem" }}
+              style={{ fontSize: "0.80rem", fontWeight: "400" }}
             >
               Remember Me
             </label>
@@ -125,7 +125,7 @@ const LoginForm = () => {
             type="button"
             onClick={handleForgotPassword}
             className="btn btn-link text-primary p-0"
-            style={{ fontSize: "0.85rem", textDecoration: "none" }}
+            style={{ fontSize: "0.78rem", textDecoration: "none" }}
           >
             Forgot Password?
           </button>

@@ -112,3 +112,43 @@
     width: 20px;
   }
 }
+
+@media screen and (max-width: 480px) {
+  .nav-menu {
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+
+  .logo {
+    width: 30px;
+    height: auto;
+    border-radius: 50px;  /* Changed to Square */
+    margin-right: 5px;
+    margin-left: 0px;
+    margin-bottom: 0; 
+    margin-top: 0;
+  }
+
+  .page-name {
+    font-family: Arial, Helvetica, sans-serif;
+    margin-top: 10px;
+    font-size: 17px;
+    font-weight: bold;
+    color: white;
+    margin-right: auto;
+    margin-left: 0px;
+    text-align: center;
+  }
+
+  .nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 0;
+    margin-top: 10px;
+  }
+  
+  
+}
+
+
