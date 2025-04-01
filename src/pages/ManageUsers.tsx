@@ -9,8 +9,20 @@ import search_logo from "../assets/images/search_logo.png";
 import "../css/ManageUsers.css";
 
 const sampleUsers = [
-  { name: "John Doe", email: "johndoe@example.com", role: ["Admin"] },
-  { name: "Jane Smith", email: "janesmith@example.com", role: ["Student"] },
+  {
+    firstName: "John",
+    middleName: "",
+    lastName: "Doe",
+    email: "johndoe@example.com",
+    role: ["Admin"],
+  },
+  {
+    firstName: "Jane",
+    middleName: "",
+    lastName: "Smith",
+    email: "janesmith@example.com",
+    role: ["Student"],
+  },
 ];
 
 export const ManageUsers: React.FC = () => {
@@ -19,15 +31,21 @@ export const ManageUsers: React.FC = () => {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [addUserModalOpen, setAddUserModalOpen] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
 
   const [editedUser, setEditedUser] = useState({
-    name: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
     email: "",
     role: [] as string[],
   });
 
   const [newUser, setNewUser] = useState({
     firstName: "",
+    middleName: "",
     lastName: "",
     email: "",
     password: "",
@@ -38,16 +56,60 @@ export const ManageUsers: React.FC = () => {
   const availableRoles = ["Admin", "Student", "SSG Officer", "Event Organizer"];
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
 
+  // Helper function to get full name
+  const getFullName = (user) => {
+    return [user.firstName, user.middleName, user.lastName]
+      .filter(Boolean)
+      .join(" ");
+  };
+
   const handleEditClick = (index: number) => {
     setEditIndex(index);
     setEditedUser({ ...users[index] });
+    setValidationErrors({});
+  };
+
+  const validateFields = (user, isNewUser = false) => {
+    const errors: Record<string, string> = {};
+
+    if (!user.firstName.trim()) {
+      errors.firstName = "First name is required";
+    }
+
+    if (!user.lastName.trim()) {
+      errors.lastName = "Last name is required";
+    }
+
+    if (!user.email.trim()) {
+      errors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(user.email)) {
+      errors.email = "Email is invalid";
+    }
+
+    if (isNewUser && !user.password.trim()) {
+      errors.password = "Password is required";
+    }
+
+    if (user.role.length === 0) {
+      errors.role = "At least one role must be selected";
+    }
+
+    return errors;
   };
 
   const handleSaveChanges = () => {
+    const errors = validateFields(editedUser);
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
     const updatedUsers = [...users];
     updatedUsers[editIndex!] = editedUser;
     setUsers(updatedUsers);
     setEditIndex(null);
+    setValidationErrors({});
   };
 
   const handleDeleteClick = (index: number) => {
@@ -72,9 +134,17 @@ export const ManageUsers: React.FC = () => {
   };
 
   const handleAddUser = () => {
-    const fullName = `${newUser.firstName} ${newUser.lastName}`;
+    const errors = validateFields(newUser, true);
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
     const newUserObject = {
-      name: fullName,
+      firstName: newUser.firstName,
+      middleName: newUser.middleName || "",
+      lastName: newUser.lastName,
       email: newUser.email,
       role: newUser.role,
     };
@@ -82,11 +152,13 @@ export const ManageUsers: React.FC = () => {
     setAddUserModalOpen(false);
     setNewUser({
       firstName: "",
+      middleName: "",
       lastName: "",
       email: "",
       password: "",
       role: [],
     });
+    setValidationErrors({});
   };
 
   return (
@@ -110,7 +182,10 @@ export const ManageUsers: React.FC = () => {
 
           <button
             className="btn btn-warning add"
-            onClick={() => setAddUserModalOpen(true)}
+            onClick={() => {
+              setAddUserModalOpen(true);
+              setValidationErrors({});
+            }}
           >
             <AiOutlineUserAdd /> Add New User
           </button>
@@ -128,15 +203,16 @@ export const ManageUsers: React.FC = () => {
             </thead>
             <tbody>
               {users
-                .filter((user) =>
-                  [user.name, user.email, user.role.join(", ")]
+                .filter((user) => {
+                  const fullName = getFullName(user);
+                  return [fullName, user.email, user.role.join(", ")]
                     .join(" ")
                     .toLowerCase()
-                    .includes(searchTerm.toLowerCase())
-                )
+                    .includes(searchTerm.toLowerCase());
+                })
                 .map((user, index) => (
                   <tr key={index}>
-                    <td>{user.name}</td>
+                    <td>{getFullName(user)}</td>
                     <td>{user.email}</td>
                     <td>{user.role.join(", ")}</td>
                     <td className="button-group">
@@ -170,57 +246,100 @@ export const ManageUsers: React.FC = () => {
         <div className="modal-overlay">
           <div className="modal-container">
             <h3>Add New User</h3>
-            <input
-              type="text"
-              placeholder="First Name"
-              required
-              value={newUser.firstName}
-              onChange={(e) =>
-                setNewUser({ ...newUser, firstName: e.target.value })
-              }
-            />
-            <input
-              type="text"
-              placeholder="Last Name"
-              required
-              value={newUser.lastName}
-              onChange={(e) =>
-                setNewUser({ ...newUser, lastName: e.target.value })
-              }
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={newUser.email}
-              required
-              onChange={(e) =>
-                setNewUser({ ...newUser, email: e.target.value })
-              }
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={newUser.password}
-              required
-              onChange={(e) =>
-                setNewUser({ ...newUser, password: e.target.value })
-              }
-            />
+            <div className="form-group">
+              <input
+                type="text"
+                placeholder="First Name"
+                value={newUser.firstName}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, firstName: e.target.value })
+                }
+                className={validationErrors.firstName ? "input-error" : ""}
+              />
+              {validationErrors.firstName && (
+                <div className="error-message">
+                  {validationErrors.firstName}
+                </div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <input
+                type="text"
+                placeholder="Middle Name"
+                value={newUser.middleName}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, middleName: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="form-group">
+              <input
+                type="text"
+                placeholder="Last Name"
+                value={newUser.lastName}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, lastName: e.target.value })
+                }
+                className={validationErrors.lastName ? "input-error" : ""}
+              />
+              {validationErrors.lastName && (
+                <div className="error-message">{validationErrors.lastName}</div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <input
+                type="email"
+                placeholder="Email"
+                value={newUser.email}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, email: e.target.value })
+                }
+                className={validationErrors.email ? "input-error" : ""}
+              />
+              {validationErrors.email && (
+                <div className="error-message">{validationErrors.email}</div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <input
+                type="password"
+                placeholder="Password"
+                value={newUser.password}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, password: e.target.value })
+                }
+                className={validationErrors.password ? "input-error" : ""}
+              />
+              {validationErrors.password && (
+                <div className="error-message">{validationErrors.password}</div>
+              )}
+            </div>
+
             <div
-              className="form-group dropdown-wrapper"
+              className={`form-group dropdown-wrapper ${
+                validationErrors.role ? "input-error" : ""
+              }`}
               style={{ margin: "10px 0" }}
             >
               <div className="dropdown" style={{ position: "relative" }}>
                 <button
                   type="button"
-                  className="dropdown-btn"
+                  className={`dropdown-btn ${
+                    validationErrors.role ? "input-error" : ""
+                  }`}
                   onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
                   style={{
                     width: "100%",
                     padding: "8px",
                     margin: "5px 0",
                     backgroundColor: "#f8f9fa",
-                    border: "1px solid #ced4da",
+                    border: validationErrors.role
+                      ? "1px solid #dc3545"
+                      : "1px solid #ced4da",
                     borderRadius: "4px",
                     textAlign: "left",
                     display: "flex",
@@ -236,6 +355,9 @@ export const ManageUsers: React.FC = () => {
                   </span>
                   <span className="icon">{roleDropdownOpen ? "▲" : "▼"}</span>
                 </button>
+                {validationErrors.role && (
+                  <div className="error-message">{validationErrors.role}</div>
+                )}
                 {roleDropdownOpen && (
                   <div
                     className="dropdown-content"
@@ -285,7 +407,10 @@ export const ManageUsers: React.FC = () => {
             <div className="button-group">
               <button
                 className="btn btn-secondary"
-                onClick={() => setAddUserModalOpen(false)}
+                onClick={() => {
+                  setAddUserModalOpen(false);
+                  setValidationErrors({});
+                }}
               >
                 Cancel
               </button>
@@ -302,29 +427,72 @@ export const ManageUsers: React.FC = () => {
         <div className="modal-overlay">
           <div className="modal-container">
             <h3>Edit User</h3>
-            <input
-              type="text"
-              value={editedUser.name}
-              onChange={(e) =>
-                setEditedUser({ ...editedUser, name: e.target.value })
-              }
-              placeholder="Name"
-            />
-            <input
-              type="email"
-              value={editedUser.email}
-              onChange={(e) =>
-                setEditedUser({ ...editedUser, email: e.target.value })
-              }
-              placeholder="Email"
-            />
+            <div className="form-group">
+              <input
+                type="text"
+                value={editedUser.firstName}
+                onChange={(e) =>
+                  setEditedUser({ ...editedUser, firstName: e.target.value })
+                }
+                placeholder="First Name"
+                className={validationErrors.firstName ? "input-error" : ""}
+              />
+              {validationErrors.firstName && (
+                <div className="error-message">
+                  {validationErrors.firstName}
+                </div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <input
+                type="text"
+                value={editedUser.middleName}
+                onChange={(e) =>
+                  setEditedUser({ ...editedUser, middleName: e.target.value })
+                }
+                placeholder="Middle Name"
+              />
+            </div>
+
+            <div className="form-group">
+              <input
+                type="text"
+                value={editedUser.lastName}
+                onChange={(e) =>
+                  setEditedUser({ ...editedUser, lastName: e.target.value })
+                }
+                placeholder="Last Name"
+                className={validationErrors.lastName ? "input-error" : ""}
+              />
+              {validationErrors.lastName && (
+                <div className="error-message">{validationErrors.lastName}</div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <input
+                type="email"
+                value={editedUser.email}
+                onChange={(e) =>
+                  setEditedUser({ ...editedUser, email: e.target.value })
+                }
+                placeholder="Email"
+                className={validationErrors.email ? "input-error" : ""}
+              />
+              {validationErrors.email && (
+                <div className="error-message">{validationErrors.email}</div>
+              )}
+            </div>
 
             {/* Role Dropdown */}
             <div className="form-group dropdown-wrapper">
               <div className="dropdown">
                 <button
                   type="button"
-                  className="dropdown-btn"
+                  className={`dropdown-btn ${
+                    validationErrors.role ? "input-error" : ""
+                  }`}
                   onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
                 >
                   <span>
@@ -334,6 +502,9 @@ export const ManageUsers: React.FC = () => {
                   </span>
                   <span className="icon">{roleDropdownOpen ? "▲" : "▼"}</span>
                 </button>
+                {validationErrors.role && (
+                  <div className="error-message">{validationErrors.role}</div>
+                )}
                 {roleDropdownOpen && (
                   <div
                     className="dropdown-content"
@@ -386,7 +557,10 @@ export const ManageUsers: React.FC = () => {
             <div className="button-group">
               <button
                 className="btn btn-secondary"
-                onClick={() => setEditIndex(null)}
+                onClick={() => {
+                  setEditIndex(null);
+                  setValidationErrors({});
+                }}
               >
                 Cancel
               </button>
@@ -417,6 +591,23 @@ export const ManageUsers: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Add CSS for error styling */}
+      <style>{`
+        .error-message {
+          color: #dc3545;
+          font-size: 0.8rem;
+          margin-top: 5px;
+        }
+
+        .input-error {
+          border-color: #dc3545 !important;
+        }
+
+        .form-group {
+          margin-bottom: 15px;
+        }
+      `}</style>
     </div>
   );
 };
