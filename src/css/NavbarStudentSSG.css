@@ -93,14 +93,14 @@
 
 @media screen and (max-width: 768px) {
   .studentssg-menu {
-    gap: 8px; /* Tighter spacing for smaller devices */
+    gap: 25px; /* Tighter spacing for smaller devices */
     flex-wrap: nowrap;
   }
 }
 
 @media screen and (max-width: 480px) {
   .studentssg-menu {
-    gap: 6px; /* Tighter spacing for smaller devices */
+    gap: 18px; /* Tighter spacing for smaller devices */
     flex-wrap: nowrap;
   }
 
@@ -127,4 +127,11 @@
   
 
   
+}
+
+@media screen and (max-width: 344px) {
+  .studentssg-menu {
+    gap: 8px; /* Tighter spacing for smaller devices */
+    flex-wrap: nowrap;
+  }
 }

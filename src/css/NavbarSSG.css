@@ -45,7 +45,7 @@
 .ssg-menu {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 30px;
   padding: 0;
   margin-top: 10px;
 }
@@ -84,21 +84,20 @@
 /* Responsive Design */
 @media screen and (max-width: 1024px) {
   .ssg-menu {
-    gap: 10px;
+    gap: 25px;
     flex-wrap: nowrap;
   }
 }
 
 @media screen and (max-width: 768px) {
   .ssg-menu {
-    gap: 8px;
+    gap: 20px;
     flex-wrap: nowrap;
   }
 }
 
 @media screen and (max-width: 480px){
   .ssg-menu {
-    gap: 2px;
     flex-wrap: nowrap;
   }
 
@@ -114,7 +113,7 @@
   .ssg-menu {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 25px;
     padding: 0;
     margin-top: 10px;
   }
@@ -126,4 +125,15 @@
     margin-right: 5px;
   }
   
+}
+
+@media screen and (max-width: 344px){
+  .ssg-menu {
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    padding: 0;
+    margin-top: 10px;
+  }
+
 }
