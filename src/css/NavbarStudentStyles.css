@@ -1,163 +1,262 @@
-/* Navbar */
-.student-navbar {
+:root {
+  --primary-color: #162f65;
+  --hover-color: #1e3d85;
+  --text-color: white;
+  --active-bg: rgba(255, 255, 255, 0.1);
+  --transition-speed: 0.3s;
+}
+
+/* Main Sidebar Container */
+.student-sidebar {
+  position: fixed;
+  height: 100vh;
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-speed) ease;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  transform: translateX(-100%);
+  width: auto;
+  min-width: fit-content;
+  padding-right: 25px;
+}
+
+/* Desktop - Collapsed/Expanded States */
+@media (min-width: 769px) {
+  .student-sidebar {
+    transform: translateX(0);
+    width: 70px;
+  }
+  
+  .student-sidebar.expanded {
+    width: auto;
+    min-width: fit-content;
+    padding-right: 25px;
+  }
+}
+
+/* Header Section */
+.student-sidebar-header {
+  padding: 20px 15px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 15px;
-  height: 45px;
-  width: 100%;
-  box-sizing: border-box;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+  position: relative;
 }
 
-.student-header {
-  width: 100%;
-  background-color: #162f65;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-
-/* Navbar Left Section */
-.navbar-left {
+.header-content-wrapper {
   display: flex;
   align-items: center;
+  flex-grow: 1;
 }
 
-/* Logo */
-.logo {
-  width: 35px;
-  height: auto;
-  border-radius: 50px;  /* Changed to Square */
-  margin-right: 5px;
-  margin-left: 0px;
-  margin-bottom: 0; 
-  margin-top: 0;
+.sidebar-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 15px;
 }
 
-/* Page Name */
-.page-name {
-  font-family: Arial, Helvetica, sans-serif;
-  margin-top: 10px;
+.student-title {
+  font-size: 18px;
+  font-weight: bold;
+  display: block;
+  margin: 0;
+}
+
+/* Close Button (X) */
+.sidebar-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-color);
   font-size: 20px;
-  font-weight: bold;
-  color: white;
-  margin-right: auto;
-  margin-left: 0px;
-  text-align: center;
+  cursor: pointer;
+  margin-left: 15px;
+  padding: 5px;
 }
 
-/* Navbar Center Section */
-.nav-menu {
-  display: flex;
-  align-items: center;
-  gap: 35px;
-  padding: 0;
-  margin-top: 10px;
+/* Navigation Menu */
+.student-nav {
+  flex: 1;
+  padding: 20px 0;
+  overflow-y: auto;
+  white-space: nowrap;
 }
 
-.nav-menu li {
+.student-nav-menu {
   list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-.nav-menu a {
-  text-decoration: none;
-  color: white;
-  font-size: 20px; 
-  transition: transform 0.3s ease;
-}
-
-.nav-menu a:hover {
-  transform: scale(1.1);
-}
-
-/* Active Link Styling */
-.student-navigation-link.active {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 0px;   /* Changed to Square */
-  color: #ffffff;
-  font-weight: bold;
-  padding: 13px 12px;
-}
-
-/* Navbar Right Section */
-.navbar-right {
+.student-nav-link {
   display: flex;
   align-items: center;
+  padding: 15px 20px;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: all var(--transition-speed) ease;
+  border-left: 3px solid transparent;
 }
 
-.student-userprofile {
-  width: 20px;
-  margin-right: 0px;
+.student-nav-link:hover {
+  background-color: var(--hover-color);
+  border-left: 3px solid var(--text-color);
 }
 
-.d-block w-100{
-  width: 35px;
-  height: auto;
+.student-nav-link.active {
+  background-color: var(--active-bg);
+  border-left: 3px solid var(--text-color);
+  font-weight: bold;
 }
 
-/* RESPONSIVENESS */
-@media screen and (max-width: 1024px) {
-  .nav-menu {
-    gap: 30px;
-    flex-wrap: nowrap;
-  }
+.nav-icon {
+  font-size: 20px;
+  min-width: 20px;
+  margin-right: 15px;
 }
 
-@media screen and (max-width: 768px) {
-  .nav-menu {
-    gap: 25px;
-    flex-wrap: nowrap;
-  }
-
-  .student-userprofile {
-    width: 20px;
-  }
+.nav-text {
+  display: none;
+  white-space: nowrap;
 }
 
-@media screen and (max-width: 480px) {
-  .nav-menu {
-    flex-wrap: nowrap;
-  }
+/* Profile Section */
+.student-sidebar-footer {
+  padding: 15px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+}
 
-  .logo {
-    width: 30px;
-    height: auto;
-    border-radius: 50px;  /* Changed to Square */
-    margin-right: 5px;
-    margin-left: 0px;
-    margin-bottom: 0; 
-    margin-top: 0;
-  }
+.student-profile-link {
+  display: flex;
+  align-items: center;
+  color: var(--text-color);
+  text-decoration: none;
+}
 
-  .page-name {
-    font-family: Arial, Helvetica, sans-serif;
-    margin-top: 10px;
-    font-size: 17px;
-    font-weight: bold;
-    color: white;
-    margin-right: auto;
-    margin-left: 0px;
-    text-align: center;
-  }
+.student-profile-img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  margin-right: 15px;
+}
 
-  .nav-menu {
+.profile-text {
+  font-size: 16px;
+  font-weight: normal;
+  display: none;
+}
+
+/* Expanded States */
+.student-sidebar.expanded .nav-text,
+.student-sidebar.expanded .profile-text,
+.student-sidebar.expanded .student-title {
+  display: block;
+}
+
+.student-sidebar.expanded .nav-icon,
+.student-sidebar.expanded .sidebar-logo,
+.student-sidebar.expanded .student-profile-img {
+  margin-right: 15px;
+}
+
+/* Hamburger Menu */
+.student-hamburger {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 1001;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Overlay */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+
+/* Open State */
+.student-sidebar.open {
+  transform: translateX(0);
+}
+
+/* Responsive Adjustments */
+
+
+@media (max-width: 768px) {
+  .student-hamburger {
     display: flex;
-    align-items: center;
-    gap: 25px;
-    padding: 0;
-    margin-top: 10px;
   }
   
-  
-}
-@media screen and (max-width: 320px){
-  .nav-menu {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 0;
-    margin-top: 10px;
+  .sidebar-overlay {
+    display: block;
   }
 
+  /* Show all text when sidebar is open */
+  .student-sidebar.open .nav-text,
+  .student-sidebar.open .profile-text,
+  .student-sidebar.open .student-title {
+    display: block !important;
+  }
 }
 
+@media (min-width: 769px) {
+  /* Collapsed state - hide text */
+  .student-sidebar:not(.expanded) .student-title,
+  .student-sidebar:not(.expanded) .nav-text,
+  .student-sidebar:not(.expanded) .profile-text {
+    display: none;
+  }
+  
+  /* Center items when collapsed */
+  .student-sidebar:not(.expanded) {
+    align-items: center;
+  }
+  
+  .student-sidebar:not(.expanded) .student-sidebar-header,
+  .student-sidebar:not(.expanded) .student-nav-link,
+  .student-sidebar:not(.expanded) .student-profile-link {
+    justify-content: center;
+  }
+  
+  /* Remove margins when collapsed */
+  .student-sidebar:not(.expanded) .sidebar-logo,
+  .student-sidebar:not(.expanded) .nav-icon,
+  .student-sidebar:not(.expanded) .student-profile-img {
+    margin-right: 0;
+  }
+}
 
+/* Mobile Full Screen */
+@media (max-width: 480px) {
+  .student-sidebar {
+    width: 100%;
+    padding-right: 0;
+  }
+  
+  .profile-text {
+    font-size: 14px;
+  }
+}

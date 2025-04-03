@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   FaHome,
@@ -6,123 +7,179 @@ import {
   FaRegListAlt,
   FaCheckCircle,
   FaClipboard,
+  FaBars,
+  FaTimes,
 } from "react-icons/fa";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
-import "../css/NavbarStudentSSG.css";
 import userprofile from "../assets/images/userprofile.png";
+import "../css/NavbarStudentSSG.css";
 
 export const NavbarStudentSSG = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const expandSidebar = () => {
+    setIsExpanded(true);
+  };
+
+  const collapseSidebar = () => {
+    setIsExpanded(false);
+  };
+
   return (
-    <div className="studentssg-header">
-      <div className="studentssg-navbar">
-        {/* Left Section: Logo & Page Title */}
-        <div className="studentssg-navbar-left">
-          <img src={logoValid8} alt="Valid 8 logo" className="logo" />
-          <h1 className="studentssg-page-name">
-            Student <br /> Officer
-          </h1>
+    <>
+      {/* Hamburger Icon - Only shows when sidebar is closed */}
+      {!sidebarOpen && (
+        <div className="ssg-hamburger" onClick={toggleSidebar}>
+          <FaBars />
+        </div>
+      )}
+
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div className="sidebar-overlay" onClick={toggleSidebar}></div>
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`ssg-sidebar ${sidebarOpen ? "open" : ""} ${
+          isExpanded ? "expanded" : "collapsed"
+        }`}
+        onMouseEnter={expandSidebar}
+        onMouseLeave={collapseSidebar}
+      >
+        {/* Header with Logo, Title, and Close Button */}
+        <div className="ssg-sidebar-header">
+          <div className="header-content-wrapper">
+            <img src={logoValid8} alt="Valid 8 logo" className="sidebar-logo" />
+            <h1 className="ssg-title">
+              Student
+              <br />
+              Officer
+            </h1>
+          </div>
+          {sidebarOpen && (
+            <button className="sidebar-close-btn" onClick={toggleSidebar}>
+              <FaTimes />
+            </button>
+          )}
         </div>
 
-        {/* Center Section: Navigation Links */}
-        <div className="studentssg-navbar-center">
-          <ul className="studentssg-menu">
-            <li title="Home">
+        {/* Navigation Links */}
+        <nav className="ssg-nav">
+          <ul className="ssg-nav-menu">
+            <li>
               <NavLink
                 to="/studentssg_home"
                 className={({ isActive }) =>
-                  isActive
-                    ? "studentssg-navigation-link active"
-                    : "studentssg-navigation-link"
+                  isActive ? "ssg-nav-link active" : "ssg-nav-link"
                 }
+                onClick={() => setSidebarOpen(false)}
+                title="Home"
               >
-                <FaHome />
+                <FaHome className="nav-icon" />
+                <span className="nav-text">Home</span>
               </NavLink>
             </li>
-            <li title="Upcoming Events">
+            <li>
               <NavLink
                 to="/studentssg_upcoming_events"
                 className={({ isActive }) =>
-                  isActive
-                    ? "studentssg-navigation-link active"
-                    : "studentssg-navigation-link"
+                  isActive ? "ssg-nav-link active" : "ssg-nav-link"
                 }
+                onClick={() => setSidebarOpen(false)}
+                title="Upcoming Events"
               >
-                <FaCalendarAlt />
+                <FaCalendarAlt className="nav-icon" />
+                <span className="nav-text">Upcoming Events</span>
               </NavLink>
             </li>
-            <li title="Events Attended">
+            <li>
               <NavLink
                 to="/studentssg_events_attended"
                 className={({ isActive }) =>
-                  isActive
-                    ? "studentssg-navigation-link active"
-                    : "studentssg-navigation-link"
+                  isActive ? "ssg-nav-link active" : "ssg-nav-link"
                 }
+                onClick={() => setSidebarOpen(false)}
+                title="Events Attended"
               >
-                <FaClipboardCheck />
+                <FaClipboardCheck className="nav-icon" />
+                <span className="nav-text">Events Attended</span>
               </NavLink>
             </li>
-            <li title="Events">
+            <li>
               <NavLink
                 to="/studentssg_events"
                 className={({ isActive }) =>
-                  isActive
-                    ? "studentssg-navigation-link active"
-                    : "studentssg-navigation-link"
+                  isActive ? "ssg-nav-link active" : "ssg-nav-link"
                 }
+                onClick={() => setSidebarOpen(false)}
+                title="Events"
               >
-                <FaRegListAlt />
+                <FaRegListAlt className="nav-icon" />
+                <span className="nav-text">Events</span>
               </NavLink>
             </li>
-            <li title="Attendance">
+            <li>
               <NavLink
                 to="/studentssg_attendance"
                 className={({ isActive }) =>
-                  isActive
-                    ? "studentssg-navigation-link active"
-                    : "studentssg-navigation-link"
+                  isActive ? "ssg-nav-link active" : "ssg-nav-link"
                 }
+                onClick={() => setSidebarOpen(false)}
+                title="Attendance"
               >
-                <FaCheckCircle />
+                <FaCheckCircle className="nav-icon" />
+                <span className="nav-text">Attendance</span>
               </NavLink>
             </li>
-            <li title="Records">
+            <li>
               <NavLink
                 to="/studentssg_records"
                 className={({ isActive }) =>
-                  isActive
-                    ? "studentssg-navigation-link active"
-                    : "studentssg-navigation-link"
+                  isActive ? "ssg-nav-link active" : "ssg-nav-link"
                 }
+                onClick={() => setSidebarOpen(false)}
+                title="Records"
               >
-                <FaClipboard />
+                <FaClipboard className="nav-icon" />
+                <span className="nav-text">Records</span>
               </NavLink>
             </li>
           </ul>
-        </div>
+        </nav>
 
-        {/* Right Section: User Profile */}
-        <div className="studentssg-navbar-right">
-          <div className="studentssg-profile-container">
-            <NavLink
-              to="/studentssg_profile"
-              className={({ isActive }) =>
-                isActive
-                  ? "studentssg-navigation-link active"
-                  : "studentssg-navigation-link"
-              }
-              title="Profile"
-            >
-              <img
-                src={userprofile}
-                alt="user profile"
-                className="studentssg-userprofile"
-              />
-            </NavLink>
-          </div>
+        {/* User Profile Section */}
+        <div className="ssg-sidebar-footer">
+          <NavLink
+            to="/studentssg_profile"
+            className={({ isActive }) =>
+              isActive ? "ssg-profile-link active" : "ssg-profile-link"
+            }
+            onClick={() => setSidebarOpen(false)}
+            title="Profile"
+          >
+            <img
+              src={userprofile}
+              alt="user profile"
+              className="ssg-profile-img"
+            />
+            <span className="profile-text">Profile</span>
+          </NavLink>
         </div>
       </div>
-    </div>
+
+      {/* Main Content Area */}
+      <div
+        className={`ssg-content ${sidebarOpen ? "shifted" : ""} ${
+          isExpanded ? "content-expanded" : "content-collapsed"
+        }`}
+      ></div>
+    </>
   );
 };
 

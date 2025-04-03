@@ -9,6 +9,7 @@
   width: 100%;
   padding: 0;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 h3 {
@@ -28,11 +29,12 @@ h3 {
 
 table {
   border-collapse: collapse;
-  width: 100%;
-  max-width: 1000px;
+  width: 100%; /* Maximize width */
+  max-width: 100vw; /* Ensure full viewport width */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border: 2px solid #162f65;
   border-radius: 8px;
+  overflow: hidden;
 }
 
 th, td {
@@ -86,36 +88,26 @@ tr:hover {
   height: 16px;
 }
 
-th.date {
-  text-align: center;
-}
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+  .upcoming-events.container.small-container {
+    padding: 0 10px;
+  }
 
-td.date {
-  text-align: left;
-}
+  .search-upcoming {
+    margin-left: 0;
+    justify-content: flex-start;
+  }
 
-th.location {
-  text-align: center;
-}
+  table {
+    width: 100%; /* Full width on tablet */
+    max-width: 100%; /* No restriction on width */
+  }
 
-td.location {
-  text-align: left;
-}
-
-th.eventname {
-  text-align: center;
-}
-
-td.eventname {
-  text-align: left;
-}
-
-th.status {
-  text-align: center;
-}
-
-td.status {
-  text-align: left;
+  th, td {
+    padding: 10px;
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -123,12 +115,15 @@ td.status {
     margin-left: 0;
     justify-content: flex-start;
   }
-}
 
-@media screen and (max-width: 1024px) {
-  .search-upcoming {
-    margin-left: 0;
-    justify-content: flex-start;
+  table {
+    width: 100%; /* Full width on mobile */
+    max-width: 100vw; /* Ensure full viewport width */
+  }
+
+  th, td {
+    padding: 8px;
+    font-size: 13px;
   }
 }
 
@@ -137,7 +132,7 @@ td.status {
   table {
     width: 100% !important;
     min-width: 100% !important;
-    max-width: 100% !important;
+    max-width: 100vw !important; /* Full width on iPad */
     overflow-x: auto !important;
     display: block !important;
     white-space: nowrap !important;
@@ -150,4 +145,3 @@ td.status {
     white-space: normal !important;
   }
 }
-

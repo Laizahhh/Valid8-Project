@@ -55,6 +55,7 @@ export const ManageUsers: React.FC = () => {
   // Available roles
   const availableRoles = ["Admin", "Student", "SSG Officer", "Event Organizer"];
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
+  const [editRoleDropdownOpen, setEditRoleDropdownOpen] = useState(false);
 
   // Helper function to get full name
   const getFullName = (user) => {
@@ -243,10 +244,45 @@ export const ManageUsers: React.FC = () => {
 
       {/* Add User Modal */}
       {addUserModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <h3>Add New User</h3>
-            <div className="form-group">
+        <div
+          className="modal-overlay"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            className="modal-container"
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "8px",
+              padding: "20px",
+              width: "90%",
+              maxWidth: "500px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            }}
+          >
+            <h3
+              style={{
+                marginTop: 0,
+                marginBottom: "20px",
+                fontSize: "clamp(1.2rem, 4vw, 1.5rem)",
+              }}
+            >
+              Add New User
+            </h3>
+
+            <div className="form-group" style={{ marginBottom: "15px" }}>
               <input
                 type="text"
                 placeholder="First Name"
@@ -255,15 +291,31 @@ export const ManageUsers: React.FC = () => {
                   setNewUser({ ...newUser, firstName: e.target.value })
                 }
                 className={validationErrors.firstName ? "input-error" : ""}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border: validationErrors.firstName
+                    ? "1px solid #dc3545"
+                    : "1px solid #ced4da",
+                  borderRadius: "4px",
+                  fontSize: "16px",
+                }}
               />
               {validationErrors.firstName && (
-                <div className="error-message">
+                <div
+                  className="error-message"
+                  style={{
+                    color: "#dc3545",
+                    fontSize: "14px",
+                    marginTop: "5px",
+                  }}
+                >
                   {validationErrors.firstName}
                 </div>
               )}
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: "15px" }}>
               <input
                 type="text"
                 placeholder="Middle Name"
@@ -271,10 +323,17 @@ export const ManageUsers: React.FC = () => {
                 onChange={(e) =>
                   setNewUser({ ...newUser, middleName: e.target.value })
                 }
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border: "1px solid #ced4da",
+                  borderRadius: "4px",
+                  fontSize: "16px",
+                }}
               />
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: "15px" }}>
               <input
                 type="text"
                 placeholder="Last Name"
@@ -283,13 +342,31 @@ export const ManageUsers: React.FC = () => {
                   setNewUser({ ...newUser, lastName: e.target.value })
                 }
                 className={validationErrors.lastName ? "input-error" : ""}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border: validationErrors.lastName
+                    ? "1px solid #dc3545"
+                    : "1px solid #ced4da",
+                  borderRadius: "4px",
+                  fontSize: "16px",
+                }}
               />
               {validationErrors.lastName && (
-                <div className="error-message">{validationErrors.lastName}</div>
+                <div
+                  className="error-message"
+                  style={{
+                    color: "#dc3545",
+                    fontSize: "14px",
+                    marginTop: "5px",
+                  }}
+                >
+                  {validationErrors.lastName}
+                </div>
               )}
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: "15px" }}>
               <input
                 type="email"
                 placeholder="Email"
@@ -298,13 +375,31 @@ export const ManageUsers: React.FC = () => {
                   setNewUser({ ...newUser, email: e.target.value })
                 }
                 className={validationErrors.email ? "input-error" : ""}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border: validationErrors.email
+                    ? "1px solid #dc3545"
+                    : "1px solid #ced4da",
+                  borderRadius: "4px",
+                  fontSize: "16px",
+                }}
               />
               {validationErrors.email && (
-                <div className="error-message">{validationErrors.email}</div>
+                <div
+                  className="error-message"
+                  style={{
+                    color: "#dc3545",
+                    fontSize: "14px",
+                    marginTop: "5px",
+                  }}
+                >
+                  {validationErrors.email}
+                </div>
               )}
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: "15px" }}>
               <input
                 type="password"
                 placeholder="Password"
@@ -313,17 +408,33 @@ export const ManageUsers: React.FC = () => {
                   setNewUser({ ...newUser, password: e.target.value })
                 }
                 className={validationErrors.password ? "input-error" : ""}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border: validationErrors.password
+                    ? "1px solid #dc3545"
+                    : "1px solid #ced4da",
+                  borderRadius: "4px",
+                  fontSize: "16px",
+                }}
               />
               {validationErrors.password && (
-                <div className="error-message">{validationErrors.password}</div>
+                <div
+                  className="error-message"
+                  style={{
+                    color: "#dc3545",
+                    fontSize: "14px",
+                    marginTop: "5px",
+                  }}
+                >
+                  {validationErrors.password}
+                </div>
               )}
             </div>
 
             <div
-              className={`form-group dropdown-wrapper ${
-                validationErrors.role ? "input-error" : ""
-              }`}
-              style={{ margin: "10px 0" }}
+              className="form-group dropdown-wrapper"
+              style={{ marginBottom: "15px" }}
             >
               <div className="dropdown" style={{ position: "relative" }}>
                 <button
@@ -334,8 +445,7 @@ export const ManageUsers: React.FC = () => {
                   onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
                   style={{
                     width: "100%",
-                    padding: "8px",
-                    margin: "5px 0",
+                    padding: "10px",
                     backgroundColor: "#f8f9fa",
                     border: validationErrors.role
                       ? "1px solid #dc3545"
@@ -346,6 +456,7 @@ export const ManageUsers: React.FC = () => {
                     justifyContent: "space-between",
                     alignItems: "center",
                     cursor: "pointer",
+                    fontSize: "16px",
                   }}
                 >
                   <span>
@@ -356,7 +467,16 @@ export const ManageUsers: React.FC = () => {
                   <span className="icon">{roleDropdownOpen ? "▲" : "▼"}</span>
                 </button>
                 {validationErrors.role && (
-                  <div className="error-message">{validationErrors.role}</div>
+                  <div
+                    className="error-message"
+                    style={{
+                      color: "#dc3545",
+                      fontSize: "14px",
+                      marginTop: "5px",
+                    }}
+                  >
+                    {validationErrors.role}
+                  </div>
                 )}
                 {roleDropdownOpen && (
                   <div
@@ -372,6 +492,7 @@ export const ManageUsers: React.FC = () => {
                       border: "1px solid #ced4da",
                       borderRadius: "4px",
                       zIndex: 10,
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                     }}
                   >
                     {availableRoles.map((role) => (
@@ -381,9 +502,10 @@ export const ManageUsers: React.FC = () => {
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          padding: "8px",
+                          padding: "10px",
                           cursor: "pointer",
                           backgroundColor: "#f8f9fa",
+                          borderBottom: "1px solid #eee",
                         }}
                       >
                         <input
@@ -394,7 +516,7 @@ export const ManageUsers: React.FC = () => {
                               setNewUser({ ...newUser, role: roles })
                             )
                           }
-                          style={{ marginRight: "8px" }}
+                          style={{ marginRight: "10px" }}
                         />
                         {role}
                       </label>
@@ -404,17 +526,47 @@ export const ManageUsers: React.FC = () => {
               </div>
             </div>
 
-            <div className="button-group">
+            <div
+              className="button-group"
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
+                marginTop: "20px",
+                flexWrap: "wrap",
+              }}
+            >
               <button
                 className="btn btn-secondary"
                 onClick={() => {
                   setAddUserModalOpen(false);
                   setValidationErrors({});
                 }}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#6c757d",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                }}
               >
                 Cancel
               </button>
-              <button className="btn btn-primary" onClick={handleAddUser}>
+              <button
+                className="btn btn-primary"
+                onClick={handleAddUser}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#0d6efd",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                }}
+              >
                 Add
               </button>
             </div>
@@ -422,12 +574,47 @@ export const ManageUsers: React.FC = () => {
         </div>
       )}
 
-      {/* Edit User Modal */}
+      {/* Edit User Modal - Updated with responsive styling */}
       {editIndex !== null && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <h3>Edit User</h3>
-            <div className="form-group">
+        <div
+          className="modal-overlay"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            className="modal-container"
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "8px",
+              padding: "20px",
+              width: "90%",
+              maxWidth: "500px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+            }}
+          >
+            <h3
+              style={{
+                marginTop: 0,
+                marginBottom: "20px",
+                fontSize: "clamp(1.2rem, 4vw, 1.5rem)",
+              }}
+            >
+              Edit User
+            </h3>
+
+            <div className="form-group" style={{ marginBottom: "15px" }}>
               <input
                 type="text"
                 value={editedUser.firstName}
@@ -436,15 +623,31 @@ export const ManageUsers: React.FC = () => {
                 }
                 placeholder="First Name"
                 className={validationErrors.firstName ? "input-error" : ""}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border: validationErrors.firstName
+                    ? "1px solid #dc3545"
+                    : "1px solid #ced4da",
+                  borderRadius: "4px",
+                  fontSize: "16px",
+                }}
               />
               {validationErrors.firstName && (
-                <div className="error-message">
+                <div
+                  className="error-message"
+                  style={{
+                    color: "#dc3545",
+                    fontSize: "14px",
+                    marginTop: "5px",
+                  }}
+                >
                   {validationErrors.firstName}
                 </div>
               )}
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: "15px" }}>
               <input
                 type="text"
                 value={editedUser.middleName}
@@ -452,10 +655,17 @@ export const ManageUsers: React.FC = () => {
                   setEditedUser({ ...editedUser, middleName: e.target.value })
                 }
                 placeholder="Middle Name"
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border: "1px solid #ced4da",
+                  borderRadius: "4px",
+                  fontSize: "16px",
+                }}
               />
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: "15px" }}>
               <input
                 type="text"
                 value={editedUser.lastName}
@@ -464,13 +674,31 @@ export const ManageUsers: React.FC = () => {
                 }
                 placeholder="Last Name"
                 className={validationErrors.lastName ? "input-error" : ""}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border: validationErrors.lastName
+                    ? "1px solid #dc3545"
+                    : "1px solid #ced4da",
+                  borderRadius: "4px",
+                  fontSize: "16px",
+                }}
               />
               {validationErrors.lastName && (
-                <div className="error-message">{validationErrors.lastName}</div>
+                <div
+                  className="error-message"
+                  style={{
+                    color: "#dc3545",
+                    fontSize: "14px",
+                    marginTop: "5px",
+                  }}
+                >
+                  {validationErrors.lastName}
+                </div>
               )}
             </div>
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: "15px" }}>
               <input
                 type="email"
                 value={editedUser.email}
@@ -479,45 +707,94 @@ export const ManageUsers: React.FC = () => {
                 }
                 placeholder="Email"
                 className={validationErrors.email ? "input-error" : ""}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border: validationErrors.email
+                    ? "1px solid #dc3545"
+                    : "1px solid #ced4da",
+                  borderRadius: "4px",
+                  fontSize: "16px",
+                }}
               />
               {validationErrors.email && (
-                <div className="error-message">{validationErrors.email}</div>
+                <div
+                  className="error-message"
+                  style={{
+                    color: "#dc3545",
+                    fontSize: "14px",
+                    marginTop: "5px",
+                  }}
+                >
+                  {validationErrors.email}
+                </div>
               )}
             </div>
 
-            {/* Role Dropdown */}
-            <div className="form-group dropdown-wrapper">
-              <div className="dropdown">
+            {/* Role Dropdown - Updated with responsive styling */}
+            <div
+              className="form-group dropdown-wrapper"
+              style={{ marginBottom: "15px" }}
+            >
+              <div className="dropdown" style={{ position: "relative" }}>
                 <button
                   type="button"
                   className={`dropdown-btn ${
                     validationErrors.role ? "input-error" : ""
                   }`}
-                  onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
+                  onClick={() => setEditRoleDropdownOpen(!editRoleDropdownOpen)}
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    backgroundColor: "#f8f9fa",
+                    border: validationErrors.role
+                      ? "1px solid #dc3545"
+                      : "1px solid #ced4da",
+                    borderRadius: "4px",
+                    textAlign: "left",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    cursor: "pointer",
+                    fontSize: "16px",
+                  }}
                 >
                   <span>
                     {editedUser.role.length > 0
                       ? editedUser.role.join(", ")
                       : "Select Roles"}
                   </span>
-                  <span className="icon">{roleDropdownOpen ? "▲" : "▼"}</span>
+                  <span className="icon">
+                    {editRoleDropdownOpen ? "▲" : "▼"}
+                  </span>
                 </button>
                 {validationErrors.role && (
-                  <div className="error-message">{validationErrors.role}</div>
+                  <div
+                    className="error-message"
+                    style={{
+                      color: "#dc3545",
+                      fontSize: "14px",
+                      marginTop: "5px",
+                    }}
+                  >
+                    {validationErrors.role}
+                  </div>
                 )}
-                {roleDropdownOpen && (
+                {editRoleDropdownOpen && (
                   <div
                     className="dropdown-content"
                     style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
-                      padding: "5px",
-                      backgroundColor: "white",
-                      border: "1px solid #ccc",
-                      borderRadius: "5px",
-                      marginTop: "5px",
-                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                      position: "absolute",
+                      top: "100%",
+                      left: "0",
+                      width: "100%",
+                      maxHeight: "150px",
+                      overflowY: "auto",
+                      backgroundColor: "#fff",
+                      border: "1px solid #ced4da",
+                      borderRadius: "4px",
+                      zIndex: 10,
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                     }}
                   >
                     {availableRoles.map((role) => (
@@ -527,10 +804,10 @@ export const ManageUsers: React.FC = () => {
                         style={{
                           display: "flex",
                           alignItems: "center",
-                          gap: "8px",
-                          padding: "6px 12px",
+                          padding: "10px",
                           cursor: "pointer",
-                          width: "100%",
+                          backgroundColor: "#f8f9fa",
+                          borderBottom: "1px solid #eee",
                         }}
                       >
                         <input
@@ -544,7 +821,7 @@ export const ManageUsers: React.FC = () => {
                                 setEditedUser({ ...editedUser, role: roles })
                             )
                           }
-                          style={{ marginRight: "5px" }}
+                          style={{ marginRight: "10px" }}
                         />
                         {role}
                       </label>
@@ -554,17 +831,47 @@ export const ManageUsers: React.FC = () => {
               </div>
             </div>
 
-            <div className="button-group">
+            <div
+              className="button-group"
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
+                marginTop: "20px",
+                flexWrap: "wrap",
+              }}
+            >
               <button
                 className="btn btn-secondary"
                 onClick={() => {
                   setEditIndex(null);
                   setValidationErrors({});
                 }}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#6c757d",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                }}
               >
                 Cancel
               </button>
-              <button className="btn btn-primary" onClick={handleSaveChanges}>
+              <button
+                className="btn btn-primary"
+                onClick={handleSaveChanges}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#0d6efd",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                }}
+              >
                 Save
               </button>
             </div>
@@ -572,18 +879,74 @@ export const ManageUsers: React.FC = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal - Updated with responsive styling */}
       {deleteIndex !== null && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <p>Are you sure you want to delete this user?</p>
-            <div className="button-group">
-              <button className="btn btn-danger" onClick={handleConfirmDelete}>
+        <div
+          className="modal-overlay"
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            className="modal-container"
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: "8px",
+              padding: "20px",
+              width: "90%",
+              maxWidth: "400px",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+              textAlign: "center",
+            }}
+          >
+            <p style={{ fontSize: "16px", marginBottom: "20px" }}>
+              Are you sure you want to delete this user?
+            </p>
+            <div
+              className="button-group"
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "10px",
+                flexWrap: "wrap",
+              }}
+            >
+              <button
+                className="btn btn-danger"
+                onClick={handleConfirmDelete}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#dc3545",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                }}
+              >
                 Yes, Delete
               </button>
               <button
                 className="btn btn-secondary"
                 onClick={() => setDeleteIndex(null)}
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#6c757d",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                }}
               >
                 Cancel
               </button>
@@ -607,6 +970,9 @@ export const ManageUsers: React.FC = () => {
         .form-group {
           margin-bottom: 15px;
         }
+        
+      
+
       `}</style>
     </div>
   );

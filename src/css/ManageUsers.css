@@ -70,7 +70,8 @@
 
 table {
     width: 100%;
-    max-width: 1000px;
+    max-width: none;
+
     border-collapse: collapse;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border: 2px solid #162f65;
@@ -152,41 +153,71 @@ th.manageusers-name, th.manageusers-email, th.manageusers-role, th.manageusers-a
     line-height: 1.2;
 }
 
+/* Table Container - Center on Desktop */
+.manage-users-table {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* Table - Full Width */
+table {
+    width: 100%; /* Make the table take full width */
+    max-width: 100%; /* Remove any width restriction */
+    border-collapse: collapse;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid #162f65;
+    border-radius: 8px;
+    margin: auto;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 1024px) {
-    .manage-users-header {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
+    .manage-users-table {
+        width: 100%;
         padding: 0 10px;
     }
 
-    .search-manage-user {
-        max-width: 200px; /* Keep consistent size */
-        margin-left: 0;
-    }
-
-    .add-user-btn {
-        min-width: 130px;
+    table {
+        width: 100%; /* Make the table take full width on tablet */
     }
 }
 
 @media (max-width: 768px) {
-    .manage-users-header {
-        flex-direction: column;
-        gap: 10px;
+    .manage-users-table {
+        width: 100%;
         padding: 0 5px;
     }
 
-    .search-manage-user {
-        max-width: 200px;
-        justify-content: center;
+    table {
+        width: 100%; /* Make the table take full width on mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .manage-users-table {
+        width: 100%;
+        padding: 0 0px;
+    }
+
+    table {
+        width: 100%; /* Make the table take full width on small mobile */
+    }
+
+    th, td {
+        padding: 0px; /* Reduce padding to fit content */
+        font-size: 12px; /* Slightly smaller text for better fit */
     }
 
     .add-user-btn {
-        width: 100%;
-        max-width: 250px; /* Keep consistent size */
-        justify-content: center;
+        width: 100%; /* Full width button on small screens */
+        margin: 5px 0; /* Space between button and other elements */
+    }
+
+    .search-manage-user {
+        max-width: 100%; /* Allow full width for search bar */
+        margin: 5px 0;
     }
 }

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   FaHome,
@@ -8,108 +9,161 @@ import {
   FaCheckCircle,
   FaPlusCircle,
   FaClipboard,
+  FaBars,
+  FaTimes,
 } from "react-icons/fa";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
-import "../css/NavbarStudentSSGEventOrganizer.css";
 import userprofile from "../assets/images/userprofile.png";
+import "../css/NavbarStudentSSGEventOrganizer.css";
 
-export const NavbarStudentSSGEventOrganizer: React.FC = () => {
+export const NavbarStudentSSGEventOrganizer = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const expandSidebar = () => {
+    setIsExpanded(true);
+  };
+
+  const collapseSidebar = () => {
+    setIsExpanded(false);
+  };
+
   const navLinks = [
     {
       path: "/student_ssg_eventorganizer_home",
       icon: <FaHome />,
-      tooltip: "Home",
+      text: "Home",
     },
     {
       path: "/student_ssg_eventorganizer_upcoming_events",
       icon: <FaCalendarAlt />,
-      tooltip: "Upcoming Events",
+      text: "Upcoming Events",
     },
     {
       path: "/student_ssg_eventorganizer_events_attended",
       icon: <FaClipboardCheck />,
-      tooltip: "Events Attended",
+      text: "Events Attended",
     },
     {
       path: "/student_ssg_eventorganizer_events",
       icon: <FaRegListAlt />,
-      tooltip: "Events",
+      text: "Events",
     },
     {
       path: "/student_ssg_eventorganizer_attendance",
       icon: <FaCheckCircle />,
-      tooltip: "Attendance",
+      text: "Attendance",
     },
     {
       path: "/student_ssg_eventorganizer_records",
       icon: <FaClipboard />,
-      tooltip: "Records",
+      text: "Records",
     },
     {
       path: "/student_ssg_eventorganizer_create_event",
       icon: <FaPlusCircle />,
-      tooltip: "Create Event",
+      text: "Create Event",
     },
     {
       path: "/student_ssg_eventorganizer_manage_event",
       icon: <FaClipboardList />,
-      tooltip: "Manage Event",
+      text: "Manage Event",
     },
   ];
 
   return (
-    <div className="studentssg-eventorganizer-header">
-      <div className="studentssg-eventorganizer-navbar">
-        {/* Left Section: Logo & Page Title */}
-        <div className="studentssg-eventorganizer-navbar-left">
-          <img src={logoValid8} alt="Valid 8 logo" className="logo" />
-          <h1 className="studentssg-eventorganizer-page-name">
-            Student <br /> Officer <br /> Organizer
-          </h1>
+    <>
+      {/* Hamburger Icon - Only shows when sidebar is closed */}
+      {!sidebarOpen && (
+        <div className="ssg-hamburger" onClick={toggleSidebar}>
+          <FaBars />
+        </div>
+      )}
+
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div className="sidebar-overlay" onClick={toggleSidebar}></div>
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`ssg-sidebar ${sidebarOpen ? "open" : ""} ${
+          isExpanded ? "expanded" : "collapsed"
+        }`}
+        onMouseEnter={expandSidebar}
+        onMouseLeave={collapseSidebar}
+      >
+        {/* Header with Logo, Title, and Close Button */}
+        <div className="ssg-sidebar-header">
+          <div className="header-content-wrapper">
+            <img src={logoValid8} alt="Valid 8 logo" className="sidebar-logo" />
+            <h1 className="ssg-title">
+              Student
+              <br />
+              Officer
+              <br />
+              Organizer
+            </h1>
+          </div>
+          {sidebarOpen && (
+            <button className="sidebar-close-btn" onClick={toggleSidebar}>
+              <FaTimes />
+            </button>
+          )}
         </div>
 
-        {/* Center Section: Navigation Links */}
-        <div className="studentssg-eventorganizer-navbar-center">
-          <ul className="studentssg-eventorganizer-menu">
+        {/* Navigation Links */}
+        <nav className="ssg-nav">
+          <ul className="ssg-nav-menu">
             {navLinks.map((item, index) => (
-              <li key={index} title={item.tooltip}>
+              <li key={index}>
                 <NavLink
                   to={item.path}
                   className={({ isActive }) =>
-                    isActive
-                      ? "studentssg-eventorganizer-navigation-link active"
-                      : "studentssg-eventorganizer-navigation-link"
+                    isActive ? "ssg-nav-link active" : "ssg-nav-link"
                   }
+                  onClick={() => setSidebarOpen(false)}
+                  title={item.text}
                 >
-                  {item.icon}
+                  <div className="nav-icon">{item.icon}</div>
+                  <span className="nav-text">{item.text}</span>
                 </NavLink>
               </li>
             ))}
           </ul>
-        </div>
+        </nav>
 
-        {/* Right Section: User Profile */}
-        <div className="studentssg-eventorganizer-navbar-right">
-          <div className="studentssg-eventorganizer-profile-container">
-            <NavLink
-              to="/student_ssg_eventorganizer_profile"
-              className={({ isActive }) =>
-                isActive
-                  ? "studentssg-eventorganizer-navigation-link active"
-                  : "studentssg-eventorganizer-navigation-link"
-              }
-              title="Profile"
-            >
-              <img
-                src={userprofile}
-                alt="user profile"
-                className="studentssg-eventorganizer-userprofile"
-              />
-            </NavLink>
-          </div>
+        {/* User Profile Section */}
+        <div className="ssg-sidebar-footer">
+          <NavLink
+            to="/student_ssg_eventorganizer_profile"
+            className={({ isActive }) =>
+              isActive ? "ssg-profile-link active" : "ssg-profile-link"
+            }
+            onClick={() => setSidebarOpen(false)}
+            title="Profile"
+          >
+            <img
+              src={userprofile}
+              alt="user profile"
+              className="ssg-profile-img"
+            />
+            <span className="profile-text">Profile</span>
+          </NavLink>
         </div>
       </div>
-    </div>
+
+      {/* Main Content Area */}
+      <div
+        className={`ssg-content ${sidebarOpen ? "shifted" : ""} ${
+          isExpanded ? "content-expanded" : "content-collapsed"
+        }`}
+      ></div>
+    </>
   );
 };
 

@@ -68,7 +68,7 @@ const App = () => {
           element={<EventOrganizerDashboard />}
         />
         <Route
-          path="event_organizer_home"
+          path="/event_organizer_home"
           element={<HomeUser role="event-organizer" />}
         />
         <Route

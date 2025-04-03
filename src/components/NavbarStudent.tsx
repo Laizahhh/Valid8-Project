@@ -1,83 +1,139 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { FaHome, FaCalendarAlt, FaClipboardCheck } from "react-icons/fa";
+import {
+  FaHome,
+  FaCalendarAlt,
+  FaClipboardCheck,
+  FaBars,
+  FaTimes,
+} from "react-icons/fa";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
-import "../css/NavbarStudentStyles.css";
 import userprofile from "../assets/images/userprofile.png";
+import "../css/NavbarStudentStyles.css";
 
 export const NavbarStudent = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const expandSidebar = () => {
+    setIsExpanded(true);
+  };
+
+  const collapseSidebar = () => {
+    setIsExpanded(false);
+  };
+
   return (
-    <div className="student-header">
-      <div className="student-navbar">
-        {/* Left Section: Logo and Page Name */}
-        <div className="navbar-left">
-          <img src={logoValid8} alt="Valid 8 logo" className="logo" />
-          <h1 className="page-name">Student</h1>
+    <>
+      {/* Hamburger Icon - Only shows when sidebar is closed */}
+      {!sidebarOpen && (
+        <div className="student-hamburger" onClick={toggleSidebar}>
+          <FaBars />
+        </div>
+      )}
+
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div className="sidebar-overlay" onClick={toggleSidebar}></div>
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`student-sidebar ${sidebarOpen ? "open" : ""} ${
+          isExpanded ? "expanded" : "collapsed"
+        }`}
+        onMouseEnter={expandSidebar}
+        onMouseLeave={collapseSidebar}
+      >
+        {/* Header with Logo, Title, and Close Button */}
+        <div className="student-sidebar-header">
+          <div className="header-content-wrapper">
+            <img src={logoValid8} alt="Valid 8 logo" className="sidebar-logo" />
+            <h1 className="student-title">Student</h1>
+          </div>
+          {sidebarOpen && (
+            <button className="sidebar-close-btn" onClick={toggleSidebar}>
+              <FaTimes />
+            </button>
+          )}
         </div>
 
-        {/* Center Section: Navigation Links */}
-        <div className="navbar-center">
-          <ul className="nav-menu">
-            <li title="Home">
+        {/* Navigation Links */}
+        <nav className="student-nav">
+          <ul className="student-nav-menu">
+            <li>
               <NavLink
                 to="/student_home"
                 className={({ isActive }) =>
-                  isActive
-                    ? "student-navigation-link active"
-                    : "student-navigation-link"
+                  isActive ? "student-nav-link active" : "student-nav-link"
                 }
+                onClick={() => setSidebarOpen(false)}
+                title="Home"
               >
-                <FaHome />
+                <FaHome className="nav-icon" />
+                <span className="nav-text">Home</span>
               </NavLink>
             </li>
-            <li title="Upcoming Events">
+            <li>
               <NavLink
                 to="/student_upcoming_events"
                 className={({ isActive }) =>
-                  isActive
-                    ? "student-navigation-link active"
-                    : "student-navigation-link"
+                  isActive ? "student-nav-link active" : "student-nav-link"
                 }
+                onClick={() => setSidebarOpen(false)}
+                title="Upcoming Events"
               >
-                <FaCalendarAlt />
+                <FaCalendarAlt className="nav-icon" />
+                <span className="nav-text">Upcoming Events</span>
               </NavLink>
             </li>
-            <li title="Events Attended">
+            <li>
               <NavLink
                 to="/student_events_attended"
                 className={({ isActive }) =>
-                  isActive
-                    ? "student-navigation-link active"
-                    : "student-navigation-link"
+                  isActive ? "student-nav-link active" : "student-nav-link"
                 }
+                onClick={() => setSidebarOpen(false)}
+                title="Events Attended"
               >
-                <FaClipboardCheck />
+                <FaClipboardCheck className="nav-icon" />
+                <span className="nav-text">Events Attended</span>
               </NavLink>
             </li>
           </ul>
-        </div>
+        </nav>
 
-        {/* Right Section: User Profile */}
-        <div className="navbar-right">
-          <div className="student-profile-container">
-            <NavLink
-              to="/student_profile"
-              className={({ isActive }) =>
-                isActive
-                  ? "student-navigation-link active"
-                  : "student-navigation-link"
-              }
-              title="Profile"
-            >
-              <img
-                src={userprofile}
-                alt="user profile"
-                className="student-userprofile"
-              />
-            </NavLink>
-          </div>
+        {/* User Profile Section */}
+        <div className="student-sidebar-footer">
+          <NavLink
+            to="/student_profile"
+            className={({ isActive }) =>
+              isActive ? "student-profile-link active" : "student-profile-link"
+            }
+            onClick={() => setSidebarOpen(false)}
+            title="Profile"
+          >
+            <img
+              src={userprofile}
+              alt="user profile"
+              className="student-profile-img"
+            />
+            <span className="profile-text">Profile</span>
+          </NavLink>
         </div>
       </div>
-    </div>
+
+      {/* Main Content Area */}
+      <div
+        className={`student-content ${sidebarOpen ? "shifted" : ""} ${
+          isExpanded ? "content-expanded" : "content-collapsed"
+        }`}
+      ></div>
+    </>
   );
 };
 

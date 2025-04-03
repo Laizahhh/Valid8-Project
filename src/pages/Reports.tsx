@@ -159,13 +159,14 @@ export const Reports: React.FC = () => {
                   <td>{event.location}</td>
                   <td>
                     <button
-                      className="btn btn-warning"
+                      className="btn btn-warning btn-sm"
                       onClick={() => handleViewReport(event)}
+                      style={{ marginRight: "2px" }}
                     >
                       View Report
                     </button>
                     <button
-                      className="btn btn-success ml-2"
+                      className="btn btn-success btn-sm"
                       onClick={() => handleDownloadReport(event)}
                     >
                       <FaDownload /> Download
@@ -243,7 +244,18 @@ export const Reports: React.FC = () => {
                             : prev,
                         selectedEvent.programs[0]
                       ).name
+                    }{" "}
+                    (
+                    {
+                      selectedEvent.programs.reduce(
+                        (prev, curr) =>
+                          curr.attendees.length > prev.attendees.length
+                            ? curr
+                            : prev,
+                        selectedEvent.programs[0]
+                      ).attendees.length
                     }
+                    )
                   </p>
                   <p>
                     <span style={{ color: "#F44336" }}>●</span> Program with
@@ -256,7 +268,18 @@ export const Reports: React.FC = () => {
                             : prev,
                         selectedEvent.programs[0]
                       ).name
+                    }{" "}
+                    (
+                    {
+                      selectedEvent.programs.reduce(
+                        (prev, curr) =>
+                          curr.attendees.length < prev.attendees.length
+                            ? curr
+                            : prev,
+                        selectedEvent.programs[0]
+                      ).attendees.length
                     }
+                    )
                   </p>
                 </>
               ) : (

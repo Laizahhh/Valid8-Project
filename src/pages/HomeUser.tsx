@@ -202,7 +202,7 @@ export const HomeUser: React.FC<HomeUserProps> = ({ role }) => {
         {/* Welcoming Description */}
         <div className="welcome-section text-center p-4">
           <h2>
-            Welcome to the Valid8 {role.charAt(0).toUpperCase() + role.slice(1)}{" "}
+            Welcome to Valid8 {role.charAt(0).toUpperCase() + role.slice(1)}{" "}
             Dashboard
           </h2>
           <p className="text-muted">

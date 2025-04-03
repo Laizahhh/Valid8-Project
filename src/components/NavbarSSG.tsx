@@ -1,73 +1,127 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   FaHome,
   FaRegListAlt,
   FaCheckCircle,
   FaClipboard,
+  FaBars,
+  FaTimes,
 } from "react-icons/fa";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
 import userprofile from "../assets/images/userprofile.png";
 import "../css/NavbarSSG.css";
 
-export const NavbarSSG: React.FC = () => {
+export const NavbarSSG = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const expandSidebar = () => {
+    setIsExpanded(true);
+  };
+
+  const collapseSidebar = () => {
+    setIsExpanded(false);
+  };
+
   const navLinks = [
-    { path: "/ssg_home", icon: <FaHome />, tooltip: "Home" },
-    { path: "/ssg_events", icon: <FaRegListAlt />, tooltip: "Events" },
-    { path: "/ssg_attendance", icon: <FaCheckCircle />, tooltip: "Attendance" },
-    { path: "/ssg_records", icon: <FaClipboard />, tooltip: "Records" },
+    { path: "/ssg_home", icon: <FaHome />, text: "Home" },
+    { path: "/ssg_events", icon: <FaRegListAlt />, text: "Events" },
+    { path: "/ssg_attendance", icon: <FaCheckCircle />, text: "Attendance" },
+    { path: "/ssg_records", icon: <FaClipboard />, text: "Records" },
   ];
 
   return (
-    <div className="ssg-header">
-      <div className="ssg-navbar">
-        {/* Left Section: Logo & Page Title */}
-        <div className="ssg-navbar-left">
-          <img src={logoValid8} alt="Valid 8 logo" className="logo" />
-          <h1 className="ssg-page-name">
-            SSG <br /> Officer
-          </h1>
+    <>
+      {/* Hamburger Icon - Only shows when sidebar is closed */}
+      {!sidebarOpen && (
+        <div className="ssg-hamburger" onClick={toggleSidebar}>
+          <FaBars />
+        </div>
+      )}
+
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div className="sidebar-overlay" onClick={toggleSidebar}></div>
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`ssg-sidebar ${sidebarOpen ? "open" : ""} ${
+          isExpanded ? "expanded" : "collapsed"
+        }`}
+        onMouseEnter={expandSidebar}
+        onMouseLeave={collapseSidebar}
+      >
+        {/* Header with Logo, Title, and Close Button */}
+        <div className="ssg-sidebar-header">
+          <div className="header-content-wrapper">
+            <img src={logoValid8} alt="Valid 8 logo" className="sidebar-logo" />
+            <h1 className="ssg-title">
+              SSG
+              <br />
+              Officer
+            </h1>
+          </div>
+          {sidebarOpen && (
+            <button className="sidebar-close-btn" onClick={toggleSidebar}>
+              <FaTimes />
+            </button>
+          )}
         </div>
 
-        {/* Center Section: Navigation Links */}
-        <div className="ssg-navbar-center">
-          <ul className="ssg-menu">
+        {/* Navigation Links */}
+        <nav className="ssg-nav">
+          <ul className="ssg-nav-menu">
             {navLinks.map((item, index) => (
-              <li key={index} title={item.tooltip}>
+              <li key={index}>
                 <NavLink
                   to={item.path}
                   className={({ isActive }) =>
-                    isActive
-                      ? "ssg-navigation-link active"
-                      : "ssg-navigation-link"
+                    isActive ? "ssg-nav-link active" : "ssg-nav-link"
                   }
+                  onClick={() => setSidebarOpen(false)}
+                  title={item.text}
                 >
-                  {item.icon}
+                  <div className="nav-icon">{item.icon}</div>
+                  <span className="nav-text">{item.text}</span>
                 </NavLink>
               </li>
             ))}
           </ul>
-        </div>
+        </nav>
 
-        {/* Right Section: User Profile */}
-        <div className="ssg-navbar-right">
-          <div className="ssg-profile-container">
-            <NavLink
-              to="/ssg_profile"
-              className={({ isActive }) =>
-                isActive ? "ssg-navigation-link active" : "ssg-navigation-link"
-              }
-              title="Profile"
-            >
-              <img
-                src={userprofile}
-                alt="User Profile"
-                className="ssg-userprofile"
-              />
-            </NavLink>
-          </div>
+        {/* User Profile Section */}
+        <div className="ssg-sidebar-footer">
+          <NavLink
+            to="/ssg_profile"
+            className={({ isActive }) =>
+              isActive ? "ssg-profile-link active" : "ssg-profile-link"
+            }
+            onClick={() => setSidebarOpen(false)}
+            title="Profile"
+          >
+            <img
+              src={userprofile}
+              alt="user profile"
+              className="ssg-profile-img"
+            />
+            <span className="profile-text">Profile</span>
+          </NavLink>
         </div>
       </div>
-    </div>
+
+      {/* Main Content Area */}
+      <div
+        className={`ssg-content ${sidebarOpen ? "shifted" : ""} ${
+          isExpanded ? "content-expanded" : "content-collapsed"
+        }`}
+      ></div>
+    </>
   );
 };
 
