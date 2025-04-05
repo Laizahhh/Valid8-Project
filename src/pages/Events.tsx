@@ -3,7 +3,7 @@ import { NavbarAdmin } from "../components/NavbarAdmin";
 import { NavbarStudentSSG } from "../components/NavbarStudentSSG";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
 import search_logo from "../assets/images/search_logo.png";
-import { FaFilter } from "react-icons/fa"; // Import filter icon
+import { FaFilter, FaSearch } from "react-icons/fa";
 import "../css/Events.css";
 import NavbarSSG from "../components/NavbarSSG";
 
@@ -11,7 +11,6 @@ interface EventsProps {
   role: string;
 }
 
-// Sample dummy events
 const dummyEvents = [
   {
     name: "Leadership Training",
@@ -56,7 +55,6 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
   const [filter, setFilter] = useState("all");
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Apply filters based on event status
   const filteredEvents = dummyEvents
     .filter((event) =>
       event.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -68,8 +66,8 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
     });
 
   return (
-    <div className="upcoming-header">
-      {/* ✅ Fixed Navbar Conditional Rendering */}
+    <div className="events-page">
+      {/* Navbar Conditional Rendering */}
       {role === "admin" && <NavbarAdmin />}
       {role === "student-ssg" && <NavbarStudentSSG />}
       {role === "ssg" && <NavbarSSG />}
@@ -77,30 +75,31 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
         <NavbarStudentSSGEventOrganizer />
       )}
 
-      <div className="upcoming-events container small-container">
-        <h3>Events</h3>
+      <div className="events-container">
+        <div className="events-header">
+          <h2>Events</h2>
+          <p className="subtitle">View and manage all events</p>
+        </div>
 
-        {/* Search Bar & Filter */}
-        <div className="d-flex align-items-center gap-3">
-          {/* Restored Original Search Box */}
-          <div className="search-upcoming">
+        {/* Search and Filter Section */}
+        <div className="search-filter-section">
+          <div className="search-box">
+            <FaSearch className="search-icon" />
             <input
-              type="search"
+              type="text"
               placeholder="Search events..."
-              className="search-input"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
             />
-            <img src={search_logo} alt="search" className="search-icon" />
           </div>
 
-          {/* Filter Button & Dropdown */}
-          <div className="position-relative">
+          <div className="filter-container">
             <button
-              className="btn btn-outline-secondary filter-btn"
+              className="filter-btn"
               onClick={() => setDropdownOpen(!dropdownOpen)}
             >
-              <FaFilter size={18} />
+              <FaFilter /> Filter
             </button>
             {dropdownOpen && (
               <div className="filter-dropdown">
@@ -143,29 +142,36 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
         </div>
 
         {/* Events Table */}
-        <div className="upcoming-events-table mt-3">
-          <table>
+        <div className="table-responsive">
+          <table className="events-table">
             <thead>
               <tr>
-                <th className="eventname">Event</th>
-                <th className="date">Date</th>
-                <th className="location">Location</th>
-                <th className="status">Status</th>
+                <th>Event Name</th>
+                <th>Date</th>
+                <th>Location</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {filteredEvents.map((event, index) => (
-                <tr key={index}>
-                  <td>{event.name}</td>
-                  <td>{event.date}</td>
-                  <td>{event.location}</td>
-                  <td>{event.status}</td>
-                </tr>
-              ))}
-              {filteredEvents.length === 0 && (
+              {filteredEvents.length > 0 ? (
+                filteredEvents.map((event, index) => (
+                  <tr key={index}>
+                    <td>{event.name}</td>
+                    <td>{event.date}</td>
+                    <td>{event.location}</td>
+                    <td>
+                      <span
+                        className={`status-badge ${event.status.toLowerCase()}`}
+                      >
+                        {event.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
-                  <td colSpan={4} className="text-center">
-                    No matching events found.
+                  <td colSpan={4} className="no-results">
+                    No matching events found
                   </td>
                 </tr>
               )}

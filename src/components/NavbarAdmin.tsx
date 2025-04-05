@@ -8,13 +8,15 @@ import {
   FaBars,
   FaTimes,
 } from "react-icons/fa";
+import { useUser } from "../context/UserContext";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
-import userprofile from "../assets/images/userprofile.png";
+import defaultAvatar from "../assets/images/userprofile1.png";
 import "../css/NavbarAdmin.css";
 
 export const NavbarAdmin = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const { avatar } = useUser();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -132,7 +134,7 @@ export const NavbarAdmin = () => {
             title="Profile"
           >
             <img
-              src={userprofile}
+              src={avatar || defaultAvatar}
               alt="user profile"
               className="admin-profile-img"
             />

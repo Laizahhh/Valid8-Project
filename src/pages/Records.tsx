@@ -3,8 +3,8 @@ import { NavbarStudent } from "../components/NavbarStudent";
 import { NavbarStudentSSG } from "../components/NavbarStudentSSG";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
 import { NavbarSSG } from "../components/NavbarSSG";
+import { FaSearch } from "react-icons/fa";
 import "../css/Records.css";
-import search_logo from "../assets/images/search_logo.png";
 
 interface RecordsProps {
   role: string;
@@ -54,7 +54,7 @@ export const Records: React.FC<RecordsProps> = ({ role }) => {
   );
 
   return (
-    <div className="records-header">
+    <div className="records-page">
       {/* Dynamically select the navbar based on the role */}
       {role === "student-ssg" ? (
         <NavbarStudentSSG />
@@ -67,45 +67,59 @@ export const Records: React.FC<RecordsProps> = ({ role }) => {
       )}
 
       <div className="records-container">
-        <h3>Student Records</h3>
-
-        <div className="search-records">
-          <input
-            type="search"
-            placeholder="Search students..."
-            className="search-input"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <img src={search_logo} alt="search" className="search-icon" />
+        <div className="records-header">
+          <h2>Student Records</h2>
+          <p className="subtitle">View and manage student attendance records</p>
         </div>
 
-        <div className="records-table">
-          <table>
+        <div className="search-filter-section">
+          <div className="search-box">
+            <FaSearch className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search students..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+          </div>
+        </div>
+
+        <div className="table-responsive">
+          <table className="records-table">
             <thead>
               <tr>
-                <th className="records-student-id">Student ID</th>
-                <th className="records-name">Name</th>
-                <th className="records-year-level">Year Level</th>
-                <th className="records-program">Program</th>
-                <th className="records-event">Event</th>
-                <th className="records-status">Status</th>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Year Level</th>
+                <th>Program</th>
+                <th>Event</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {filteredRecords.map((record, index) => (
-                <tr key={index}>
-                  <td>{record.studentId}</td>
-                  <td>{record.name}</td>
-                  <td>{record.yearLevel}</td>
-                  <td>{record.program}</td>
-                  <td>{record.event}</td>
-                  <td>{record.status}</td>
-                </tr>
-              ))}
-              {filteredRecords.length === 0 && (
+              {filteredRecords.length > 0 ? (
+                filteredRecords.map((record, index) => (
+                  <tr key={index}>
+                    <td>{record.studentId}</td>
+                    <td>{record.name}</td>
+                    <td>{record.yearLevel}</td>
+                    <td>{record.program}</td>
+                    <td>{record.event}</td>
+                    <td>
+                      <span
+                        className={`status-badge ${record.status.toLowerCase()}`}
+                      >
+                        {record.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
-                  <td colSpan={6}>No matching records found.</td>
+                  <td colSpan={6} className="no-results">
+                    No matching records found
+                  </td>
                 </tr>
               )}
             </tbody>

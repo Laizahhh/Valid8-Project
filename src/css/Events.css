@@ -1,71 +1,321 @@
-/* Search Box */
-.search-upcoming {
-    display: flex;
-    align-items: center;
-    position: relative;
+:root {
+  --primary-color: #162f65;
+  --hover-color: #1e3d85;
+  --text-color: #333;
+  --active-bg: rgba(255, 255, 255, 0.1);
+  --transition-speed: 0.3s;
+  --sidebar-width-expanded: 250px;
+  --sidebar-width-collapsed: 70px;
+  --table-offset: 80px; /* 1 inch offset */
+}
+
+.events-page {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-color);
+  line-height: 1.6;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+}
+
+.events-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 30px 30px 110px; /* Right shift added */
+  transition: padding-left var(--transition-speed) ease;
+}
+
+.events-header {
+  text-align: center;
+  margin-bottom: 30px;
+  margin-left: var(--table-offset); /* Right shift */
+  width: calc(100% - var(--table-offset)); /* Adjust width */
+}
+
+.events-header h2 {
+  color: #2c3e50;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: #7f8c8d;
+  font-size: 1rem;
+}
+
+/* Search and Filter Section */
+.search-filter-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-left: var(--table-offset); /* Right shift */
+  width: calc(100% - var(--table-offset)); /* Adjust width */
+}
+
+.search-box {
+  position: relative;
+  flex-grow: 1;
+  max-width: 500px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  font-size: 1rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 2px 10px rgba(52, 152, 219, 0.2);
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #7f8c8d;
+}
+
+/* Filter Styles */
+.filter-container {
+  position: relative;
+}
+
+.filter-btn {
+  padding: 10px 15px;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 25px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #000000;
+  z-index: 10; /* Add z-index to ensure button stays above other elements */
+}
+
+.filter-btn:hover {
+  background-color: #f8f9fa;
+}
+/* Filter Dropdown Styles */
+.filter-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 5px);
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+  min-width: 180px;
+  opacity: 1;
+  visibility: visible;
+  transition: all 0.2s ease;
+  /* Add these to ensure text visibility */
+  color: #000000; /* Explicit black text color */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Match your font */
+  font-size: 0.95rem; /* Match your text size */
+  padding: 5px 0;
+}
+
+.dropdown-item {
+  width: 100%;
+  padding: 10px 20px; /* Increased horizontal padding */
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #333; /* Dark gray text */
+  /* Add these for better text display */
+  display: block;
+  white-space: nowrap;
+  text-decoration: none;
+  gap: 10px; /* Space between icon and text */
+  border-radius: 4px; /* Slightly rounded corners */
+  margin: 2px 5px; /* Small margin */
+}
+
+
+
+.dropdown-item:hover, .dropdown-item.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+/* Table Styles */
+.table-responsive {
+  width: calc(100% - var(--table-offset)); /* Adjust width */
+  margin-left: var(--table-offset); /* Right shift */
+  overflow-x: auto;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  background-color: white;
+}
+
+.events-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.events-table th {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 15px;
+  text-align: left;
+  font-weight: 500;
+}
+
+.events-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  color: #000000;
+}
+
+.events-table tr:last-child td {
+  border-bottom: none;
+}
+
+.events-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-badge.past {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.no-results {
+  text-align: center;
+  padding: 20px;
+  color: #7f8c8d;
+}
+
+/* Update the search-filter-section styles for desktop */
+@media (min-width: 769px) {
+  .search-filter-section {
+    margin-left: var(--table-offset);
+    width: calc(100% - var(--table-offset));
+    justify-content: center; /* Changed from space-between */
+    padding-right: 0; /* Remove any right padding */
+    flex-wrap: nowrap; /* Prevent wrapping */
   }
-  
-  .search-input {
-    width: 250px; /* Keep your original size */
-    padding: 8px 35px 8px 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+
+  .search-box {
+    max-width: 500px; /* Fixed width for search box */
+    margin: 0 auto; /* Center the search box */
+    flex-grow: 0; /* Prevent from growing */
   }
-  
-  .search-icon {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 16px;
-    cursor: pointer;
+
+  .filter-container {
+    position: absolute; /* Position filter button absolutely */
+    right: calc(var(--table-offset) + 20px); /* Align with table right edge */
   }
-  
-  /* Filter Button */
-  .filter-btn {
-    background: none;
-    border: none;
-    padding: 5px;
-    cursor: pointer;
-    transition: 0.3s;
+}
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .events-container {
+    padding: 20px 15px 20px 30px; /* Less right shift on mobile */
   }
-  
-  .filter-btn:hover {
-    color: #007bff;
-    transform: scale(1.1);
-  }
-  
-  /* Dropdown Styling */
-  .filter-dropdown {
-    position: absolute;
-    top: 40px;
-    right: 0;
-    background: white;
-    border: 1px solid #ccc;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-    width: 150px;
-    z-index: 10;
-  }
-  
-  .filter-dropdown .dropdown-item {
+
+  .events-header,
+  .search-filter-section,
+  .table-responsive {
+    margin-left: 0;
     width: 100%;
-    text-align: left;
+  }
+
+  .events-table {
+    display: block;
+  }
+
+  .events-table thead {
+    display: none;
+  }
+
+  .events-table tr {
+    display: block;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
     padding: 10px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    transition: 0.3s;
+    width: 100%; /* Maximized cards */
+    box-sizing: border-box;
   }
-  
-  .filter-dropdown .dropdown-item:hover {
-    background: #6c757d;
-    color: white;
+
+  .events-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 10px; /* Increased padding for mobile */
+    font-size: 1rem; /* Larger text on mobile */
+    width: 100%; /* Full width cells */
+    box-sizing: border-box;
   }
-  
-  .filter-dropdown .dropdown-item.active {
-    background: #6c757d;
-    color: white;
+
+  .events-table td::before {
+    content: attr(data-label);
     font-weight: bold;
+    margin-right: 15px;
+    color: #2c3e50;
+    min-width: 100px; /* Ensure consistent spacing */
   }
-  
+
+  .status-badge {
+    padding: 8px 12px; /* Larger badges on mobile */
+    font-size: 0.95rem; /* Larger text */
+  }
+}
+
+@media (max-width: 375px) {
+  .events-container {
+    padding: 15px 10px 15px 20px; /* Adjusted for small screens */
+  }
+
+  .events-header h2 {
+    font-size: 1.5rem;
+    margin-top: 20px;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+  }
+
+  .search-input {
+    padding: 12px 15px 12px 35px; /* Adjusted padding */
+    font-size: 1rem; /* Larger text for mobile */
+  }
+
+  .filter-btn {
+    padding: 10px 15px; /* Larger touch target */
+    font-size: 1rem;
+  }
+
+  .events-table td {
+    font-size: 0.95rem; /* Slightly larger text */
+    padding: 10px 8px; /* Adjusted padding */
+  }
+}

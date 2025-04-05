@@ -114,7 +114,6 @@
   background-color: var(--active-bg);
   border-left: 3px solid var(--text-color);
   font-weight: bold;
-  border-radius: 5px;
 }
 
 .nav-icon {

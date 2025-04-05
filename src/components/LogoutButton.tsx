@@ -1,62 +1,76 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logout_button from "../assets/images/logout_button.png";
-import "../css/Profile.css";
+import { FiLogOut } from "react-icons/fi";
+import "../css/LogoutButton.css";
 
 const LogoutButton = () => {
-  const [showConfirm, setShowConfirm] = useState(false); // Track confirmation popup
-  const [showOverlay, setShowOverlay] = useState(false); // Show overlay after logout
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
 
-  // Show confirmation popup
   const handleLogoutClick = () => {
     setShowConfirm(true);
   };
 
-  // Handle confirmed logout
   const handleConfirmLogout = () => {
-    setShowOverlay(true); // Show full-screen logout overlay
+    setIsLoggingOut(true);
     setTimeout(() => {
-      localStorage.clear(); // Clear stored user session
-      navigate("/", { replace: true }); // Redirect to homepage
-    }, 1500); // Delay for a better effect
+      localStorage.clear();
+      navigate("/", { replace: true });
+    }, 1000);
   };
 
-  // Cancel confirmation and return to profile
   const handleCancelLogout = () => {
     setShowConfirm(false);
   };
 
   return (
-    <div>
-      {/* Logout Button */}
-      <button onClick={handleLogoutClick} className="logout-btn">
-        <img src={logout_button} alt="logout button" className="logout" />
-        Logout
+    <>
+      {/* Main Logout Button */}
+      <button onClick={handleLogoutClick} className="logout-button">
+        <FiLogOut className="logout-icon" />
+        <span>Logout</span>
       </button>
 
-      {/* Confirmation Popup */}
+      {/* Confirmation Dialog */}
       {showConfirm && (
-        <div className="confirm-popup">
-          <p>Are you sure you want to logout?</p>
-          <div className="confirm-buttons">
-            <button className="yes-button" onClick={handleConfirmLogout}>
-              Yes
-            </button>
-            <button className="no-button" onClick={handleCancelLogout}>
-              No
-            </button>
+        <div className="logout-confirm-overlay">
+          <div className="logout-confirm-dialog">
+            <div className="logout-confirm-header">
+              <FiLogOut className="confirm-icon" />
+              <h3>Confirm Logout</h3>
+            </div>
+            <p>Are you sure you want to sign out of your account?</p>
+            <div className="logout-confirm-actions">
+              <button
+                className="logout-confirm-cancel"
+                onClick={handleCancelLogout}
+                disabled={isLoggingOut}
+              >
+                Cancel
+              </button>
+              <button
+                className="logout-confirm-proceed"
+                onClick={handleConfirmLogout}
+                disabled={isLoggingOut}
+              >
+                {isLoggingOut ? "Logging Out..." : "Yes, Logout"}
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Logout Overlay (Full Page Effect) */}
-      {showOverlay && (
-        <div className="confirm-popup">
-          <p>Logging out...</p>
+      {/* Full-screen Loading Overlay */}
+      {isLoggingOut && (
+        <div className="logout-loading-overlay">
+          <div className="logout-loading-content">
+            <div className="logout-loading-spinner"></div>
+            <p>Signing you out...</p>
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
