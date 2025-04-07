@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../api/authApi"; // Import login function
+import { login } from "../api/authApi";
+import { FaUser, FaLock, FaEnvelope, FaEye, FaEyeSlash } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 const LoginForm = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [rememberMe, setRememberMe] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Load remembered email if available
     const savedEmail = localStorage.getItem("rememberedEmail");
     if (savedEmail) {
       setEmail(savedEmail);
@@ -19,16 +22,15 @@ const LoginForm = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setIsLoading(true);
 
     try {
       const userData = await login(email, password);
-      console.log("User Data:", userData);
 
       if (!userData.token || !userData.roles) {
         throw new Error("Invalid response from server.");
       }
 
-      // Store user info and token
       localStorage.setItem("user", JSON.stringify(userData));
       localStorage.setItem("token", userData.token);
 
@@ -62,8 +64,11 @@ const LoginForm = () => {
       }
     } catch (error: any) {
       alert(
-        error.response?.data?.message || "Login failed! Check credentials."
+        error.response?.data?.message ||
+          "Login failed! Please check your credentials."
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -72,69 +77,89 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="container mt-4">
-      <h4 className="userlogin">User Login</h4>
+    <div className="login-form-container">
+      <h4 className="user-login-title">
+        <FaUser className="user-icon" /> User Login
+      </h4>
+
       <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Email</label>
+        <div className="form-group">
+          <label className="form-label">
+            <FaEnvelope className="input-icon" /> Email
+          </label>
           <input
             type="email"
-            className="form-control"
+            className="form-input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            placeholder="Enter Email"
+            placeholder="Enter your email address"
             minLength={2}
             maxLength={50}
           />
         </div>
-        <div className="mb-3">
-          <label className="form-label">Password</label>
-          <input
-            type="password"
-            className="form-control"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder="Enter Password"
-            minLength={8}
-            maxLength={30}
-          />
+
+        <div className="form-group">
+          <label className="form-label">
+            <FaLock className="input-icon" /> Password
+          </label>
+          <div className="password-input-container">
+            <input
+              type={showPassword ? "text" : "password"}
+              className="form-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Enter your password"
+              minLength={8}
+              maxLength={30}
+            />
+            <button
+              type="button"
+              className="toggle-password"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
         </div>
 
-        {/* Remember Me & Forgot Password */}
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <div className="form-check">
+        <div className="form-options">
+          <div className="remember-me">
             <input
               type="checkbox"
-              className="form-check-input"
               id="rememberMe"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
             />
-            <label
-              className="form-check-label"
-              htmlFor="rememberMe"
-              style={{ fontSize: "0.80rem", fontWeight: "400" }}
-            >
-              Remember Me
-            </label>
+            <label htmlFor="rememberMe">Remember me</label>
           </div>
 
           <button
             type="button"
             onClick={handleForgotPassword}
-            className="btn btn-link text-primary p-0"
-            style={{ fontSize: "0.78rem", textDecoration: "none" }}
+            className="forgot-password"
           >
             Forgot Password?
           </button>
         </div>
 
-        <button type="submit" className="home-button">
-          Login
-        </button>
+        <motion.button
+          type="submit"
+          className="login-button"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          disabled={isLoading}
+        >
+          {isLoading ? <span className="spinner"></span> : "Login"}
+        </motion.button>
       </form>
+
+      <div className="login-footer">
+        <p>
+          Don't have an account? <a href="/register">Register here</a>
+        </p>
+      </div>
     </div>
   );
 };

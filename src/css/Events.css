@@ -42,23 +42,26 @@
   font-size: 1rem;
 }
 
-/* Search and Filter Section */
+/* Updated Search and Filter Section */
 .search-filter-section {
   display: flex;
-  justify-content: space-between;
+  justify-content: center; /* Changed from space-between to center */
   align-items: center;
   margin-bottom: 30px;
-  gap: 20px;
+  gap: 15px; /* Reduced gap for closer placement */
   flex-wrap: wrap;
-  margin-left: var(--table-offset); /* Right shift */
-  width: calc(100% - var(--table-offset)); /* Adjust width */
+  margin-left: var(--table-offset);
+  width: calc(100% - var(--table-offset));
+  position: relative; /* Added for positioning */
 }
 
 .search-box {
   position: relative;
   flex-grow: 1;
   max-width: 500px;
+  min-width: 200px; /* Added minimum width */
 }
+
 
 .search-input {
   width: 100%;
@@ -84,9 +87,9 @@
   color: #7f8c8d;
 }
 
-/* Filter Styles */
 .filter-container {
   position: relative;
+  margin-left: 0; /* Remove any default margin */
 }
 
 .filter-btn {
@@ -100,13 +103,13 @@
   cursor: pointer;
   transition: all 0.3s ease;
   color: #000000;
-  z-index: 10; /* Add z-index to ensure button stays above other elements */
+  z-index: 10;
 }
 
 .filter-btn:hover {
   background-color: #f8f9fa;
 }
-/* Filter Dropdown Styles */
+
 .filter-dropdown {
   position: absolute;
   right: 0;
@@ -120,41 +123,38 @@
   opacity: 1;
   visibility: visible;
   transition: all 0.2s ease;
-  /* Add these to ensure text visibility */
-  color: #000000; /* Explicit black text color */
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Match your font */
-  font-size: 0.95rem; /* Match your text size */
+  color: #000000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 0.95rem;
   padding: 5px 0;
 }
 
 .dropdown-item {
   width: 100%;
-  padding: 10px 20px; /* Increased horizontal padding */
+  padding: 10px 20px;
   text-align: left;
   background: none;
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #333; /* Dark gray text */
-  /* Add these for better text display */
+  color: #333;
   display: block;
   white-space: nowrap;
   text-decoration: none;
-  gap: 10px; /* Space between icon and text */
-  border-radius: 4px; /* Slightly rounded corners */
-  margin: 2px 5px; /* Small margin */
+  gap: 10px;
+  border-radius: 4px;
+  margin: 2px 5px;
 }
-
-
 
 .dropdown-item:hover, .dropdown-item.active {
   background-color: var(--primary-color);
   color: white;
 }
+
 /* Table Styles */
 .table-responsive {
-  width: calc(100% - var(--table-offset)); /* Adjust width */
-  margin-left: var(--table-offset); /* Right shift */
+  width: calc(100% - var(--table-offset));
+  margin-left: var(--table-offset);
   overflow-x: auto;
   margin-bottom: 30px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -214,31 +214,32 @@
   color: #7f8c8d;
 }
 
-/* Update the search-filter-section styles for desktop */
+/* Desktop Styles */
 @media (min-width: 769px) {
   .search-filter-section {
     margin-left: var(--table-offset);
     width: calc(100% - var(--table-offset));
-    justify-content: center; /* Changed from space-between */
-    padding-right: 0; /* Remove any right padding */
-    flex-wrap: nowrap; /* Prevent wrapping */
+    justify-content: center;
+    padding-right: 0;
+    flex-wrap: nowrap;
   }
 
   .search-box {
-    max-width: 500px; /* Fixed width for search box */
-    margin: 0 auto; /* Center the search box */
-    flex-grow: 0; /* Prevent from growing */
+    max-width: 500px;
+    margin: 0 auto;
+    flex-grow: 0;
   }
 
   .filter-container {
-    position: absolute; /* Position filter button absolutely */
-    right: calc(var(--table-offset) + 20px); /* Align with table right edge */
+    position: relative; /* Changed from absolute */
+    right: auto; /* Remove absolute positioning */
   }
 }
-/* Responsive Styles */
+
+/* Tablet Styles */
 @media (max-width: 768px) {
   .events-container {
-    padding: 20px 15px 20px 30px; /* Less right shift on mobile */
+    padding: 20px 15px 20px 30px;
   }
 
   .events-header,
@@ -250,6 +251,7 @@
 
   .events-table {
     display: block;
+    border: none;
   }
 
   .events-table thead {
@@ -262,18 +264,21 @@
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 10px;
-    width: 100%; /* Maximized cards */
+    width: 100%;
     box-sizing: border-box;
+    background-color: white;
   }
 
   .events-table td {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 10px; /* Increased padding for mobile */
-    font-size: 1rem; /* Larger text on mobile */
-    width: 100%; /* Full width cells */
+    padding: 12px 10px;
+    font-size: 1rem;
+    width: 100%;
     box-sizing: border-box;
+    border-bottom: 1px solid #eee;
+    text-align: right;
   }
 
   .events-table td::before {
@@ -281,18 +286,43 @@
     font-weight: bold;
     margin-right: 15px;
     color: #2c3e50;
-    min-width: 100px; /* Ensure consistent spacing */
+    min-width: 100px;
+    text-align: left;
+  }
+
+  .events-table td:last-child {
+    border-bottom: none;
   }
 
   .status-badge {
-    padding: 8px 12px; /* Larger badges on mobile */
-    font-size: 0.95rem; /* Larger text */
+    padding: 8px 12px;
+    font-size: 0.95rem;
+  }
+
+  .events-table tr:nth-child(even) {
+    background-color: white;
+  }
+  .search-filter-section {
+    flex-direction: row; /* Ensure horizontal layout */
+    flex-wrap: nowrap; /* Prevent wrapping */
+    gap: 10px; /* Reduced gap for smaller screens */
+  }
+
+  .search-box {
+    flex-grow: 1;
+  }
+
+  .filter-container {
+    flex-shrink: 0; /* Prevent shrinking */
   }
 }
 
+
+
+/* Mobile Styles */
 @media (max-width: 375px) {
   .events-container {
-    padding: 15px 10px 15px 20px; /* Adjusted for small screens */
+    padding: 15px 10px 15px 20px;
   }
 
   .events-header h2 {
@@ -305,17 +335,17 @@
   }
 
   .search-input {
-    padding: 12px 15px 12px 35px; /* Adjusted padding */
-    font-size: 1rem; /* Larger text for mobile */
+    padding: 12px 15px 12px 35px;
+    font-size: 1rem;
   }
 
   .filter-btn {
-    padding: 10px 15px; /* Larger touch target */
+    padding: 10px 15px;
     font-size: 1rem;
   }
 
   .events-table td {
-    font-size: 0.95rem; /* Slightly larger text */
-    padding: 10px 8px; /* Adjusted padding */
+    font-size: 0.95rem;
+    padding: 10px 8px;
   }
 }

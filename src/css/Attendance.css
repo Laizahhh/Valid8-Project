@@ -1,267 +1,464 @@
-/* General styles */
-.attendance-section {
-    width: 90%;
-    margin: auto;
-    padding: 0px;
-    border-radius: 8px;
-}
-
-/* Title */
-.attendance-section h3 {
-    padding-top: 10px;
-    text-align: center;
-    padding-bottom: 5px;
-    margin-bottom: 15px;
-}
-
-/* Search Box */
-.attendance-search {
+/* Attendance Page Styles */
+.attendance-page {
+    min-height: 100vh;
+    background-color: #f5f7fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .attendance-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 60px 40px 80px; /* Standard desktop padding */
+  }
+  
+  .attendance-header {
+    margin-bottom: 40px;
+    position: relative;
+  }
+  
+  .header-content {
+    margin-bottom: 30px;
+    padding: 0 15px; /* Added padding */
+  }
+  
+  .attendance-title {
+    color: #162f65;
+    font-size: 2.4rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+  }
+  
+  .attendance-subtitle {
+    color: #6c757d;
+    font-size: 1.1rem;
+    margin-bottom: 0;
+    font-weight: 400;
+  }
+  
+  /* Search Box */
+  .attendance-search-container {
     display: flex;
-    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 30px;
+    padding: 0 15px; /* Added padding */
+  }
+  
+  .attendance-search-box {
     position: relative;
     width: 100%;
-    max-width: 200px;
-    margin: 20px 0;
-    margin-left: 0px;
-}
-
-.attendance-search-input {
-    padding: 8px 12px 8px 30px;
-    width: 100%;
-    border: 2px solid #162f65;
-    border-radius: 5px;
-    outline: none;
-    text-align: left;
-}
-
-.attendance-search-icon {
+    max-width: 450px;
+  }
+  
+  .attendance-search-icon {
     position: absolute;
-    left: 10px;
+    left: 20px;
     top: 50%;
     transform: translateY(-50%);
-    width: 16px;
-    height: 16px;
-}
-
-/* Table Container */
-.attendance-table-container {
+    width: 18px;
+    height: 18px;
+    opacity: 0.7;
+  }
+  
+  .attendance-search-input {
     width: 100%;
-    overflow-x: auto;
-    white-space: nowrap;
-}
-
-/* Table */
-.attendance-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 700px;
-    max-width: 10000px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border: 2px solid #162f65;
+    padding: 14px 20px 14px 50px;
+    border: 1px solid #d1d7e0;
     border-radius: 8px;
-}
-
-.attendance-table th,
-.attendance-table td {
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #ddd;
-    vertical-align: middle;
-}
-
-.attendance-table th {
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+    background-color: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  .attendance-search-input:focus {
+    border-color: #162f65;
+    box-shadow: 0 2px 10px rgba(22, 47, 101, 0.15);
+  }
+  
+  /* Attendance Cards */
+  .attendance-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 25px;
+    padding: 0 15px; /* Added padding */
+  }
+  
+  .attendance-card {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #e9ecef;
+  }
+  
+  .attendance-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  }
+  
+  .card-header {
+    padding: 25px;
     background-color: #162f65;
     color: white;
-}
-
-/* Stack elements vertically inside Time In, Checkpoint, and Time Out */
-.attendance-table .time-column {
+    position: relative;
+  }
+  
+  .event-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background-color: rgba(255, 255, 255, 0.15);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  
+  .card-header h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding-right: 40px;
+  }
+  
+  .event-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 15px 0;
+    font-size: 0.95rem;
+  }
+  
+  .event-details span {
+    display: flex;
+    align-items: center;
+  }
+  
+  .detail-icon {
+    margin-right: 8px;
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+  
+  .event-description {
+    margin: 15px 0 0 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    opacity: 0.9;
+    padding: 0 5px; /* Added padding */
+  }
+  
+  .card-body {
+    padding: 25px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-}
-
-.attendance-table .face-scan {
-    font-weight: bold;
-    color: #162f65;
-}
-
-.attendance-table .student-id {
-    font-size: 14px;
-    color: #333;
-}
-
-.attendance-table .time {
-    font-size: 14px;
-    font-weight: bold;
-    color: #28a745;
-}
-
-.attendance-table .time-column input,
-.attendance-table .time-column select {
-    width: 100%;
-    padding: 6px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.attendance-table .time-column button {
-    width: 100%;
-    padding: 6px;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-/* Buttons */
-.btn-success,
-.btn-primary {
-    background-color: transparent;
-    color: #28a745;
-    border: 2px solid #28a745;
-    padding: 6px 10px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.btn-success:hover {
-    background-color: #28a745;
-    color: white;
-}
-
-.btn-primary {
-    color: #007bff;
-    border: 2px solid #007bff;
-}
-
-.btn-primary:hover {
-    background-color: #007bff;
-    color: white;
-}
-
-/* Ensure buttons inside the table are centered */
-.attendance-table td {
-    text-align: center;
-}
-
-.attendance-table .submit-column {
-    text-align: center;
-    border-style: none;
-    margin-left: 0px;
-}
-
-.attendance-table .submit-column button {
-    border-style: none;
+    gap: 25px;
+  }
+  
+  .form-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 0 10px; /* Added padding */
+  }
+  
+  .form-group {
+    margin-bottom: 0;
+    padding: 0 5px; /* Added padding */
+  }
+  
+  .form-group label {
     display: block;
-    margin: auto;
-    padding: 6px 10px;
-    font-size: 14px;
-    margin-right: 205px;
-}
-
-.face-scan-icon {
-    margin-right: 1px;
-    font-size: 14px;
-    vertical-align: middle;
-    margin-bottom: 3px;
-}
-
-.attendance-table select {
-    border-radius: 5px; /* Adjust the radius as needed */
-    padding: 5px;
-    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    font-weight: 500;
+    color: #495057;
+    font-size: 0.95rem;
+  }
+  
+  .form-group select,
+  .form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #d1d7e0;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
     background-color: white;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-/* Style for dropdowns */
-.attendance-table select,
-.attendance-table input {
-    border-radius: 5px; /* Adjust the radius as needed */
-    padding: 5px;
-    border: 1px solid #ccc;
-    background-color: white;
-    font-size: 14px;
-    cursor: pointer;
+  }
+  
+  .form-group select:focus,
+  .form-group input:focus {
+    border-color: #162f65;
     outline: none;
-}
+    box-shadow: 0 0 0 3px rgba(22, 47, 101, 0.1);
+  }
+  
+  .time-records-section {
+    border-top: 1px solid #e9ecef;
+    padding: 20px 10px 0; /* Adjusted padding */
+    margin-top: 10px;
+  }
+  
+  .time-record {
+    margin-bottom: 20px;
+    padding: 0 5px; /* Added padding */
+  }
+  
+  .time-record h4 {
+    margin: 0 0 12px 0;
+    color: #343a40;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  
+  .time-input-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 5px; /* Added padding */
+  }
+  
+ /* Enhanced Face Scan Button */
+.face-scan-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #FFC107 0%, #FF9800 100%);
+    color: #212529;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .face-scan-btn:hover {
+    background: linear-gradient(135deg, #FFB300 0%, #FB8C00 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
 
-/* Ensure input focus effect is smooth */
-.attendance-table input:focus,
-.attendance-table select:focus {
-    border-color: #162f65; /* Highlight border on focus */
-    box-shadow: 0 0 5px rgba(22, 47, 101, 0.3);
-}
+  .face-scan-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  
+  .face-scan-btn .face-scan-icon {
+    margin-right: 10px;
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+  }
+  .face-scan-btn:hover .face-scan-icon {
+    transform: scale(1.1);
+  }
 
-
-/* Responsive Design */
-@media screen and (max-width: 768px) {
-    .attendance-section {
-        width: 100%;
-        padding: 15px;
+  .face-scan-btn:hover .face-scan-icon {
+    transform: scale(1.1);
+  }
+  
+  /* Pulse animation effect */
+  .face-scan-btn.pulse {
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
     }
-
-    .attendance-search {
-        margin-left: 0; /* Aligns search box to the left */
-        justify-content: flex-start; /* Ensures left alignment */
+    70% {
+      box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
     }
-
-    .attendance-table-container {
-        overflow-x: auto;
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
     }
-
-    .attendance-table th,
-    .attendance-table td {
-        font-size: 14px;
-        padding: 8px;
+  }
+  
+  /* Scanning state */
+  .face-scan-btn.scanning {
+    background: linear-gradient(135deg, #FFA000 0%, #F57C00 100%);
+    color: white;
+  }
+  
+  .face-scan-btn.scanning .face-scan-icon {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Success state */
+  .face-scan-btn.success {
+    background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+    color: white;
+  }
+  
+  /* Error state */
+  .face-scan-btn.error {
+    background: linear-gradient(135deg, #F44336 0%, #C62828 100%);
+    color: white;
+  }
+  
+  /* Add a subtle shine effect */
+  .face-scan-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 50%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(30deg);
+    transition: all 0.3s ease;
+  }
+  
+  .face-scan-btn:hover::after {
+    left: 110%;
+  }  
+  
+  .time-display {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .time-display .recorded {
+    color: #28a745;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+  }
+  
+  .time-display .pending {
+    color: #6c757d;
+    font-style: italic;
+  }
+  
+  .no-results {
+    text-align: center;
+    padding: 60px 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e9ecef;
+    margin: 0 15px; /* Added margin */
+  }
+  
+  .no-results-content {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 0 10px; /* Added padding */
+  }
+  
+  .no-results p {
+    color: #495057;
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  
+  .no-results small {
+    color: #6c757d;
+    font-size: 0.95rem;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .attendance-container {
+      padding: 30px 60px 40px 120px; /* Increased right padding to 120px (1 inch) */
     }
-
-    .attendance-table td button {
-        font-size: 12px;
-        padding: 5px;
+  }
+  
+  @media (max-width: 992px) {
+    .attendance-container {
+      padding: 30px;
     }
-
-    .attendance-search-input {
-        width: 80%;
-    }
-
     
-}
-
-@media screen and (max-width: 480px) {
-    .attendance-section {
-        padding: 10px;
+    .form-section {
+      grid-template-columns: 1fr;
     }
-
-    .attendance-search {
-        margin-left: 0; /* Keeps it left-aligned on smaller screens */
-        align-items: flex-start; /* Stacks elements properly */
+  }
+  
+  @media (max-width: 768px) {
+    .attendance-container {
+      padding: 25px;
     }
-
-    .attendance-search-input {
-        width: 100%;
-        max-width: none;
+    
+    .attendance-title {
+      font-size: 2rem;
     }
-
-    .attendance-table-container {
-        overflow-x: auto;
+    
+    .attendance-cards {
+      grid-template-columns: 1fr;
+    padding: 0 10px; /* Adjusted padding */
     }
-
-    .attendance-table {
-        min-width: 600px;
+    
+    .attendance-search-container {
+      justify-content: center;
+      padding: 0 10px; /* Adjusted padding */
     }
-
-    .attendance-table th,
-    .attendance-table td {
-        font-size: 12px;
-        padding: 6px;
+    
+    .attendance-search-box {
+      max-width: 100%;
     }
-
-    .attendance-table td button {
-        font-size: 10px;
-        padding: 4px;
+  }
+  
+  @media (max-width: 576px) {
+    .attendance-container {
+      padding: 20px 15px;
     }
-}
+    
+    .attendance-title {
+      font-size: 1.7rem;
+    padding: 0 10px; /* Added padding */
+    }
+    
+    .card-header {
+      padding: 20px;
+    }
+    
+    .card-body {
+      padding: 20px;
+    }
+    
+    .time-input-group {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    
+    .face-scan-btn {
+      width: 100%;
+    }
+    
+    .time-display {
+      text-align: center;
+      justify-content: center;
+    }
+    
+    .form-section,
+    .time-records-section,
+    .time-record,
+    .time-input-group {
+      padding: 0; /* Reset padding on smallest screens */
+    }
+  }

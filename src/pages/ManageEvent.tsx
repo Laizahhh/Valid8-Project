@@ -4,10 +4,12 @@ import {
   AiFillCheckCircle,
   AiFillCloseCircle,
   AiOutlineSync,
+  AiOutlineCalendar, // New icon for upcoming events
 } from "react-icons/ai";
 import { NavbarEventOrganizer } from "../components/NavbarEventOrganizer";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
 import search_logo from "../assets/images/search_logo.png";
+import Modal from "react-modal";
 import "../css/ManageEvent.css";
 
 interface ManageEventProps {
@@ -27,19 +29,19 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
     {
       name: "Sports Fest",
       date: "2025-04-10",
-      location: "Gym",
+      location: "University Gymnasium",
       status: "Upcoming",
     },
     {
       name: "Cultural Night",
       date: "2025-05-15",
-      location: "Auditorium",
+      location: "Main Auditorium",
       status: "Upcoming",
     },
     {
-      name: "Graduation",
+      name: "Graduation Ceremony",
       date: "2025-06-20",
-      location: "Main Hall",
+      location: "Grand Ballroom",
       status: "Upcoming",
     },
   ]);
@@ -59,8 +61,6 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
 
   const [isOngoingModalOpen, setOngoingModalOpen] = useState(false);
   const [ongoingIndex, setOngoingIndex] = useState<number | null>(null);
-
-  const [activeButtons, setActiveButtons] = useState<string[]>([]);
 
   const filteredEvents = events.filter((event) =>
     event.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -97,81 +97,113 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
     const updatedEvents = [...events];
     updatedEvents[index].status = newStatus;
     setEvents(updatedEvents);
-
-    // Update the active button for the specific event
-    const updatedActiveButtons = [...activeButtons];
-    updatedActiveButtons[index] = newStatus;
-    setActiveButtons(updatedActiveButtons);
   };
 
+  const getStatusBadge = (status: string) => {
+    let badgeClass = "";
+    switch (status) {
+      case "Upcoming":
+        badgeClass = "badge bg-primary";
+        break;
+      case "Ongoing":
+        badgeClass = "badge bg-warning text-dark";
+        break;
+      case "Completed":
+        badgeClass = "badge bg-success";
+        break;
+      case "Canceled":
+        badgeClass = "badge bg-danger";
+        break;
+      default:
+        badgeClass = "badge bg-secondary";
+    }
+    return <span className={badgeClass}>{status}</span>;
+  };
+
+  // Set app element for accessibility
+  Modal.setAppElement("#root");
+
   return (
-    <div>
+    <div className="manage-events-page">
       {role === "student-ssg-eventorganizer" ? (
         <NavbarStudentSSGEventOrganizer />
       ) : (
         <NavbarEventOrganizer />
       )}
 
-      <div className="manage-events container small-container">
-        <h3>Manage Event</h3>
+      <div className="manage-events-container">
+        <header className="manage-events-header">
+          <h2>Event Management</h2>
+          <p className="subtitle">
+            Manage and update university events and their status
+          </p>
+        </header>
 
-        <div className="search-manage-event">
-          <input
-            type="search"
-            placeholder="Search events..."
-            className="search-input"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <img src={search_logo} alt="search" className="search-icon" />
+        {/* Search Bar */}
+        <div className="search-container">
+          <div className="search-box">
+            <img src={search_logo} alt="search" className="search-icon" />
+            <input
+              type="search"
+              placeholder="Search events by name..."
+              className="search-input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
 
-        <div className="upcoming-events-table">
-          <table>
+        {/* Events Table */}
+        <div className="table-responsive">
+          <table className="events-table">
             <thead>
               <tr>
-                <th className="manage-event">Event</th>
-                <th className="date">Date</th>
-                <th className="location">Location</th>
-                <th className="status">Status</th>
-                <th className="actions">Actions</th>
+                <th>Event Name</th>
+                <th>Date</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredEvents.length > 0 ? (
-                filteredEvents.map((event, index) => (
-                  <tr key={index}>
-                    <td>{event.name}</td>
-                    <td>{event.date}</td>
-                    <td>{event.location}</td>
-                    <td>{event.status}</td>
-                    <td className="button-group">
+              {filteredEvents.map((event, index) => (
+                <tr key={index}>
+                  <td data-label="Event Name">{event.name}</td>
+                  <td data-label="Date">
+                    {new Date(event.date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </td>
+                  <td data-label="Location">{event.location}</td>
+                  <td data-label="Status">{getStatusBadge(event.status)}</td>
+                  <td data-label="Actions" className="actions-cell">
+                    <div className="button-group">
                       <button
-                        className={`btn btn-primary btn-sm ${
-                          activeButtons[index] === "Edit" ? "btn-clicked" : ""
-                        }`}
+                        className="btn btn-outline-primary btn-sm"
                         onClick={() => openEditModal(event, index)}
                       >
                         <AiFillEdit /> Edit
                       </button>
                       <button
-                        className={`btn btn-info btn-sm ${
-                          activeButtons[index] === "Upcoming"
-                            ? "btn-clicked"
-                            : ""
+                        className={`btn btn-sm ${
+                          event.status === "Upcoming"
+                            ? "btn-primary"
+                            : "btn-outline-primary"
                         }`}
                         onClick={() => {
                           setUpcomingIndex(index);
                           setUpcomingModalOpen(true);
                         }}
                       >
-                        <AiFillEdit /> Upcoming
+                        <AiOutlineCalendar /> Upcoming
                       </button>
                       <button
-                        className={`btn btn-warning btn-sm ${
-                          activeButtons[index] === "Ongoing"
-                            ? "btn-clicked"
-                            : ""
+                        className={`btn btn-sm ${
+                          event.status === "Ongoing"
+                            ? "btn-warning"
+                            : "btn-outline-warning"
                         }`}
                         onClick={() => {
                           setOngoingIndex(index);
@@ -180,25 +212,24 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
                       >
                         <AiOutlineSync /> Ongoing
                       </button>
-
                       <button
-                        className={`btn btn-success btn-sm ${
-                          activeButtons[index] === "Completed"
-                            ? "btn-clicked"
-                            : ""
+                        className={`btn btn-sm ${
+                          event.status === "Completed"
+                            ? "btn-success"
+                            : "btn-outline-success"
                         }`}
                         onClick={() => {
                           setCompleteIndex(index);
                           setCompleteModalOpen(true);
                         }}
                       >
-                        <AiFillCheckCircle /> Completed
+                        <AiFillCheckCircle /> Complete
                       </button>
                       <button
-                        className={`btn btn-danger btn-sm ${
-                          activeButtons[index] === "Canceled"
-                            ? "btn-clicked"
-                            : ""
+                        className={`btn btn-sm ${
+                          event.status === "Canceled"
+                            ? "btn-danger"
+                            : "btn-outline-danger"
                         }`}
                         onClick={() => {
                           setCancelIndex(index);
@@ -207,217 +238,214 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
                       >
                         <AiFillCloseCircle /> Cancel
                       </button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filteredEvents.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="no-events">
-                    No matching events found.
+                  <td colSpan={5} className="no-results">
+                    No matching events found. Try a different search term.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-      </div>
 
-      {/* Edit Modal */}
-      {isEditModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <h3>Edit Event</h3>
-            <input
-              type="text"
-              name="name"
-              value={editingEvent?.name || ""}
-              onChange={handleEditChange}
-              placeholder="Event Name"
-            />
-            <input
-              type="date"
-              name="date"
-              value={editingEvent?.date || ""}
-              onChange={handleEditChange}
-            />
-            <input
-              type="text"
-              name="location"
-              value={editingEvent?.location || ""}
-              onChange={handleEditChange}
-              placeholder="Event Location"
-            />
-            <div
-              className="modal-buttons"
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "20px",
-                marginTop: "10px",
-              }}
-            >
-              <button className="btn btn-secondary" onClick={closeEditModal}>
-                Cancel
-              </button>
-              <button className="btn btn-primary" onClick={saveEditedEvent}>
-                Save
-              </button>
+        {/* Edit Modal */}
+        <Modal
+          isOpen={isEditModalOpen}
+          onRequestClose={closeEditModal}
+          className="edit-modal"
+          overlayClassName="modal-overlay"
+        >
+          <div className="modal-header">
+            <h3>Edit Event Details</h3>
+            <button onClick={closeEditModal} className="close-button">
+              &times;
+            </button>
+          </div>
+          <div className="modal-body">
+            <div className="form-group">
+              <label htmlFor="event-name">Event Name</label>
+              <input
+                type="text"
+                id="event-name"
+                name="name"
+                className="form-control"
+                value={editingEvent?.name || ""}
+                onChange={handleEditChange}
+                placeholder="Enter event name"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="event-date">Date</label>
+              <input
+                type="date"
+                id="event-date"
+                name="date"
+                className="form-control"
+                value={editingEvent?.date || ""}
+                onChange={handleEditChange}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="event-location">Location</label>
+              <input
+                type="text"
+                id="event-location"
+                name="location"
+                className="form-control"
+                value={editingEvent?.location || ""}
+                onChange={handleEditChange}
+                placeholder="Enter event location"
+              />
             </div>
           </div>
-        </div>
-      )}
+          <div className="modal-footer">
+            <button className="btn btn-secondary" onClick={closeEditModal}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" onClick={saveEditedEvent}>
+              Save Changes
+            </button>
+          </div>
+        </Modal>
 
-      {/* Upcoming Confirmation Modal */}
-      {isUpcomingModalOpen && upcomingIndex !== null && (
-        <div className="modal-overlay">
-          <div className="modal-container">
+        {/* Status Change Modals */}
+        <Modal
+          isOpen={isUpcomingModalOpen}
+          onRequestClose={() => setUpcomingModalOpen(false)}
+          className="confirmation-modal"
+          overlayClassName="modal-overlay"
+        >
+          <div className="modal-header">
+            <h3>Confirm Status Change</h3>
+          </div>
+          <div className="modal-body">
             <p>Are you sure you want to mark this event as upcoming?</p>
-            <div
-              className="modal-buttons"
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "20px",
-                marginTop: "10px",
-              }}
+          </div>
+          <div className="modal-footer">
+            <button
+              className="btn btn-outline-secondary"
+              onClick={() => setUpcomingModalOpen(false)}
             >
-              <button
-                className="btn btn-info"
-                onClick={() => {
+              Cancel
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                if (upcomingIndex !== null) {
                   updateEventStatus(upcomingIndex, "Upcoming");
                   setUpcomingModalOpen(false);
-                  setUpcomingIndex(null);
-                }}
-              >
-                Yes
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={() => {
-                  setUpcomingModalOpen(false);
-                  setUpcomingIndex(null);
-                }}
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Ongoing Confirmation Modal */}
-      {isOngoingModalOpen && ongoingIndex !== null && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <p>Are you sure you want to mark this event as ongoing?</p>
-            <div
-              className="modal-buttons"
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "20px",
-                marginTop: "10px",
+                }
               }}
             >
-              <button
-                className="btn btn-warning"
-                onClick={() => {
+              Confirm
+            </button>
+          </div>
+        </Modal>
+
+        <Modal
+          isOpen={isOngoingModalOpen}
+          onRequestClose={() => setOngoingModalOpen(false)}
+          className="confirmation-modal"
+          overlayClassName="modal-overlay"
+        >
+          <div className="modal-header">
+            <h3>Confirm Status Change</h3>
+          </div>
+          <div className="modal-body">
+            <p>Are you sure you want to mark this event as ongoing?</p>
+          </div>
+          <div className="modal-footer">
+            <button
+              className="btn btn-outline-secondary"
+              onClick={() => setOngoingModalOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-warning"
+              onClick={() => {
+                if (ongoingIndex !== null) {
                   updateEventStatus(ongoingIndex, "Ongoing");
                   setOngoingModalOpen(false);
-                  setOngoingIndex(null);
-                }}
-              >
-                Yes
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={() => {
-                  setOngoingModalOpen(false);
-                  setOngoingIndex(null);
-                }}
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Cancel Confirmation Modal */}
-      {isCancelModalOpen && cancelIndex !== null && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <p>Are you sure you want to mark this event as canceled?</p>
-            <div
-              className="modal-buttons"
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "20px",
-                marginTop: "10px",
+                }
               }}
             >
-              <button
-                className="btn btn-danger"
-                onClick={() => {
-                  updateEventStatus(cancelIndex, "Canceled");
-                  setCancelModalOpen(false);
-                  setCancelIndex(null);
-                }}
-              >
-                Yes
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={() => {
-                  setCancelModalOpen(false);
-                  setCancelIndex(null);
-                }}
-              >
-                No
-              </button>
-            </div>
+              Confirm
+            </button>
           </div>
-        </div>
-      )}
+        </Modal>
 
-      {/* Complete Confirmation Modal */}
-      {isCompleteModalOpen && completeIndex !== null && (
-        <div className="modal-overlay">
-          <div className="modal-container">
+        <Modal
+          isOpen={isCompleteModalOpen}
+          onRequestClose={() => setCompleteModalOpen(false)}
+          className="confirmation-modal"
+          overlayClassName="modal-overlay"
+        >
+          <div className="modal-header">
+            <h3>Confirm Status Change</h3>
+          </div>
+          <div className="modal-body">
             <p>Are you sure you want to mark this event as completed?</p>
-            <div
-              className="modal-buttons"
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                gap: "20px",
-                marginTop: "10px",
-              }}
+          </div>
+          <div className="modal-footer">
+            <button
+              className="btn btn-outline-secondary"
+              onClick={() => setCompleteModalOpen(false)}
             >
-              <button
-                className="btn btn-success"
-                onClick={() => {
+              Cancel
+            </button>
+            <button
+              className="btn btn-success"
+              onClick={() => {
+                if (completeIndex !== null) {
                   updateEventStatus(completeIndex, "Completed");
                   setCompleteModalOpen(false);
-                  setCompleteIndex(null);
-                }}
-              >
-                Yes
-              </button>
-              <button
-                className="btn btn-secondary"
-                onClick={() => {
-                  setCompleteModalOpen(false);
-                  setCompleteIndex(null);
-                }}
-              >
-                No
-              </button>
-            </div>
+                }
+              }}
+            >
+              Confirm
+            </button>
           </div>
-        </div>
-      )}
+        </Modal>
+
+        <Modal
+          isOpen={isCancelModalOpen}
+          onRequestClose={() => setCancelModalOpen(false)}
+          className="confirmation-modal"
+          overlayClassName="modal-overlay"
+        >
+          <div className="modal-header">
+            <h3>Confirm Status Change</h3>
+          </div>
+          <div className="modal-body">
+            <p>Are you sure you want to cancel this event?</p>
+          </div>
+          <div className="modal-footer">
+            <button
+              className="btn btn-outline-secondary"
+              onClick={() => setCancelModalOpen(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-danger"
+              onClick={() => {
+                if (cancelIndex !== null) {
+                  updateEventStatus(cancelIndex, "Canceled");
+                  setCancelModalOpen(false);
+                }
+              }}
+            >
+              Confirm
+            </button>
+          </div>
+        </Modal>
+      </div>
     </div>
   );
 };

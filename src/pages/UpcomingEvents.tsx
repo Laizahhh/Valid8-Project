@@ -90,7 +90,9 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
                     <td data-label="Date">{event.date}</td>
                     <td data-label="Location">{event.location}</td>
                     <td data-label="Status">
-                      <span className={`status-badge ${event.status.toLowerCase()}`}>
+                      <span
+                        className={`status-badge ${event.status.toLowerCase()}`}
+                      >
                         {event.status}
                       </span>
                     </td>

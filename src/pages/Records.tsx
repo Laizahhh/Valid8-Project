@@ -101,12 +101,12 @@ export const Records: React.FC<RecordsProps> = ({ role }) => {
               {filteredRecords.length > 0 ? (
                 filteredRecords.map((record, index) => (
                   <tr key={index}>
-                    <td>{record.studentId}</td>
-                    <td>{record.name}</td>
-                    <td>{record.yearLevel}</td>
-                    <td>{record.program}</td>
-                    <td>{record.event}</td>
-                    <td>
+                    <td data-label="Student ID">{record.studentId}</td>
+                    <td data-label="Name">{record.name}</td>
+                    <td data-label="Year Level">{record.yearLevel}</td>
+                    <td data-label="Program">{record.program}</td>
+                    <td data-label="Event">{record.event}</td>
+                    <td data-label="Status">
                       <span
                         className={`status-badge ${record.status.toLowerCase()}`}
                       >

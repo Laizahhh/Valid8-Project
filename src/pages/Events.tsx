@@ -2,7 +2,6 @@ import { useState } from "react";
 import { NavbarAdmin } from "../components/NavbarAdmin";
 import { NavbarStudentSSG } from "../components/NavbarStudentSSG";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
-import search_logo from "../assets/images/search_logo.png";
 import { FaFilter, FaSearch } from "react-icons/fa";
 import "../css/Events.css";
 import NavbarSSG from "../components/NavbarSSG";
@@ -156,10 +155,10 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
               {filteredEvents.length > 0 ? (
                 filteredEvents.map((event, index) => (
                   <tr key={index}>
-                    <td>{event.name}</td>
-                    <td>{event.date}</td>
-                    <td>{event.location}</td>
-                    <td>
+                    <td data-label="Event Name">{event.name}</td>
+                    <td data-label="Date">{event.date}</td>
+                    <td data-label="Location">{event.location}</td>
+                    <td data-label="Status">
                       <span
                         className={`status-badge ${event.status.toLowerCase()}`}
                       >

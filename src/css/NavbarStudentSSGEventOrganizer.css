@@ -23,6 +23,7 @@
   width: auto;
   min-width: fit-content;
   padding-right: 25px;
+  overflow: hidden; /* Added to prevent scrollbar */
 }
 
 /* Desktop - Collapsed/Expanded States */
@@ -86,8 +87,14 @@
 .ssg-nav {
   flex: 1;
   padding: 20px 0;
-  overflow-y: auto;
+  overflow-y: auto; /* Changed to auto to only show when needed */
   white-space: nowrap;
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none; /* For IE and Edge */
+}
+
+.ssg-nav::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari and Opera */
 }
 
 .ssg-nav-menu {

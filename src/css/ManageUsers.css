@@ -1,223 +1,588 @@
-/* Search & Add User Button Wrapper */
-.manage-users-header {
+/* ManageUsers.css - Updated to match reports page styling */
+
+:root {
+    --primary-color: #162f65;
+    --hover-color: #1e3d85;
+    --text-color: white;
+    --active-bg: rgba(255, 255, 255, 0.1);
+    --transition-speed: 0.3s;
+    --sidebar-width-expanded: 250px;
+    --sidebar-width-collapsed: 70px;
+    --table-offset: 80px;
+  }
+  
+  /* Main Content Area Adjustments */
+  .manage-users-page {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    line-height: 1.6;
+    min-height: 100vh;
+    background-color: #f5f7fa;
+  }
+  
+  .manage-users-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 70px 30px 150px;
+    transition: padding-left var(--transition-speed) ease;
+  }
+  
+  /* Header styles */
+  .manage-users-header {
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .manage-users-header h2 {
+    color: #2c3e50;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .manage-users-header .subtitle {
+    color: #7f8c8d;
+    font-size: 1rem;
+  }
+  
+  /* Search container */
+  .search-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
-    padding: 0 20px; /* Consistent padding on both sides */
-}
-
-/* Search Box - Aligned to the Left on All Devices */
-.search-manage-user {
-    display: flex;
-    align-items: center;
+    margin-bottom: 30px;
+    gap: 15px;
+  }
+  
+  .search-box {
+    flex: 1;
     position: relative;
-    width: 100%;
-    max-width: 200px; /* Consistent size across devices */
-    margin: 8px 0;
-}
-
-/* Search Input Box */
-.search-input {
-    padding: 8px 12px 8px 30px;
-    width: 100%;
-    border: 2px solid #162f65;
-    border-radius: 5px;
-    outline: none;
-    text-align: left;
-}
-
-/* Search Icon inside the Input */
-.search-icon {
+    max-width: 600px;
+  }
+  
+  .search-icon {
     position: absolute;
-    left: 10px;
+    left: 15px;
     top: 50%;
     transform: translateY(-50%);
-    width: 16px;
-    height: 16px;
-}
-
-/* Add User Button */
-.add-user-btn {
+    width: 18px;
+    height: 18px;
+    opacity: 0.6;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 12px 20px 12px 40px;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    font-size: 1rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 2px 10px rgba(52, 152, 219, 0.2);
+  }
+  
+  .add-user-btn {
     display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    padding: 10px 16px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .add-user-btn:hover {
+    background-color: var(--hover-color);
+  }
+  
+  /* Table styles */
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    background-color: white;
+  }
+  
+  .users-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  
+  .users-table th {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 15px;
+    text-align: left;
+    font-weight: 500;
+  }
+  
+  .users-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+  }
+  
+  .users-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .users-table tr:hover {
+    background-color: #f8f9fa;
+  }
+  
+  /* Role badges */
+  .role-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  
+  .badge {
+    display: inline-block;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 4px;
+    color: white;
+  }
+  
+  .badge.bg-primary {
+    background-color: #3498db;
+  }
+  
+  .badge.bg-success {
+    background-color: #27ae60;
+  }
+  
+  .badge.bg-warning {
+    background-color: #f39c12;
+  }
+  
+  .badge.bg-secondary {
+    background-color: #95a5a6;
+  }
+  
+  /* Action buttons */
+  .actions-cell {
+    white-space: nowrap;
+  }
+  
+  .button-group {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .btn {
+    padding: 10px 16px;
+    min-width: 80px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 5px;
-    background-color: #f0ad4e;
+    transition: all 0.2s ease;
+    height: 38px;
+    box-sizing: border-box;
+  }
+  
+  .btn-primary {
+    background-color: #3498db;
     color: white;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.3s ease;
-    margin-left: auto; /* Pushes the button to the right edge */
-    min-width: 130px; /* Ensures consistent size */
-}
-
-.add-user-btn:hover {
-    background-color: #ec971f;
-}
-
-/* Table Container - Center on Desktop */
-.manage-users-table {
+  }
+  
+  .btn-primary:hover {
+    background-color: #2980b9;
+  }
+  
+  .btn-info {
+    background-color: #17a2b8;
+    color: white;
+  }
+  
+  .btn-info:hover {
+    background-color: #138496;
+  }
+  
+  .btn-danger {
+    background-color: #e74c3c;
+    color: white;
+  }
+  
+  .btn-danger:hover {
+    background-color: #c0392b;
+  }
+  
+  .btn-secondary {
+    background-color: #95a5a6;
+    color: white;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #7f8c8d;
+  }
+  
+  .btn-outline-secondary {
+    background-color: transparent;
+    color: #95a5a6;
+    border: 1px solid #95a5a6;
+  }
+  
+  .btn-outline-secondary:hover {
+    background-color: #f8f9fa;
+  }
+  
+  /* No results message */
+  .no-results {
+    text-align: center;
+    padding: 20px;
+    color: #7f8c8d;
+  }
+  
+  /* Modal styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    max-width: none;
-
-    border-collapse: collapse;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border: 2px solid #162f65;
+    z-index: 1000;
+  }
+  
+  .user-modal, .confirmation-modal {
+    background: white;
     border-radius: 8px;
-    margin: auto;
-}
-
-/* Ensure table text is properly aligned */
-th, td {
-    text-align: center;
-    padding: 12px;
-    border: 1px solid #ddd;
-}
-
-th.manageusers-name, th.manageusers-email, th.manageusers-role, th.manageusers-actions {
-    text-align: center;
-}
-
-/* Dropdown Wrapper */
-.dropdown-wrapper {
-    position: relative;
-}
-
-/* Dropdown Button */
-.dropdown-btn {
     width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f9f9f9;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    outline: none;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  .modal-header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .modal-header h3 {
+    color: #2c3e50;
+    margin: 0;
+    font-size: 1.3rem;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
     cursor: pointer;
+    color: #7f8c8d;
+    transition: color 0.2s;
+  }
+  
+  .close-button:hover {
+    color: #e74c3c;
+  }
+  
+  .modal-body {
+    padding: 10px 0;
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    margin-top: 20px;
+  }
+  
+  /* Form styles */
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #2c3e50;
+    font-size: 0.95rem;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+  }
+  
+  .form-group input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  }
+  
+  .input-error {
+    border-color: #e74c3c !important;
+  }
+  
+  .input-error:focus {
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2) !important;
+  }
+  
+  .error-message {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    margin-top: 5px;
+  }
+  
+  /* Dropdown styles */
+  .dropdown-wrapper {
+    position: relative;
+  }
+  
+  .dropdown-btn {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
     text-align: left;
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-/* Dropdown Content - Ensure full left alignment */
-.dropdown-content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+  
+  .dropdown-btn .icon {
+    font-size: 0.8rem;
+  }
+  
+  .dropdown-content {
     position: absolute;
+    top: 100%;
     left: 0;
-    width: 100%;
+    right: 0;
     background: white;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
     margin-top: 5px;
+    z-index: 10;
     max-height: 200px;
     overflow-y: auto;
-    z-index: 100;
-}
-
-/* Dropdown Item - Align Left */
-.dropdown-item {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dropdown-item {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
-    padding: 6px 12px;
+    padding: 8px 12px;
     cursor: pointer;
-    width: 100%;
-    box-sizing: border-box;
+    transition: background-color 0.2s;
+    font-size: 0.9rem;
+  }
+  
+  .dropdown-item:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .dropdown-item input {
+    margin-right: 8px;
+  }
+
+  /* Radio-style checkbox */
+.dropdown-item.radio-style {
+  position: relative;
+  padding-left: 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  min-height: 24px;
 }
 
-.dropdown-item input[type="checkbox"] {
-    margin: 0;
-    padding: 0;
-    width: 16px;
-    height: 16px;
-    vertical-align: middle;
+.radio-input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
 }
 
-.dropdown-item label {
-    margin: 0;
-    padding: 0;
-    font-size: 14px;
-    line-height: 1.2;
+.radio-custom {
+  position: absolute;
+  left: 10px;
+  height: 16px;
+  width: 16px;
+  background-color: #fff;
+  border: 2px solid #ddd;
+  border-radius: 50%;
 }
 
-/* Table Container - Center on Desktop */
-.manage-users-table {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    overflow-x: auto;
+.radio-input:checked ~ .radio-custom {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
 }
 
-/* Table - Full Width */
-table {
-    width: 100%; /* Make the table take full width */
-    max-width: 100%; /* Remove any width restriction */
-    border-collapse: collapse;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border: 2px solid #162f65;
-    border-radius: 8px;
-    margin: auto;
+.radio-custom:after {
+  content: "";
+  position: absolute;
+  display: none;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 1024px) {
-    .manage-users-table {
-        width: 100%;
-        padding: 0 10px;
-    }
-
-    table {
-        width: 100%; /* Make the table take full width on tablet */
-    }
+.radio-input:checked ~ .radio-custom:after {
+  display: block;
 }
 
-@media (max-width: 768px) {
-    .manage-users-table {
-        width: 100%;
-        padding: 0 5px;
-    }
-
-    table {
-        width: 100%; /* Make the table take full width on mobile */
-    }
+.radio-custom:after {
+  left: 4px;
+  top: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
 }
 
-@media (max-width: 480px) {
-    .manage-users-table {
-        width: 100%;
-        padding: 0 0px;
-    }
+/* For the selected items display */
+.dropdown-btn .selected-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
 
-    table {
-        width: 100%; /* Make the table take full width on small mobile */
-    }
+.dropdown-btn .selected-role-badge {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 12px;
+}
 
-    th, td {
-        padding: 0px; /* Reduce padding to fit content */
-        font-size: 12px; /* Slightly smaller text for better fit */
-    }
+/* Dropdown content styling */
+.dropdown-content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 5px;
+  z-index: 10;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
 
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9rem;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .manage-users-container {
+      padding: 20px 15px;
+    }
+    
+    .search-container {
+      flex-direction: column;
+    }
+    
     .add-user-btn {
-        width: 100%; /* Full width button on small screens */
-        margin: 5px 0; /* Space between button and other elements */
+      width: 100%;
+      justify-content: center;
     }
-
-    .search-manage-user {
-        max-width: 100%; /* Allow full width for search bar */
-        margin: 5px 0;
+    
+    .button-group {
+      flex-direction: column;
+      gap: 5px;
     }
-}
+    
+    .btn {
+      width: 100%;
+    }
+    
+    /* Responsive table */
+    .users-table {
+      display: block;
+    }
+    
+    .users-table thead {
+      display: none;
+    }
+    
+    .users-table tr {
+      display: block;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    
+    .users-table td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 10px;
+      border-bottom: 1px solid #eee;
+      text-align: right !important;
+    }
+    
+    .users-table td:before {
+      content: attr(data-label);
+      font-weight: bold;
+      margin-right: 15px;
+      color: #2c3e50;
+    }
+    
+    .users-table td:last-child {
+      border-bottom: none;
+    }
+    
+    .role-badges {
+      justify-content: flex-end;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .modal-footer {
+      flex-direction: column;
+    }
+    
+    .modal-footer .btn {
+      width: 100%;
+    }
+  }

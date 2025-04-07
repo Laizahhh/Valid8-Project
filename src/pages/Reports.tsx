@@ -248,7 +248,7 @@ export const Reports: React.FC = () => {
                         View Report
                       </button>
                       <button
-                        className="btn-primary"
+                        className="btn btn-primary"
                         onClick={() => handleDownloadReport(event)}
                         aria-label="Download report"
                       >
