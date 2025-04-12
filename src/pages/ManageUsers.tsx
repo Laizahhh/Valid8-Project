@@ -23,6 +23,7 @@ const sampleUsers = [
     lastName: "Smith",
     email: "janesmith@example.com",
     role: ["Student"],
+    studentId: "2020-12345",
   },
   {
     firstName: "Robert",
@@ -37,6 +38,7 @@ const sampleUsers = [
     lastName: "Lopez",
     email: "mlopez@example.com",
     role: ["SSG Officer", "Student"],
+    studentId: "2021-54321",
   },
   {
     firstName: "David",
@@ -56,6 +58,9 @@ export const ManageUsers: React.FC = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
+  const [showStudentIdField, setShowStudentIdField] = useState(false);
+  const [studentId, setStudentId] = useState("");
+  const [editStudentId, setEditStudentId] = useState("");
 
   const [editedUser, setEditedUser] = useState({
     firstName: "",
@@ -89,6 +94,7 @@ export const ManageUsers: React.FC = () => {
   const handleEditClick = (index: number) => {
     setEditIndex(index);
     setEditedUser({ ...users[index] });
+    setEditStudentId(users[index].studentId || "");
     setValidationErrors({});
   };
 
@@ -123,13 +129,24 @@ export const ManageUsers: React.FC = () => {
   const handleSaveChanges = () => {
     const errors = validateFields(editedUser);
 
+    if (editedUser.role.includes("Student") && !editStudentId.trim()) {
+      setValidationErrors({
+        ...errors,
+        studentId: "Student ID is required for Student role",
+      });
+      return;
+    }
+
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
 
     const updatedUsers = [...users];
-    updatedUsers[editIndex!] = editedUser;
+    updatedUsers[editIndex!] = {
+      ...editedUser,
+      ...(editedUser.role.includes("Student") && { studentId: editStudentId }),
+    };
     setUsers(updatedUsers);
     setEditIndex(null);
     setValidationErrors({});
@@ -153,11 +170,24 @@ export const ManageUsers: React.FC = () => {
     const newRoles = roles.includes(role)
       ? roles.filter((r) => r !== role)
       : [...roles, role];
+
+    if (role === "Student") {
+      setShowStudentIdField(newRoles.includes("Student"));
+    }
+
     setRoles(newRoles);
   };
 
   const handleAddUser = () => {
     const errors = validateFields(newUser, true);
+
+    if (newUser.role.includes("Student") && !studentId.trim()) {
+      setValidationErrors({
+        ...errors,
+        studentId: "Student ID is required for Student role",
+      });
+      return;
+    }
 
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
@@ -170,6 +200,7 @@ export const ManageUsers: React.FC = () => {
       lastName: newUser.lastName,
       email: newUser.email,
       role: newUser.role,
+      ...(newUser.role.includes("Student") && { studentId }),
     };
     setUsers([...users, newUserObject]);
     setAddUserModalOpen(false);
@@ -181,6 +212,8 @@ export const ManageUsers: React.FC = () => {
       password: "",
       role: [],
     });
+    setStudentId("");
+    setShowStudentIdField(false);
     setValidationErrors({});
   };
 
@@ -205,7 +238,7 @@ export const ManageUsers: React.FC = () => {
 
   const filteredUsers = users.filter((user) => {
     const fullName = getFullName(user);
-    return [fullName, user.email, user.role.join(", ")]
+    return [fullName, user.email, user.role.join(", "), user.studentId || ""]
       .join(" ")
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
@@ -252,7 +285,7 @@ export const ManageUsers: React.FC = () => {
               <tr>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Roles</th>
+                <th>Details</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -261,11 +294,16 @@ export const ManageUsers: React.FC = () => {
                 <tr key={index}>
                   <td data-label="Name">{getFullName(user)}</td>
                   <td data-label="Email">{user.email}</td>
-                  <td data-label="Roles">
-                    <div className="role-badges">
-                      {user.role.map((role, i) => (
-                        <span key={i}>{getRoleBadge(role)}</span>
-                      ))}
+                  <td data-label="Details">
+                    <div>
+                      {user.role.includes("Student") && user.studentId && (
+                        <div className="student-id">ID: {user.studentId}</div>
+                      )}
+                      <div className="role-badges">
+                        {user.role.map((role, i) => (
+                          <span key={i}>{getRoleBadge(role)}</span>
+                        ))}
+                      </div>
                     </div>
                   </td>
                   <td data-label="Actions" className="actions-cell">
@@ -402,6 +440,25 @@ export const ManageUsers: React.FC = () => {
                 <div className="error-message">{validationErrors.password}</div>
               )}
             </div>
+
+            {showStudentIdField && (
+              <div className="form-group">
+                <label htmlFor="studentId">Student ID</label>
+                <input
+                  type="text"
+                  id="studentId"
+                  placeholder="Student ID"
+                  value={studentId}
+                  onChange={(e) => setStudentId(e.target.value)}
+                  className={validationErrors.studentId ? "input-error" : ""}
+                />
+                {validationErrors.studentId && (
+                  <div className="error-message">
+                    {validationErrors.studentId}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="form-group">
               <label>Roles</label>
@@ -554,6 +611,25 @@ export const ManageUsers: React.FC = () => {
                 <div className="error-message">{validationErrors.email}</div>
               )}
             </div>
+
+            {editedUser.role.includes("Student") && (
+              <div className="form-group">
+                <label htmlFor="editStudentId">Student ID</label>
+                <input
+                  type="text"
+                  id="editStudentId"
+                  placeholder="Student ID"
+                  value={editStudentId}
+                  onChange={(e) => setEditStudentId(e.target.value)}
+                  className={validationErrors.studentId ? "input-error" : ""}
+                />
+                {validationErrors.studentId && (
+                  <div className="error-message">
+                    {validationErrors.studentId}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="form-group">
               <label>Roles</label>
