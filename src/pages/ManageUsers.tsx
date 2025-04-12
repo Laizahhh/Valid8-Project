@@ -24,6 +24,8 @@ const sampleUsers = [
     email: "janesmith@example.com",
     role: ["Student"],
     studentId: "2020-12345",
+    yearLevel: "1",
+    program: "BS Computer Engineering",
   },
   {
     firstName: "Robert",
@@ -39,13 +41,8 @@ const sampleUsers = [
     email: "mlopez@example.com",
     role: ["SSG Officer", "Student"],
     studentId: "2021-54321",
-  },
-  {
-    firstName: "David",
-    middleName: "William",
-    lastName: "Brown",
-    email: "dbrown@example.com",
-    role: ["Admin", "Event Organizer"],
+    yearLevel: "3",
+    program: "BS Civil Engineering",
   },
 ];
 
@@ -58,9 +55,18 @@ export const ManageUsers: React.FC = () => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
-  const [showStudentIdField, setShowStudentIdField] = useState(false);
+  const [showStudentFields, setShowStudentFields] = useState(false);
   const [studentId, setStudentId] = useState("");
+  const [yearLevel, setYearLevel] = useState("1");
+  const [program, setProgram] = useState("");
+  const [customProgram, setCustomProgram] = useState("");
+  const [showCustomProgramInput, setShowCustomProgramInput] = useState(false);
   const [editStudentId, setEditStudentId] = useState("");
+  const [editYearLevel, setEditYearLevel] = useState("1");
+  const [editProgram, setEditProgram] = useState("");
+  const [editCustomProgram, setEditCustomProgram] = useState("");
+  const [showEditCustomProgramInput, setShowEditCustomProgramInput] =
+    useState(false);
 
   const [editedUser, setEditedUser] = useState({
     firstName: "",
@@ -80,8 +86,18 @@ export const ManageUsers: React.FC = () => {
   });
 
   const availableRoles = ["Admin", "Student", "SSG Officer", "Event Organizer"];
+  const yearLevels = ["1", "2", "3", "4", "5"];
+  const defaultPrograms = [
+    "BS Computer Engineering",
+    "BS Civil Engineering",
+    "BS Electronics Engineering",
+    "BS Electrical Engineering",
+    "Other (Please specify)",
+  ];
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const [editRoleDropdownOpen, setEditRoleDropdownOpen] = useState(false);
+  const [programDropdownOpen, setProgramDropdownOpen] = useState(false);
+  const [editProgramDropdownOpen, setEditProgramDropdownOpen] = useState(false);
 
   Modal.setAppElement("#root");
 
@@ -92,9 +108,18 @@ export const ManageUsers: React.FC = () => {
   };
 
   const handleEditClick = (index: number) => {
+    const user = users[index];
     setEditIndex(index);
-    setEditedUser({ ...users[index] });
-    setEditStudentId(users[index].studentId || "");
+    setEditedUser({ ...user });
+    setEditStudentId(user.studentId || "");
+    setEditYearLevel(user.yearLevel || "1");
+    setEditProgram(user.program || "");
+    setEditCustomProgram(
+      defaultPrograms.includes(user.program || "") ? "" : user.program || ""
+    );
+    setShowEditCustomProgramInput(
+      !defaultPrograms.includes(user.program || "")
+    );
     setValidationErrors({});
   };
 
@@ -129,12 +154,16 @@ export const ManageUsers: React.FC = () => {
   const handleSaveChanges = () => {
     const errors = validateFields(editedUser);
 
-    if (editedUser.role.includes("Student") && !editStudentId.trim()) {
-      setValidationErrors({
-        ...errors,
-        studentId: "Student ID is required for Student role",
-      });
-      return;
+    if (editedUser.role.includes("Student")) {
+      if (!editStudentId.trim()) {
+        errors.studentId = "Student ID is required for Student role";
+      }
+      if (!editYearLevel) {
+        errors.yearLevel = "Year level is required for Student role";
+      }
+      if (!editProgram && !editCustomProgram) {
+        errors.program = "Program is required for Student role";
+      }
     }
 
     if (Object.keys(errors).length > 0) {
@@ -145,7 +174,14 @@ export const ManageUsers: React.FC = () => {
     const updatedUsers = [...users];
     updatedUsers[editIndex!] = {
       ...editedUser,
-      ...(editedUser.role.includes("Student") && { studentId: editStudentId }),
+      ...(editedUser.role.includes("Student") && {
+        studentId: editStudentId,
+        yearLevel: editYearLevel,
+        program:
+          editProgram === "Other (Please specify)"
+            ? editCustomProgram
+            : editProgram,
+      }),
     };
     setUsers(updatedUsers);
     setEditIndex(null);
@@ -172,21 +208,49 @@ export const ManageUsers: React.FC = () => {
       : [...roles, role];
 
     if (role === "Student") {
-      setShowStudentIdField(newRoles.includes("Student"));
+      setShowStudentFields(newRoles.includes("Student"));
     }
 
     setRoles(newRoles);
   };
 
+  const handleProgramSelect = (selectedProgram: string) => {
+    if (selectedProgram === "Other (Please specify)") {
+      setShowCustomProgramInput(true);
+      setProgram(selectedProgram);
+    } else {
+      setShowCustomProgramInput(false);
+      setProgram(selectedProgram);
+      setCustomProgram("");
+    }
+    setProgramDropdownOpen(false);
+  };
+
+  const handleEditProgramSelect = (selectedProgram: string) => {
+    if (selectedProgram === "Other (Please specify)") {
+      setShowEditCustomProgramInput(true);
+      setEditProgram(selectedProgram);
+    } else {
+      setShowEditCustomProgramInput(false);
+      setEditProgram(selectedProgram);
+      setEditCustomProgram("");
+    }
+    setEditProgramDropdownOpen(false);
+  };
+
   const handleAddUser = () => {
     const errors = validateFields(newUser, true);
 
-    if (newUser.role.includes("Student") && !studentId.trim()) {
-      setValidationErrors({
-        ...errors,
-        studentId: "Student ID is required for Student role",
-      });
-      return;
+    if (newUser.role.includes("Student")) {
+      if (!studentId.trim()) {
+        errors.studentId = "Student ID is required for Student role";
+      }
+      if (!yearLevel) {
+        errors.yearLevel = "Year level is required for Student role";
+      }
+      if (!program && !customProgram) {
+        errors.program = "Program is required for Student role";
+      }
     }
 
     if (Object.keys(errors).length > 0) {
@@ -200,7 +264,11 @@ export const ManageUsers: React.FC = () => {
       lastName: newUser.lastName,
       email: newUser.email,
       role: newUser.role,
-      ...(newUser.role.includes("Student") && { studentId }),
+      ...(newUser.role.includes("Student") && {
+        studentId,
+        yearLevel,
+        program: program === "Other (Please specify)" ? customProgram : program,
+      }),
     };
     setUsers([...users, newUserObject]);
     setAddUserModalOpen(false);
@@ -213,7 +281,11 @@ export const ManageUsers: React.FC = () => {
       role: [],
     });
     setStudentId("");
-    setShowStudentIdField(false);
+    setYearLevel("1");
+    setProgram("");
+    setCustomProgram("");
+    setShowStudentFields(false);
+    setShowCustomProgramInput(false);
     setValidationErrors({});
   };
 
@@ -238,7 +310,14 @@ export const ManageUsers: React.FC = () => {
 
   const filteredUsers = users.filter((user) => {
     const fullName = getFullName(user);
-    return [fullName, user.email, user.role.join(", "), user.studentId || ""]
+    return [
+      fullName,
+      user.email,
+      user.role.join(", "),
+      user.studentId || "",
+      user.yearLevel || "",
+      user.program || "",
+    ]
       .join(" ")
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
@@ -296,8 +375,24 @@ export const ManageUsers: React.FC = () => {
                   <td data-label="Email">{user.email}</td>
                   <td data-label="Details">
                     <div>
-                      {user.role.includes("Student") && user.studentId && (
-                        <div className="student-id">ID: {user.studentId}</div>
+                      {user.role.includes("Student") && (
+                        <>
+                          {user.studentId && (
+                            <div className="student-id">
+                              ID: {user.studentId}
+                            </div>
+                          )}
+                          {user.yearLevel && (
+                            <div className="year-level">
+                              Year: {user.yearLevel}
+                            </div>
+                          )}
+                          {user.program && (
+                            <div className="program">
+                              Program: {user.program}
+                            </div>
+                          )}
+                        </>
                       )}
                       <div className="role-badges">
                         {user.role.map((role, i) => (
@@ -441,23 +536,109 @@ export const ManageUsers: React.FC = () => {
               )}
             </div>
 
-            {showStudentIdField && (
-              <div className="form-group">
-                <label htmlFor="studentId">Student ID</label>
-                <input
-                  type="text"
-                  id="studentId"
-                  placeholder="Student ID"
-                  value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
-                  className={validationErrors.studentId ? "input-error" : ""}
-                />
-                {validationErrors.studentId && (
-                  <div className="error-message">
-                    {validationErrors.studentId}
+            {showStudentFields && (
+              <>
+                <div className="form-group">
+                  <label htmlFor="studentId">Student ID</label>
+                  <input
+                    type="text"
+                    id="studentId"
+                    placeholder="Student ID"
+                    value={studentId}
+                    onChange={(e) => setStudentId(e.target.value)}
+                    className={validationErrors.studentId ? "input-error" : ""}
+                  />
+                  {validationErrors.studentId && (
+                    <div className="error-message">
+                      {validationErrors.studentId}
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="yearLevel">Year Level</label>
+                  <select
+                    id="yearLevel"
+                    value={yearLevel}
+                    onChange={(e) => setYearLevel(e.target.value)}
+                    className={validationErrors.yearLevel ? "input-error" : ""}
+                  >
+                    {yearLevels.map((level) => (
+                      <option key={level} value={level}>
+                        {level}
+                      </option>
+                    ))}
+                  </select>
+                  {validationErrors.yearLevel && (
+                    <div className="error-message">
+                      {validationErrors.yearLevel}
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label>Program</label>
+                  <div className="dropdown-wrapper">
+                    <div className="dropdown">
+                      <button
+                        type="button"
+                        className={`dropdown-btn ${
+                          validationErrors.program ? "input-error" : ""
+                        }`}
+                        onClick={() =>
+                          setProgramDropdownOpen(!programDropdownOpen)
+                        }
+                      >
+                        {program || "Select Program"}
+                        <span className="icon">
+                          {programDropdownOpen ? "▲" : "▼"}
+                        </span>
+                      </button>
+                      {validationErrors.program && (
+                        <div className="error-message">
+                          {validationErrors.program}
+                        </div>
+                      )}
+                      {programDropdownOpen && (
+                        <div className="dropdown-content">
+                          {defaultPrograms.map((programOption) => (
+                            <label
+                              key={programOption}
+                              className="dropdown-item radio-style"
+                            >
+                              <input
+                                type="radio"
+                                name="program"
+                                checked={program === programOption}
+                                onChange={() =>
+                                  handleProgramSelect(programOption)
+                                }
+                                className="radio-input"
+                              />
+                              <span className="radio-custom"></span>
+                              {programOption}
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {showCustomProgramInput && (
+                  <div className="form-group">
+                    <label htmlFor="customProgram">Specify Program</label>
+                    <input
+                      type="text"
+                      id="customProgram"
+                      placeholder="Enter your program"
+                      value={customProgram}
+                      onChange={(e) => setCustomProgram(e.target.value)}
+                      className={validationErrors.program ? "input-error" : ""}
+                    />
                   </div>
                 )}
-              </div>
+              </>
             )}
 
             <div className="form-group">
@@ -613,22 +794,125 @@ export const ManageUsers: React.FC = () => {
             </div>
 
             {editedUser.role.includes("Student") && (
-              <div className="form-group">
-                <label htmlFor="editStudentId">Student ID</label>
-                <input
-                  type="text"
-                  id="editStudentId"
-                  placeholder="Student ID"
-                  value={editStudentId}
-                  onChange={(e) => setEditStudentId(e.target.value)}
-                  className={validationErrors.studentId ? "input-error" : ""}
-                />
-                {validationErrors.studentId && (
-                  <div className="error-message">
-                    {validationErrors.studentId}
+              <>
+                <div className="form-group">
+                  <label htmlFor="editStudentId">Student ID</label>
+                  <input
+                    type="text"
+                    id="editStudentId"
+                    placeholder="Student ID"
+                    value={editStudentId}
+                    onChange={(e) => setEditStudentId(e.target.value)}
+                    className={validationErrors.studentId ? "input-error" : ""}
+                  />
+                  {validationErrors.studentId && (
+                    <div className="error-message">
+                      {validationErrors.studentId}
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="editYearLevel">Year Level</label>
+                  <select
+                    id="editYearLevel"
+                    value={editYearLevel}
+                    onChange={(e) => setEditYearLevel(e.target.value)}
+                    className={validationErrors.yearLevel ? "input-error" : ""}
+                  >
+                    {yearLevels.map((level) => (
+                      <option key={level} value={level}>
+                        {level}
+                      </option>
+                    ))}
+                  </select>
+                  {validationErrors.yearLevel && (
+                    <div className="error-message">
+                      {validationErrors.yearLevel}
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label>Program</label>
+                  <div className="dropdown-wrapper">
+                    <div className="dropdown">
+                      <button
+                        type="button"
+                        className={`dropdown-btn ${
+                          validationErrors.program ? "input-error" : ""
+                        }`}
+                        onClick={() =>
+                          setEditProgramDropdownOpen(!editProgramDropdownOpen)
+                        }
+                      >
+                        {editProgram ||
+                          users[editIndex!]?.program ||
+                          "Select Program"}
+                        <span className="icon">
+                          {editProgramDropdownOpen ? "▲" : "▼"}
+                        </span>
+                      </button>
+                      {validationErrors.program && (
+                        <div className="error-message">
+                          {validationErrors.program}
+                        </div>
+                      )}
+                      {editProgramDropdownOpen && (
+                        <div className="dropdown-content">
+                          {defaultPrograms.map((programOption) => (
+                            <label
+                              key={programOption}
+                              className="dropdown-item radio-style"
+                            >
+                              <input
+                                type="radio"
+                                name="editProgram"
+                                checked={
+                                  editProgram === programOption ||
+                                  (!editProgram &&
+                                    users[editIndex!]?.program ===
+                                      programOption) ||
+                                  (programOption === "Other (Please specify)" &&
+                                    !defaultPrograms.includes(
+                                      users[editIndex!]?.program || ""
+                                    ))
+                                }
+                                onChange={() =>
+                                  handleEditProgramSelect(programOption)
+                                }
+                                className="radio-input"
+                              />
+                              <span className="radio-custom"></span>
+                              {programOption}
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {showEditCustomProgramInput && (
+                  <div className="form-group">
+                    <label htmlFor="editCustomProgram">Specify Program</label>
+                    <input
+                      type="text"
+                      id="editCustomProgram"
+                      placeholder="Enter your program"
+                      value={
+                        editCustomProgram ||
+                        (users[editIndex!]?.program &&
+                        !defaultPrograms.includes(users[editIndex!].program)
+                          ? users[editIndex!].program
+                          : "")
+                      }
+                      onChange={(e) => setEditCustomProgram(e.target.value)}
+                      className={validationErrors.program ? "input-error" : ""}
+                    />
                   </div>
                 )}
-              </div>
+              </>
             )}
 
             <div className="form-group">
