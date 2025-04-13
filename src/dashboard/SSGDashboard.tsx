@@ -45,7 +45,7 @@ export const SSGDashboard: React.FC = () => {
           style={{ marginRight: "2rem" }}
         >
           <h2 className="mb-3" style={{ color: "#343a40", fontWeight: "600" }}>
-            Welcome to Valid8 SSG Dashboard
+            Welcome Ssg!
           </h2>
           <p
             className="text-muted"

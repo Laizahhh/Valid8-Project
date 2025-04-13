@@ -4,7 +4,8 @@ import {
   AiFillCheckCircle,
   AiFillCloseCircle,
   AiOutlineSync,
-  AiOutlineCalendar, // New icon for upcoming events
+  AiOutlineCalendar,
+  AiOutlineDown,
 } from "react-icons/ai";
 import { NavbarEventOrganizer } from "../components/NavbarEventOrganizer";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
@@ -62,9 +63,17 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
   const [isOngoingModalOpen, setOngoingModalOpen] = useState(false);
   const [ongoingIndex, setOngoingIndex] = useState<number | null>(null);
 
+  const [dropdownOpenIndex, setDropdownOpenIndex] = useState<number | null>(
+    null
+  );
+
   const filteredEvents = events.filter((event) =>
     event.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const toggleDropdown = (index: number) => {
+    setDropdownOpenIndex(dropdownOpenIndex === index ? null : index);
+  };
 
   const openEditModal = (event: Event, index: number) => {
     setEditingEvent({ ...event });
@@ -97,6 +106,7 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
     const updatedEvents = [...events];
     updatedEvents[index].status = newStatus;
     setEvents(updatedEvents);
+    setDropdownOpenIndex(null);
   };
 
   const getStatusBadge = (status: string) => {
@@ -120,7 +130,6 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
     return <span className={badgeClass}>{status}</span>;
   };
 
-  // Set app element for accessibility
   Modal.setAppElement("#root");
 
   return (
@@ -139,7 +148,6 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
           </p>
         </header>
 
-        {/* Search Bar */}
         <div className="search-container">
           <div className="search-box">
             <img src={search_logo} alt="search" className="search-icon" />
@@ -153,104 +161,137 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
           </div>
         </div>
 
-        {/* Events Table */}
-        <div className="table-responsive">
-          <table className="events-table">
-            <thead>
-              <tr>
-                <th>Event Name</th>
-                <th>Date</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredEvents.map((event, index) => (
-                <tr key={index}>
-                  <td data-label="Event Name">{event.name}</td>
-                  <td data-label="Date">
-                    {new Date(event.date).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </td>
-                  <td data-label="Location">{event.location}</td>
-                  <td data-label="Status">{getStatusBadge(event.status)}</td>
-                  <td data-label="Actions" className="actions-cell">
-                    <div className="button-group">
-                      <button
-                        className="btn btn-outline-primary btn-sm"
-                        onClick={() => openEditModal(event, index)}
-                      >
-                        <AiFillEdit /> Edit
-                      </button>
-                      <button
-                        className={`btn btn-sm ${
-                          event.status === "Upcoming"
-                            ? "btn-primary"
-                            : "btn-outline-primary"
-                        }`}
-                        onClick={() => {
-                          setUpcomingIndex(index);
-                          setUpcomingModalOpen(true);
-                        }}
-                      >
-                        <AiOutlineCalendar /> Upcoming
-                      </button>
-                      <button
-                        className={`btn btn-sm ${
-                          event.status === "Ongoing"
-                            ? "btn-warning"
-                            : "btn-outline-warning"
-                        }`}
-                        onClick={() => {
-                          setOngoingIndex(index);
-                          setOngoingModalOpen(true);
-                        }}
-                      >
-                        <AiOutlineSync /> Ongoing
-                      </button>
-                      <button
-                        className={`btn btn-sm ${
-                          event.status === "Completed"
-                            ? "btn-success"
-                            : "btn-outline-success"
-                        }`}
-                        onClick={() => {
-                          setCompleteIndex(index);
-                          setCompleteModalOpen(true);
-                        }}
-                      >
-                        <AiFillCheckCircle /> Complete
-                      </button>
-                      <button
-                        className={`btn btn-sm ${
-                          event.status === "Canceled"
-                            ? "btn-danger"
-                            : "btn-outline-danger"
-                        }`}
-                        onClick={() => {
-                          setCancelIndex(index);
-                          setCancelModalOpen(true);
-                        }}
-                      >
-                        <AiFillCloseCircle /> Cancel
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {filteredEvents.length === 0 && (
+        <div className="table-responsive-container">
+          <div className="table-responsive">
+            <table className="events-table">
+              <thead>
                 <tr>
-                  <td colSpan={5} className="no-results">
-                    No matching events found. Try a different search term.
-                  </td>
+                  <th>Event Name</th>
+                  <th>Date</th>
+                  <th>Location</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
+              </thead>
+              <tbody>
+                {filteredEvents.map((event, index) => (
+                  <tr key={index}>
+                    <td data-label="Event Name">{event.name}</td>
+                    <td data-label="Date">
+                      {new Date(event.date).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </td>
+                    <td data-label="Location">{event.location}</td>
+                    <td data-label="Status">{getStatusBadge(event.status)}</td>
+                    <td data-label="Actions" className="actions-cell">
+                      <div className="button-group">
+                        <button
+                          className="btn btn-outline-primary btn-sm"
+                          onClick={() => openEditModal(event, index)}
+                        >
+                          <AiFillEdit /> Edit
+                        </button>
+                        <div className="status-dropdown-container">
+                          <button
+                            className="btn btn-outline-secondary btn-sm dropdown-toggle"
+                            onClick={() => toggleDropdown(index)}
+                          >
+                            Status
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {filteredEvents.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="no-results">
+                      No matching events found. Try a different search term.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Dropdown menus rendered outside the table */}
+          {filteredEvents.map((event, index) => (
+            <div
+              key={`dropdown-${index}`}
+              className={`status-dropdown-menu-container ${
+                dropdownOpenIndex === index ? "visible" : ""
+              }`}
+              style={{
+                position: "absolute",
+                top:
+                  document
+                    .querySelector(
+                      `tr:nth-child(${index + 1}) .status-dropdown-container`
+                    )
+                    ?.getBoundingClientRect().bottom +
+                  window.scrollY +
+                  "px",
+                left:
+                  document
+                    .querySelector(
+                      `tr:nth-child(${index + 1}) .status-dropdown-container`
+                    )
+                    ?.getBoundingClientRect().left + "px",
+              }}
+            >
+              {dropdownOpenIndex === index && (
+                <div className="status-dropdown-menu">
+                  <button
+                    className={`dropdown-item ${
+                      event.status === "Upcoming" ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setUpcomingIndex(index);
+                      setUpcomingModalOpen(true);
+                    }}
+                  >
+                    <AiOutlineCalendar /> Upcoming
+                  </button>
+                  <button
+                    className={`dropdown-item ${
+                      event.status === "Ongoing" ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setOngoingIndex(index);
+                      setOngoingModalOpen(true);
+                    }}
+                  >
+                    <AiOutlineSync /> Ongoing
+                  </button>
+                  <button
+                    className={`dropdown-item ${
+                      event.status === "Completed" ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setCompleteIndex(index);
+                      setCompleteModalOpen(true);
+                    }}
+                  >
+                    <AiFillCheckCircle /> Complete
+                  </button>
+                  <button
+                    className={`dropdown-item ${
+                      event.status === "Canceled" ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      setCancelIndex(index);
+                      setCancelModalOpen(true);
+                    }}
+                  >
+                    <AiFillCloseCircle /> Cancel
+                  </button>
+                </div>
               )}
-            </tbody>
-          </table>
+            </div>
+          ))}
         </div>
 
         {/* Edit Modal */}

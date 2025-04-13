@@ -213,9 +213,8 @@ export const HomeUser: React.FC<HomeUserProps> = ({ role }) => {
           {" "}
           {/* Added marginRight */}
           <h2 className="mb-3" style={{ color: "#343a40", fontWeight: "600" }}>
-            Welcome to Valid8{" "}
-            {role.charAt(0).toUpperCase() + role.slice(1).replace("-", " ")}{" "}
-            Dashboard
+            Welcome{" "}
+            {role.charAt(0).toUpperCase() + role.slice(1).replace("-", " ")}!
           </h2>
           <p
             className="text-muted"
@@ -268,7 +267,8 @@ export const HomeUser: React.FC<HomeUserProps> = ({ role }) => {
         style={{
           backgroundColor: "#f8f9fa",
           borderTop: "1px solid #dee2e6",
-          paddingRight: "3rem",
+          paddingRight: "0rem",
+          paddingLeft: "2rem",
         }} // Added paddingRight
       >
         <div className="container text-center">

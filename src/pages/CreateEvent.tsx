@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { NavbarEventOrganizer } from "../components/NavbarEventOrganizer";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
 import {
@@ -6,13 +6,24 @@ import {
   FaMapMarkerAlt,
   FaUsers,
   FaGraduationCap,
+  FaPlus,
+  FaTimes,
+  FaSearchLocation,
+  FaLocationArrow,
 } from "react-icons/fa";
 
 interface CreateEventProps {
   role: string;
 }
 
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
 export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
+  // Form state
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [eventLocation, setEventLocation] = useState("");
@@ -20,6 +31,24 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
   const [selectedPrograms, setSelectedPrograms] = useState<string[]>([]);
   const [ssgDropdownOpen, setSSGDropdownOpen] = useState(false);
   const [programDropdownOpen, setProgramDropdownOpen] = useState(false);
+  const [newOfficer, setNewOfficer] = useState("");
+  const [newProgram, setNewProgram] = useState("");
+  const [showAddOfficerInput, setShowAddOfficerInput] = useState(false);
+  const [showAddProgramInput, setShowAddProgramInput] = useState(false);
+
+  // Location picker state
+  const [showMap, setShowMap] = useState(false);
+  const [map, setMap] = useState<any>(null);
+  const [marker, setMarker] = useState<any>(null);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+  const [nearbyPlaces, setNearbyPlaces] = useState<any[]>([]);
+  const [showNearbyPlaces, setShowNearbyPlaces] = useState(false);
+
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
 
   const ssgOfficers = ["Officer 1", "Officer 2", "Officer 3"];
   const programs = [
@@ -28,6 +57,162 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
     "BS Electronics Engineering",
     "BS Electrical Engineering",
   ];
+  useEffect(() => {
+    const loadGoogleMaps = () => {
+      if (!window.google) {
+        const script = document.createElement("script");
+        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyD4-AX0Po1hh-Q-fYA6NN4bumyTOi8W1ec&libraries=places`;
+        script.async = true;
+        script.onload = initializeMap;
+        script.onerror = () =>
+          console.error("Google Maps script failed to load");
+        document.head.appendChild(script);
+      } else {
+        initializeMap();
+      }
+    };
+
+    loadGoogleMaps();
+
+    return () => {
+      if (marker) marker.setMap(null);
+    };
+  }, []);
+  const initializeMap = () => {
+    if (mapRef.current && !map) {
+      const newMap = new window.google.maps.Map(mapRef.current, {
+        center: { lat: 14.5995, lng: 120.9842 }, // Default to Manila
+        zoom: 15,
+      });
+      setMap(newMap);
+
+      // Add click listener to place marker
+      newMap.addListener("click", (e: any) => {
+        placeMarker(e.latLng, newMap);
+        geocodePosition(e.latLng);
+      });
+
+      // Initialize search box
+      if (searchInputRef.current) {
+        const searchBox = new window.google.maps.places.SearchBox(
+          searchInputRef.current
+        );
+        newMap.controls[window.google.maps.ControlPosition.TOP_LEFT].push(
+          searchInputRef.current
+        );
+
+        searchBox.addListener("places_changed", () => {
+          const places = searchBox.getPlaces();
+          if (places && places.length > 0) {
+            const place = places[0];
+            if (!place.geometry) return;
+
+            if (place.geometry.viewport) {
+              newMap.fitBounds(place.geometry.viewport);
+            } else {
+              newMap.setCenter(place.geometry.location);
+              newMap.setZoom(17);
+            }
+
+            placeMarker(place.geometry.location, newMap);
+            setEventLocation(place.formatted_address || place.name || "");
+          }
+        });
+      }
+    }
+  };
+
+  const placeMarker = (location: any, map: any) => {
+    if (marker) {
+      marker.setMap(null);
+    }
+
+    const newMarker = new window.google.maps.Marker({
+      position: location,
+      map: map,
+    });
+
+    setMarker(newMarker);
+    map.panTo(location);
+  };
+
+  const geocodePosition = (pos: any) => {
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ location: pos }, (results: any, status: any) => {
+      if (status === "OK" && results[0]) {
+        setEventLocation(results[0].formatted_address);
+      }
+    });
+  };
+
+  const toggleLocationPicker = () => {
+    setShowMap(!showMap);
+    setShowNearbyPlaces(false);
+    if (!showMap && mapRef.current) {
+      setTimeout(() => {
+        if (map) {
+          map.setCenter(userLocation || { lat: 14.5995, lng: 120.9842 });
+          map.setZoom(15);
+        }
+      }, 100);
+    }
+  };
+
+  const findNearbyPlaces = () => {
+    if (!map || !userLocation) return;
+
+    const service = new window.google.maps.places.PlacesService(map);
+    const request = {
+      location: userLocation,
+      radius: 1000, // 1km radius
+      type: ["establishment"],
+    };
+
+    service.nearbySearch(request, (results: any[], status: any) => {
+      if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+        setNearbyPlaces(results);
+        setShowNearbyPlaces(true);
+      }
+    });
+  };
+
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setUserLocation(pos);
+          if (map) {
+            map.setCenter(pos);
+            placeMarker(pos, map);
+            geocodePosition(pos);
+          }
+          findNearbyPlaces();
+        },
+        () => {
+          alert(
+            "Unable to get your location. Please check your browser permissions."
+          );
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
+  };
+
+  const selectPlace = (place: any) => {
+    if (place.geometry && place.geometry.location) {
+      if (map) {
+        map.setCenter(place.geometry.location);
+        placeMarker(place.geometry.location, map);
+      }
+      setEventLocation(place.name || place.vicinity || "");
+      setShowNearbyPlaces(false);
+    }
+  };
 
   const resetForm = () => {
     setEventName("");
@@ -37,6 +222,12 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
     setSelectedPrograms([]);
     setSSGDropdownOpen(false);
     setProgramDropdownOpen(false);
+    setNewOfficer("");
+    setNewProgram("");
+    setShowAddOfficerInput(false);
+    setShowAddProgramInput(false);
+    setShowMap(false);
+    setShowNearbyPlaces(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -62,6 +253,32 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
         ? selectedList.filter((selected) => selected !== item)
         : [...selectedList, item]
     );
+  };
+
+  const addNewOfficer = () => {
+    if (newOfficer.trim() && !ssgOfficers.includes(newOfficer.trim())) {
+      setSelectedSSGOfficers([...selectedSSGOfficers, newOfficer.trim()]);
+      setNewOfficer("");
+    }
+    setShowAddOfficerInput(false);
+  };
+
+  const addNewProgram = () => {
+    if (newProgram.trim() && !programs.includes(newProgram.trim())) {
+      setSelectedPrograms([...selectedPrograms, newProgram.trim()]);
+      setNewProgram("");
+    }
+    setShowAddProgramInput(false);
+  };
+
+  const removeOfficer = (officer: string) => {
+    setSelectedSSGOfficers(
+      selectedSSGOfficers.filter((item) => item !== officer)
+    );
+  };
+
+  const removeProgram = (program: string) => {
+    setSelectedPrograms(selectedPrograms.filter((item) => item !== program));
   };
 
   return (
@@ -116,14 +333,85 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
               <FaMapMarkerAlt className="input-icon" />
               Location
             </label>
-            <input
-              type="text"
-              value={eventLocation}
-              onChange={(e) => setEventLocation(e.target.value)}
-              required
-              placeholder="Enter Location"
-              className="form-input"
-            />
+            <div className="location-input-group">
+              <input
+                type="text"
+                value={eventLocation}
+                onChange={(e) => setEventLocation(e.target.value)}
+                required
+                placeholder="Enter Location or click the map icon"
+                className="form-input"
+              />
+              <div className="location-buttons">
+                <button
+                  type="button"
+                  className="map-toggle-btn"
+                  onClick={toggleLocationPicker}
+                  title="Open map picker"
+                >
+                  <FaSearchLocation />
+                </button>
+                <button
+                  type="button"
+                  className="near-me-btn"
+                  onClick={getUserLocation}
+                  title="Find places near me"
+                >
+                  <FaLocationArrow />
+                </button>
+              </div>
+            </div>
+
+            {showMap && (
+              <div className="map-picker-container">
+                <input
+                  type="text"
+                  ref={searchInputRef}
+                  placeholder="Search for a location"
+                  className="map-search-input"
+                />
+                <div ref={mapRef} className="map-container"></div>
+                <div className="map-controls">
+                  <button
+                    type="button"
+                    className="btn btn-near-me"
+                    onClick={getUserLocation}
+                  >
+                    <FaLocationArrow /> Find Near Me
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-confirm-location"
+                    onClick={toggleLocationPicker}
+                  >
+                    Confirm Location
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {showNearbyPlaces && (
+              <div className="nearby-places-container">
+                <h4>Nearby Places</h4>
+                <ul className="nearby-places-list">
+                  {nearbyPlaces.map((place) => (
+                    <li
+                      key={place.place_id}
+                      onClick={() => selectPlace(place)}
+                      className="nearby-place-item"
+                    >
+                      {place.name} - {place.vicinity}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  className="btn btn-close-nearby"
+                  onClick={() => setShowNearbyPlaces(false)}
+                >
+                  Close
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Assign SSG Officers Dropdown */}
@@ -143,6 +431,16 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
                     {selectedSSGOfficers.map((officer) => (
                       <span key={officer} className="selected-badge">
                         {officer}
+                        <button
+                          type="button"
+                          className="remove-badge"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeOfficer(officer);
+                          }}
+                        >
+                          <FaTimes size={10} />
+                        </button>
                       </span>
                     ))}
                   </div>
@@ -173,6 +471,42 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
                       <span className="dropdown-text">{officer}</span>
                     </label>
                   ))}
+                  {showAddOfficerInput ? (
+                    <div className="add-new-item">
+                      <input
+                        type="text"
+                        value={newOfficer}
+                        onChange={(e) => setNewOfficer(e.target.value)}
+                        placeholder="Enter new officer name"
+                        className="add-new-input"
+                        autoFocus
+                      />
+                      <div className="add-new-buttons">
+                        <button
+                          type="button"
+                          className="add-new-btn confirm"
+                          onClick={addNewOfficer}
+                        >
+                          Add
+                        </button>
+                        <button
+                          type="button"
+                          className="add-new-btn cancel"
+                          onClick={() => setShowAddOfficerInput(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="add-new-btn"
+                      onClick={() => setShowAddOfficerInput(true)}
+                    >
+                      <FaPlus size={12} /> Add New Officer
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -195,6 +529,16 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
                     {selectedPrograms.map((program) => (
                       <span key={program} className="selected-badge">
                         {program}
+                        <button
+                          type="button"
+                          className="remove-badge"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeProgram(program);
+                          }}
+                        >
+                          <FaTimes size={10} />
+                        </button>
                       </span>
                     ))}
                   </div>
@@ -225,6 +569,42 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
                       <span className="dropdown-text">{program}</span>
                     </label>
                   ))}
+                  {showAddProgramInput ? (
+                    <div className="add-new-item">
+                      <input
+                        type="text"
+                        value={newProgram}
+                        onChange={(e) => setNewProgram(e.target.value)}
+                        placeholder="Enter new program name"
+                        className="add-new-input"
+                        autoFocus
+                      />
+                      <div className="add-new-buttons">
+                        <button
+                          type="button"
+                          className="add-new-btn confirm"
+                          onClick={addNewProgram}
+                        >
+                          Add
+                        </button>
+                        <button
+                          type="button"
+                          className="add-new-btn cancel"
+                          onClick={() => setShowAddProgramInput(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="add-new-btn"
+                      onClick={() => setShowAddProgramInput(true)}
+                    >
+                      <FaPlus size={12} /> Add New Program
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -251,16 +631,18 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
 
         .navbar-container {
           width: 100%;
+          margin: 0;
+          padding: 0;
         }
 
         .create-event-container {
           background: #ffffff;
-          padding: 2rem;
+          padding: 1.5rem;
           border-radius: 0.5rem;
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-          width: 100%;
+          width: 90%;
           max-width: 600px;
-          margin: 2rem auto;
+          margin: 1rem auto;
         }
 
         .form-title {
@@ -268,17 +650,18 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
           font-weight: 600;
           margin-bottom: 0.5rem;
           text-align: center;
+          font-size: 1.5rem;
         }
 
         .form-subtitle {
           color: #6c757d;
           text-align: center;
-          margin-bottom: 2rem;
+          margin-bottom: 1.5rem;
           font-size: 0.9rem;
         }
 
         .form-group {
-          margin-bottom: 1.5rem;
+          margin-bottom: 1.25rem;
         }
 
         .input-label {
@@ -287,6 +670,7 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
           font-weight: 500;
           margin-bottom: 0.5rem;
           color: #495057;
+          font-size: 0.9rem;
         }
 
         .input-icon {
@@ -310,6 +694,108 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
           box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
 
+        .location-input-group {
+          position: relative;
+          display: flex;
+        }
+
+        .location-buttons {
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          display: flex;
+          gap: 5px;
+        }
+
+        .map-toggle-btn, .near-me-btn {
+          background: none;
+          border: none;
+          color: #6c757d;
+          cursor: pointer;
+          font-size: 1.2rem;
+          padding: 0.5rem;
+        }
+
+        .map-picker-container {
+          margin-top: 1rem;
+          border: 1px solid #ced4da;
+          border-radius: 0.5rem;
+          overflow: hidden;
+        }
+
+        .map-search-input {
+          width: 100%;
+          padding: 0.75rem 1rem;
+          border: none;
+          border-bottom: 1px solid #ced4da;
+          font-size: 0.9rem;
+        }
+
+        .map-container {
+          height: 300px;
+          width: 100%;
+        }
+
+        .map-controls {
+          display: flex;
+          gap: 10px;
+          padding: 10px;
+          background: #f8f9fa;
+        }
+
+        .btn-near-me {
+          background-color: #17a2b8;
+          color: white;
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+        }
+
+        .btn-confirm-location {
+          width: 100%;
+          padding: 0.75rem;
+          background-color: #28a745;
+          color: white;
+          border: none;
+          cursor: pointer;
+        }
+
+        .nearby-places-container {
+          margin-top: 1rem;
+          border: 1px solid #ced4da;
+          border-radius: 0.5rem;
+          padding: 1rem;
+          background: white;
+        }
+
+        .nearby-places-list {
+          list-style: none;
+          padding: 0;
+          margin: 1rem 0;
+          max-height: 200px;
+          overflow-y: auto;
+        }
+
+        .nearby-place-item {
+          padding: 0.75rem;
+          border-bottom: 1px solid #eee;
+          cursor: pointer;
+        }
+
+        .nearby-place-item:hover {
+          background-color: #f8f9fa;
+        }
+
+        .btn-close-nearby {
+          width: 100%;
+          background-color: #6c757d;
+          color: white;
+        }
+
+        /* Dropdown styles */
         .dropdown-wrapper {
           position: relative;
         }
@@ -328,6 +814,7 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
           font-size: 0.9rem;
           color: #495057;
           transition: border-color 0.3s ease;
+          min-height: 45px;
         }
 
         .dropdown-btn:hover {
@@ -346,7 +833,7 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
           border-radius: 0.5rem;
           margin-top: 0.5rem;
-          max-height: 200px;
+          max-height: 250px;
           overflow-y: auto;
           z-index: 100;
           border: 1px solid #e9ecef;
@@ -355,11 +842,16 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
         /* Radio-style checkbox */
         .dropdown-item.radio-style {
           position: relative;
-          padding-left: 30px;
+          padding: 0.5rem 1rem 0.5rem 2.5rem;
           cursor: pointer;
           display: flex;
           align-items: center;
           min-height: 24px;
+          transition: background-color 0.2s;
+        }
+
+        .dropdown-item.radio-style:hover {
+          background-color: #f8f9fa;
         }
 
         .radio-input {
@@ -370,7 +862,7 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
 
         .radio-custom {
           position: absolute;
-          left: 10px;
+          left: 1rem;
           height: 16px;
           width: 16px;
           background-color: #fff;
@@ -405,7 +897,6 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
         .dropdown-text {
           font-size: 0.9rem;
           color: #495057;
-          margin-left: 5px;
         }
 
         /* Selected items display */
@@ -413,16 +904,102 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
           display: flex;
           flex-wrap: wrap;
           gap: 5px;
+          align-items: center;
         }
 
         .selected-badge {
           background-color: #162f65;
           color: white;
-          padding: 2px 6px;
-          border-radius: 10px;
+          padding: 4px 8px;
+          border-radius: 15px;
           font-size: 12px;
+          display: flex;
+          align-items: center;
+          gap: 5px;
         }
 
+        .remove-badge {
+          background: none;
+          border: none;
+          color: white;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          padding: 0;
+        }
+
+        .remove-badge:hover {
+          opacity: 0.8;
+        }
+
+        /* Add new item styles */
+        .add-new-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+          width: 100%;
+          padding: 0.5rem;
+          background-color: transparent;
+          border: none;
+          color: #162f65;
+          font-size: 0.8rem;
+          cursor: pointer;
+          transition: background-color 0.2s;
+          border-top: 1px solid #e9ecef;
+        }
+
+        .add-new-btn:hover {
+          background-color: #f8f9fa;
+        }
+
+        .add-new-item {
+          padding: 0.75rem;
+          border-top: 1px solid #e9ecef;
+        }
+
+        .add-new-input {
+          width: 100%;
+          padding: 0.5rem;
+          border: 1px solid #ced4da;
+          border-radius: 4px;
+          margin-bottom: 0.5rem;
+          font-size: 0.9rem;
+        }
+
+        .add-new-buttons {
+          display: flex;
+          gap: 0.5rem;
+        }
+
+        .add-new-buttons button {
+          flex: 1;
+          padding: 0.4rem;
+          border: none;
+          border-radius: 4px;
+          font-size: 0.8rem;
+          cursor: pointer;
+        }
+
+        .add-new-buttons .confirm {
+          background-color: #28a745;
+          color: white;
+        }
+
+        .add-new-buttons .confirm:hover {
+          background-color: #218838;
+        }
+
+        .add-new-buttons .cancel {
+          background-color: #dc3545;
+          color: white;
+        }
+
+        .add-new-buttons .cancel:hover {
+          background-color: #c82333;
+        }
+
+        /* Button group styles */
         .button-group {
           display: flex;
           justify-content: space-between;
@@ -464,13 +1041,35 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
+        /* Responsive adjustments */
         @media (max-width: 768px) {
           .create-event-container {
-            margin: 1rem;
-            padding: 1.5rem;
+            margin: 1rem auto;
+            padding: 1.25rem;
+            width: 95%;
+          }
+
+          .form-title {
+            font-size: 1.3rem;
           }
 
           .button-group {
+            flex-direction: column;
+          }
+
+          .btn {
+            width: 100%;
+          }
+
+          .dropdown-content {
+            max-height: 200px;
+          }
+
+          .map-container {
+            height: 250px;
+          }
+
+          .map-controls {
             flex-direction: column;
           }
         }
@@ -478,6 +1077,25 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
         @media (min-width: 992px) {
           .create-event-wrapper {
             margin-left: 5rem;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .form-input, .dropdown-btn {
+            padding: 0.65rem 0.9rem;
+          }
+
+          .selected-badge {
+            font-size: 11px;
+            padding: 3px 6px;
+          }
+
+          .button-group {
+            margin-top: 1.5rem;
+          }
+
+          .map-container {
+            height: 200px;
           }
         }
       `}</style>
