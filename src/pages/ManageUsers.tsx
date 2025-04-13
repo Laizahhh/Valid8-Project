@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { NavbarAdmin } from "../components/NavbarAdmin";
 import {
   AiFillEdit,
@@ -16,6 +16,7 @@ const sampleUsers = [
     lastName: "Doe",
     email: "johndoe@example.com",
     role: ["Admin"],
+    profilePic: "",
   },
   {
     firstName: "Jane",
@@ -26,27 +27,19 @@ const sampleUsers = [
     studentId: "2020-12345",
     yearLevel: "1",
     program: "BS Computer Engineering",
+    profilePic: "https://randomuser.me/api/portraits/women/44.jpg",
   },
-  {
-    firstName: "Robert",
-    middleName: "James",
-    lastName: "Johnson",
-    email: "rjohnson@example.com",
-    role: ["Event Organizer"],
-  },
-  {
-    firstName: "Maria",
-    middleName: "Garcia",
-    lastName: "Lopez",
-    email: "mlopez@example.com",
-    role: ["SSG Officer", "Student"],
-    studentId: "2021-54321",
-    yearLevel: "3",
-    program: "BS Civil Engineering",
-  },
+  // ... (update other sample users similarly)
 ];
-
 export const ManageUsers: React.FC = () => {
+  const [profilePic, setProfilePic] = useState<File | null>(null);
+  const [profilePicPreview, setProfilePicPreview] = useState<string>("");
+  const [editProfilePic, setEditProfilePic] = useState<File | null>(null);
+  const [editProfilePicPreview, setEditProfilePicPreview] =
+    useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const editFileInputRef = useRef<HTMLInputElement>(null);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState(sampleUsers);
   const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -84,6 +77,25 @@ export const ManageUsers: React.FC = () => {
     password: "",
     role: [] as string[],
   });
+
+  // Add this function to handle profile picture upload
+  const handleProfilePicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setProfilePic(file);
+      setProfilePicPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleEditProfilePicChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setEditProfilePic(file);
+      setEditProfilePicPreview(URL.createObjectURL(file));
+    }
+  };
 
   const availableRoles = ["Admin", "Student", "SSG Officer", "Event Organizer"];
   const yearLevels = ["1", "2", "3", "4", "5"];
@@ -174,6 +186,7 @@ export const ManageUsers: React.FC = () => {
     const updatedUsers = [...users];
     updatedUsers[editIndex!] = {
       ...editedUser,
+      profilePic: editProfilePicPreview || users[editIndex!].profilePic,
       ...(editedUser.role.includes("Student") && {
         studentId: editStudentId,
         yearLevel: editYearLevel,
@@ -184,6 +197,8 @@ export const ManageUsers: React.FC = () => {
       }),
     };
     setUsers(updatedUsers);
+    setEditProfilePic(null);
+    setEditProfilePicPreview("");
     setEditIndex(null);
     setValidationErrors({});
   };
@@ -269,8 +284,11 @@ export const ManageUsers: React.FC = () => {
         yearLevel,
         program: program === "Other (Please specify)" ? customProgram : program,
       }),
+      profilePic: profilePicPreview || "",
     };
     setUsers([...users, newUserObject]);
+    setProfilePic(null);
+    setProfilePicPreview("");
     setAddUserModalOpen(false);
     setNewUser({
       firstName: "",
@@ -371,8 +389,24 @@ export const ManageUsers: React.FC = () => {
             <tbody>
               {filteredUsers.map((user, index) => (
                 <tr key={index}>
-                  <td data-label="Name">{getFullName(user)}</td>
+                  {/* Name + Avatar Column */}
+                  <td data-label="Name">
+                    <div className="user-with-avatar">
+                      {user.profilePic && (
+                        <img
+                          src={user.profilePic}
+                          alt="Profile"
+                          className="user-avatar"
+                        />
+                      )}
+                      {getFullName(user)}
+                    </div>
+                  </td>
+
+                  {/* Email Column */}
                   <td data-label="Email">{user.email}</td>
+
+                  {/* Details Column */}
                   <td data-label="Details">
                     <div>
                       {user.role.includes("Student") && (
@@ -401,6 +435,8 @@ export const ManageUsers: React.FC = () => {
                       </div>
                     </div>
                   </td>
+
+                  {/* Actions Column */}
                   <td data-label="Actions" className="actions-cell">
                     <div className="button-group">
                       <button
@@ -431,6 +467,7 @@ export const ManageUsers: React.FC = () => {
         </div>
 
         {/* Add User Modal */}
+
         <Modal
           isOpen={addUserModalOpen}
           onRequestClose={() => {
@@ -554,7 +591,6 @@ export const ManageUsers: React.FC = () => {
                     </div>
                   )}
                 </div>
-
                 <div className="form-group">
                   <label htmlFor="yearLevel">Year Level</label>
                   <select
@@ -576,6 +612,48 @@ export const ManageUsers: React.FC = () => {
                   )}
                 </div>
 
+                <div className="form-group">
+                  <label>Profile Picture (For Face Recognition)</label>
+                  <div className="profile-pic-upload">
+                    {profilePicPreview ? (
+                      <div className="profile-pic-preview">
+                        <img src={profilePicPreview} alt="Preview" />
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-secondary"
+                          onClick={() => {
+                            setProfilePic(null);
+                            setProfilePicPreview("");
+                            if (fileInputRef.current)
+                              fileInputRef.current.value = "";
+                          }}
+                        >
+                          Change
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="upload-area">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          accept="image/*"
+                          onChange={handleProfilePicChange}
+                          style={{ display: "none" }}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-outline-primary"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          Upload Picture
+                        </button>
+                        <p className="upload-hint">
+                          Recommended: Clear face photo
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <div className="form-group">
                   <label>Program</label>
                   <div className="dropdown-wrapper">
@@ -831,6 +909,54 @@ export const ManageUsers: React.FC = () => {
                       {validationErrors.yearLevel}
                     </div>
                   )}
+                </div>
+
+                <div className="form-group">
+                  <label>Profile Picture (For Face Recognition)</label>
+                  <div className="profile-pic-upload">
+                    {editProfilePicPreview || users[editIndex!]?.profilePic ? (
+                      <div className="profile-pic-preview">
+                        <img
+                          src={
+                            editProfilePicPreview ||
+                            users[editIndex!].profilePic
+                          }
+                          alt="Preview"
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-secondary"
+                          onClick={() => editFileInputRef.current?.click()}
+                        >
+                          Change
+                        </button>
+                        <input
+                          type="file"
+                          ref={editFileInputRef}
+                          accept="image/*"
+                          onChange={handleEditProfilePicChange}
+                          style={{ display: "none" }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="upload-area">
+                        <input
+                          type="file"
+                          ref={editFileInputRef}
+                          accept="image/*"
+                          onChange={handleEditProfilePicChange}
+                          style={{ display: "none" }}
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-outline-primary"
+                          onClick={() => editFileInputRef.current?.click()}
+                        >
+                          Upload Picture
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="form-group">

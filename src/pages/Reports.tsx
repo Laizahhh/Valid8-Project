@@ -146,33 +146,298 @@ export const Reports: React.FC = () => {
     setSelectedProgram("All");
   };
 
-  const handleDownloadReport = (event: Event) => {
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      `Event Name:,${event.name}\nDate:,${event.date}\nLocation:,${event.location}\n\n` +
-      event.programs
-        .map(
-          (program) =>
-            `Program:,${program.name}\nTotal Attendees:,${
-              program.attendees.length
-            }\nTotal Absentees:,${
-              program.absentees.length
-            }\nAttendees:\n${program.attendees.join(
-              "\n"
-            )}\nAbsentees:\n${program.absentees.join("\n")}\n`
-        )
-        .join("\n");
+  // Enhanced CSV download function
+  const handleDownloadCSVReport = (event: Event) => {
+    // Generate CSV content
+    let csvContent = "data:text/csv;charset=utf-8,";
 
+    // Add header
+    csvContent += `${event.name} - Attendance Report\r\n`;
+    csvContent += `Date: ${event.date}\r\n`;
+    csvContent += `Location: ${event.location}\r\n\r\n`;
+
+    // Overall summary
+    const totalAttendees = event.programs.reduce(
+      (sum, program) => sum + program.attendees.length,
+      0
+    );
+    const totalAbsentees = event.programs.reduce(
+      (sum, program) => sum + program.absentees.length,
+      0
+    );
+    const totalParticipants = totalAttendees + totalAbsentees;
+    const attendanceRate = Math.round(
+      (totalAttendees / totalParticipants) * 100
+    );
+
+    csvContent += `Overall Summary:\r\n`;
+    csvContent += `Total Participants: ${totalParticipants}\r\n`;
+    csvContent += `Total Attendees: ${totalAttendees}\r\n`;
+    csvContent += `Total Absentees: ${totalAbsentees}\r\n`;
+    csvContent += `Overall Attendance Rate: ${attendanceRate}%\r\n\r\n`;
+
+    // Program details
+    csvContent += `Detailed Program Breakdown:\r\n\r\n`;
+
+    event.programs.forEach((program) => {
+      csvContent += `Program: ${program.name}\r\n`;
+      csvContent += `Participants: ${
+        program.attendees.length + program.absentees.length
+      }\r\n`;
+      csvContent += `Attendees: ${program.attendees.length}\r\n`;
+      csvContent += `Absentees: ${program.absentees.length}\r\n`;
+      const programAttendanceRate = Math.round(
+        (program.attendees.length /
+          (program.attendees.length + program.absentees.length)) *
+          100
+      );
+      csvContent += `Attendance Rate: ${programAttendanceRate}%\r\n\r\n`;
+
+      csvContent += `Attendees,\r\n`;
+      program.attendees.forEach((attendee) => {
+        csvContent += `${attendee},\r\n`;
+      });
+
+      csvContent += `\r\nAbsentees,\r\n`;
+      program.absentees.forEach((absentee) => {
+        csvContent += `${absentee},\r\n`;
+      });
+
+      csvContent += `\r\n`;
+    });
+
+    // Create download link and trigger click
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
     link.setAttribute(
       "download",
-      `${event.name.replace(/\s+/g, "_")}_attendance_report.csv`
+      `${event.name.replace(/\s+/g, "_")}_Report.csv`
     );
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  // PDF report using browser's print functionality
+  const handleDownloadPDFReport = (event: Event) => {
+    // Create a new window for printing
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Please allow pop-ups to download the PDF report");
+      return;
+    }
+
+    // Generate HTML content for the print window
+    let htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${event.name} - Attendance Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 40px; }
+          .header { margin-bottom: 30px; }
+          h1 { color: #333; margin-bottom: 5px; }
+          .event-details { color: #666; margin-bottom: 20px; }
+          .summary-section { margin-bottom: 30px; }
+          .summary-cards { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; }
+          .summary-card { border: 1px solid #ddd; border-radius: 8px; padding: 15px; width: 200px; }
+          .card-title { display: block; font-size: 14px; color: #666; }
+          .card-value { display: block; font-size: 24px; font-weight: bold; margin-top: 5px; }
+          .total .card-value { color: #2196F3; }
+          .present .card-value { color: #4CAF50; }
+          .absent .card-value { color: #F44336; }
+          .rate .card-value { color: #FF9800; }
+          .program-section { margin-bottom: 30px; }
+          h2, h3 { color: #333; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+          th { background-color: #f2f2f2; }
+          .attendance-lists { display: flex; gap: 30px; }
+          .attendees-list, .absentees-list { flex: 1; }
+          @media print {
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>${event.name} - Attendance Report</h1>
+          <p class="event-details">Date: ${event.date} • Location: ${
+      event.location
+    }</p>
+        </div>
+        
+        <div class="summary-section">
+          <h2>Overall Attendance Summary</h2>
+          <div class="summary-cards">
+            <div class="summary-card total">
+              <span class="card-title">Total Participants</span>
+              <span class="card-value">${getTotalParticipants()}</span>
+            </div>
+            <div class="summary-card present">
+              <span class="card-title">Attendees</span>
+              <span class="card-value">${getAttendees()}</span>
+            </div>
+            <div class="summary-card absent">
+              <span class="card-title">Absentees</span>
+              <span class="card-value">${getAbsentees()}</span>
+            </div>
+            <div class="summary-card rate">
+              <span class="card-title">Attendance Rate</span>
+              <span class="card-value">${getAttendanceRate()}</span>
+            </div>
+          </div>
+        </div>
+        
+        <h2>Program Breakdown</h2>
+    `;
+
+    // Add program summary table
+    htmlContent += `
+      <table>
+        <thead>
+          <tr>
+            <th>Program</th>
+            <th>Total Participants</th>
+            <th>Attendees</th>
+            <th>Absentees</th>
+            <th>Attendance Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    event.programs.forEach((program) => {
+      const programTotal = program.attendees.length + program.absentees.length;
+      const programRate = Math.round(
+        (program.attendees.length / programTotal) * 100
+      );
+
+      htmlContent += `
+        <tr>
+          <td>${program.name}</td>
+          <td>${programTotal}</td>
+          <td>${program.attendees.length}</td>
+          <td>${program.absentees.length}</td>
+          <td>${programRate}%</td>
+        </tr>
+      `;
+    });
+
+    htmlContent += `
+        </tbody>
+      </table>
+    `;
+
+    // Add detailed attendance lists for each program
+    event.programs.forEach((program) => {
+      htmlContent += `
+        <div class="program-section">
+          <h3>${program.name}</h3>
+          <div class="attendance-lists">
+            <div class="attendees-list">
+              <h4>Attendees (${program.attendees.length})</h4>
+              <ul>
+      `;
+
+      program.attendees.forEach((attendee) => {
+        htmlContent += `<li>${attendee}</li>`;
+      });
+
+      htmlContent += `
+              </ul>
+            </div>
+            <div class="absentees-list">
+              <h4>Absentees (${program.absentees.length})</h4>
+              <ul>
+      `;
+
+      program.absentees.forEach((absentee) => {
+        htmlContent += `<li>${absentee}</li>`;
+      });
+
+      htmlContent += `
+              </ul>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    // Add print button and closing tags
+    htmlContent += `
+        <div class="no-print" style="margin-top: 40px; text-align: center;">
+          <button onclick="window.print();" style="padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">Print Report</button>
+          <button onclick="window.close();" style="padding: 10px 20px; background-color: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-left: 10px;">Close</button>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Write to the new window and trigger print dialog
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.focus();
+  };
+
+  // Helper functions for summary data
+  const getTotalParticipants = () => {
+    if (!selectedEvent) return 0;
+
+    if (selectedProgram === "All") {
+      return selectedEvent.programs.reduce(
+        (sum, program) =>
+          sum + program.attendees.length + program.absentees.length,
+        0
+      );
+    } else {
+      const program = selectedEvent.programs.find(
+        (p) => p.name === selectedProgram
+      );
+      if (!program) return 0;
+      return program.attendees.length + program.absentees.length;
+    }
+  };
+
+  const getAttendees = () => {
+    if (!selectedEvent) return 0;
+
+    if (selectedProgram === "All") {
+      return selectedEvent.programs.reduce(
+        (sum, program) => sum + program.attendees.length,
+        0
+      );
+    } else {
+      const program = selectedEvent.programs.find(
+        (p) => p.name === selectedProgram
+      );
+      return program?.attendees.length || 0;
+    }
+  };
+
+  const getAbsentees = () => {
+    if (!selectedEvent) return 0;
+
+    if (selectedProgram === "All") {
+      return selectedEvent.programs.reduce(
+        (sum, program) => sum + program.absentees.length,
+        0
+      );
+    } else {
+      const program = selectedEvent.programs.find(
+        (p) => p.name === selectedProgram
+      );
+      return program?.absentees.length || 0;
+    }
+  };
+
+  const getAttendanceRate = () => {
+    const total = getTotalParticipants();
+    if (total === 0) return "0%";
+
+    const attendees = getAttendees();
+    return `${Math.round((attendees / total) * 100)}%`;
   };
 
   const getProgramData = () => {
@@ -249,10 +514,18 @@ export const Reports: React.FC = () => {
                       </button>
                       <button
                         className="btn btn-primary"
-                        onClick={() => handleDownloadReport(event)}
+                        onClick={() => handleDownloadCSVReport(event)}
                         aria-label="Download report"
                       >
-                        <FaDownload /> {!isMobile && "Download"}
+                        <FaDownload /> {!isMobile && "CSV"}
+                      </button>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => handleDownloadPDFReport(event)}
+                        aria-label="Download PDF report"
+                        style={{ backgroundColor: "#4285F4" }}
+                      >
+                        <FaDownload /> {!isMobile && "PDF"}
                       </button>
                     </div>
                   </td>
@@ -317,80 +590,19 @@ export const Reports: React.FC = () => {
               <div className="summary-cards">
                 <div className="summary-card total">
                   <span className="card-title">Total Participants</span>
-                  <span className="card-value">
-                    {selectedProgram === "All"
-                      ? selectedEvent.programs.reduce(
-                          (sum, program) =>
-                            sum +
-                            program.attendees.length +
-                            program.absentees.length,
-                          0
-                        )
-                      : (selectedEvent.programs.find(
-                          (p) => p.name === selectedProgram
-                        )?.attendees.length || 0) +
-                        (selectedEvent.programs.find(
-                          (p) => p.name === selectedProgram
-                        )?.absentees.length || 0)}
-                  </span>
+                  <span className="card-value">{getTotalParticipants()}</span>
                 </div>
                 <div className="summary-card present">
                   <span className="card-title">Attendees</span>
-                  <span className="card-value">
-                    {selectedProgram === "All"
-                      ? selectedEvent.programs.reduce(
-                          (sum, program) => sum + program.attendees.length,
-                          0
-                        )
-                      : selectedEvent.programs.find(
-                          (p) => p.name === selectedProgram
-                        )?.attendees.length || 0}
-                  </span>
+                  <span className="card-value">{getAttendees()}</span>
                 </div>
                 <div className="summary-card absent">
                   <span className="card-title">Absentees</span>
-                  <span className="card-value">
-                    {selectedProgram === "All"
-                      ? selectedEvent.programs.reduce(
-                          (sum, program) => sum + program.absentees.length,
-                          0
-                        )
-                      : selectedEvent.programs.find(
-                          (p) => p.name === selectedProgram
-                        )?.absentees.length || 0}
-                  </span>
+                  <span className="card-value">{getAbsentees()}</span>
                 </div>
                 <div className="summary-card rate">
                   <span className="card-title">Attendance Rate</span>
-                  <span className="card-value">
-                    {selectedProgram === "All"
-                      ? `${Math.round(
-                          (selectedEvent.programs.reduce(
-                            (sum, program) => sum + program.attendees.length,
-                            0
-                          ) /
-                            selectedEvent.programs.reduce(
-                              (sum, program) =>
-                                sum +
-                                program.attendees.length +
-                                program.absentees.length,
-                              0
-                            )) *
-                            100
-                        )}%`
-                      : `${Math.round(
-                          ((selectedEvent.programs.find(
-                            (p) => p.name === selectedProgram
-                          )?.attendees.length || 0) /
-                            ((selectedEvent.programs.find(
-                              (p) => p.name === selectedProgram
-                            )?.attendees.length || 0) +
-                              (selectedEvent.programs.find(
-                                (p) => p.name === selectedProgram
-                              )?.absentees.length || 0))) *
-                            100
-                        )}%`}
-                  </span>
+                  <span className="card-value">{getAttendanceRate()}</span>
                 </div>
               </div>
             </div>
@@ -405,29 +617,11 @@ export const Reports: React.FC = () => {
                       data={[
                         {
                           name: "Present",
-                          value:
-                            selectedProgram === "All"
-                              ? selectedEvent.programs.reduce(
-                                  (sum, program) =>
-                                    sum + program.attendees.length,
-                                  0
-                                )
-                              : selectedEvent.programs.find(
-                                  (p) => p.name === selectedProgram
-                                )?.attendees.length || 0,
+                          value: getAttendees(),
                         },
                         {
                           name: "Absent",
-                          value:
-                            selectedProgram === "All"
-                              ? selectedEvent.programs.reduce(
-                                  (sum, program) =>
-                                    sum + program.absentees.length,
-                                  0
-                                )
-                              : selectedEvent.programs.find(
-                                  (p) => p.name === selectedProgram
-                                )?.absentees.length || 0,
+                          value: getAbsentees(),
                         },
                       ]}
                       cx="50%"
@@ -451,7 +645,7 @@ export const Reports: React.FC = () => {
                 </ResponsiveContainer>
               </div>
 
-              {selectedProgram === "All" && (
+              {selectedProgram === "All" && getProgramData().length > 0 && (
                 <div className="chart-container">
                   <h5>Attendance by Program</h5>
                   <ResponsiveContainer width="100%" height={300}>
@@ -462,26 +656,21 @@ export const Reports: React.FC = () => {
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       {isMobile ? (
-                        <YAxis
-                          type="category"
-                          dataKey="name"
-                          interval={0}
-                          angle={-45}
-                          textAnchor="end"
-                        />
+                        <>
+                          <YAxis type="category" dataKey="name" interval={0} />
+                          <XAxis type="number" />
+                        </>
                       ) : (
-                        <XAxis
-                          type="category"
-                          dataKey="name"
-                          interval={0}
-                          angle={-45}
-                          textAnchor="end"
-                        />
-                      )}
-                      {isMobile ? (
-                        <XAxis type="number" />
-                      ) : (
-                        <YAxis type="number" />
+                        <>
+                          <XAxis
+                            type="category"
+                            dataKey="name"
+                            interval={0}
+                            angle={-45}
+                            textAnchor="end"
+                          />
+                          <YAxis type="number" />
+                        </>
                       )}
                       <Tooltip
                         formatter={(value) => [`${value} participants`, ""]}
@@ -532,55 +721,71 @@ export const Reports: React.FC = () => {
                 ))
               ) : (
                 <div className="program-section">
-                  <h6>{selectedProgram}</h6>
-                  <div className="participants-grid">
-                    <div className="participants-column">
-                      <h6>
-                        Attendees (
-                        {selectedEvent.programs.find(
-                          (p) => p.name === selectedProgram
-                        )?.attendees.length || 0}
-                        )
-                      </h6>
-                      <ul>
-                        {selectedEvent.programs
-                          .find((p) => p.name === selectedProgram)
-                          ?.attendees.map((attendee, i) => (
-                            <li key={i}>{attendee}</li>
-                          ))}
-                      </ul>
-                    </div>
-                    <div className="participants-column">
-                      <h6>
-                        Absentees (
-                        {selectedEvent.programs.find(
-                          (p) => p.name === selectedProgram
-                        )?.absentees.length || 0}
-                        )
-                      </h6>
-                      <ul>
-                        {selectedEvent.programs
-                          .find((p) => p.name === selectedProgram)
-                          ?.absentees.map((absentee, i) => (
-                            <li key={i}>{absentee}</li>
-                          ))}
-                      </ul>
-                    </div>
-                  </div>
+                  {selectedEvent.programs.find(
+                    (p) => p.name === selectedProgram
+                  ) && (
+                    <>
+                      <h6>{selectedProgram}</h6>
+                      <div className="participants-grid">
+                        <div className="participants-column">
+                          <h6>
+                            Attendees (
+                            {selectedEvent.programs.find(
+                              (p) => p.name === selectedProgram
+                            )?.attendees.length || 0}
+                            )
+                          </h6>
+                          <ul>
+                            {selectedEvent.programs
+                              .find((p) => p.name === selectedProgram)
+                              ?.attendees.map((attendee, i) => (
+                                <li key={i}>{attendee}</li>
+                              ))}
+                          </ul>
+                        </div>
+                        <div className="participants-column">
+                          <h6>
+                            Absentees (
+                            {selectedEvent.programs.find(
+                              (p) => p.name === selectedProgram
+                            )?.absentees.length || 0}
+                            )
+                          </h6>
+                          <ul>
+                            {selectedEvent.programs
+                              .find((p) => p.name === selectedProgram)
+                              ?.absentees.map((absentee, i) => (
+                                <li key={i}>{absentee}</li>
+                              ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
             </div>
 
             <div className="modal-footer">
-              <button
-                onClick={() => handleDownloadReport(selectedEvent)}
-                className="btn download-btn"
-              >
-                <FaDownload /> Download Full Report
-              </button>
+              <div className="download-options">
+                <button
+                  onClick={() => handleDownloadCSVReport(selectedEvent)}
+                  className="btn download-btn"
+                >
+                  <FaDownload /> Download CSV Report
+                </button>
+                <button
+                  onClick={() => handleDownloadPDFReport(selectedEvent)}
+                  className="btn download-btn pdf-btn"
+                  style={{ marginLeft: "10px", backgroundColor: "#4285F4" }}
+                >
+                  <FaDownload /> Download PDF Report
+                </button>
+              </div>
               <button
                 onClick={() => setSelectedEvent(null)}
                 className="btn close-btn"
+                style={{ marginTop: "15px" }}
               >
                 Close
               </button>

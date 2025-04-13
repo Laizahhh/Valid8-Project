@@ -539,9 +539,59 @@ select:focus {
 .dropdown-item:hover {
   background-color: #f8f9fa;
 }
+
+/* Profile Picture Styles */
+.user-with-avatar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+}
+
+.profile-pic-upload {
+  margin-top: 10px;
+}
+
+.profile-pic-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.profile-pic-preview img {
+  width: 100px;
+  height: 100px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.upload-area {
+  border: 2px dashed #ccc;
+  padding: 15px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
   
   /* Responsive adjustments */
   @media (max-width: 768px) {
+    .user-avatar {
+      width: 35px;
+      height: 35px;
+    }
     .year-level {
       text-align: right;
     }
@@ -614,6 +664,20 @@ select:focus {
       justify-content: flex-end;
     }
   }
+
+  
+@media (max-width: 576px) {  /* Mobile devices */
+  .user-avatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  /* Stack avatar and name vertically on very small screens */
+  .user-with-avatar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
   
   @media (max-width: 480px) {
     .modal-footer {

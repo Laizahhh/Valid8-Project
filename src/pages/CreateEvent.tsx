@@ -61,9 +61,14 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
     const loadGoogleMaps = () => {
       if (!window.google) {
         const script = document.createElement("script");
-        script.src = ``;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${
+          import.meta.env.VITE_GMAPS_KEY
+        }&libraries=places&callback=initMap`;
         script.async = true;
-        script.onload = initializeMap;
+        script.onload = () => {
+          window.initMap = initializeMap;
+          initializeMap();
+        };
         script.onerror = () =>
           console.error("Google Maps script failed to load");
         document.head.appendChild(script);
@@ -76,6 +81,7 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
 
     return () => {
       if (marker) marker.setMap(null);
+      delete window.initMap;
     };
   }, []);
   const initializeMap = () => {
@@ -85,6 +91,11 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
         zoom: 15,
       });
       setMap(newMap);
+
+      // Add these listeners
+      newMap.addListener("tilesloaded", () => {
+        console.log("Map fully loaded");
+      });
 
       // Add click listener to place marker
       newMap.addListener("click", (e: any) => {
@@ -159,50 +170,72 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
   };
 
   const findNearbyPlaces = () => {
-    if (!map || !userLocation) return;
+    if (!map || !userLocation) {
+      console.error("Map or user location not available");
+      return;
+    }
 
     const service = new window.google.maps.places.PlacesService(map);
+
     const request = {
       location: userLocation,
-      radius: 1000, // 1km radius
-      type: ["establishment"],
+      radius: 500, // Smaller radius (500m) for better results
+      type: ["establishment", "point_of_interest"],
+      rankBy: window.google.maps.places.RankBy.PROMINENCE,
     };
 
-    service.nearbySearch(request, (results: any[], status: any) => {
-      if (status === window.google.maps.places.PlacesServiceStatus.OK) {
+    service.nearbySearch(request, (results, status) => {
+      if (
+        status === window.google.maps.places.PlacesServiceStatus.OK &&
+        results
+      ) {
         setNearbyPlaces(results);
         setShowNearbyPlaces(true);
+      } else {
+        console.error("Nearby search failed:", status);
+        setNearbyPlaces([]);
+        setShowNearbyPlaces(true); // Still show the container with "No places found"
       }
     });
   };
 
   const getUserLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const pos = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
-          setUserLocation(pos);
-          if (map) {
-            map.setCenter(pos);
-            placeMarker(pos, map);
-            geocodePosition(pos);
-          }
-          findNearbyPlaces();
-        },
-        () => {
-          alert(
-            "Unable to get your location. Please check your browser permissions."
-          );
-        }
-      );
-    } else {
+    if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
+      return;
     }
-  };
 
+    // Show loading state
+    setNearbyPlaces([]);
+    setShowNearbyPlaces(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const pos = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setUserLocation(pos);
+
+        if (map) {
+          map.setCenter(pos);
+          placeMarker(pos, map);
+          geocodePosition(pos);
+          findNearbyPlaces(); // Call this after map is centered
+        }
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        alert(`Error getting location: ${error.message}`);
+        setShowNearbyPlaces(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
   const selectPlace = (place: any) => {
     if (place.geometry && place.geometry.location) {
       if (map) {
@@ -393,17 +426,30 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
             {showNearbyPlaces && (
               <div className="nearby-places-container">
                 <h4>Nearby Places</h4>
-                <ul className="nearby-places-list">
-                  {nearbyPlaces.map((place) => (
-                    <li
-                      key={place.place_id}
-                      onClick={() => selectPlace(place)}
-                      className="nearby-place-item"
-                    >
-                      {place.name} - {place.vicinity}
-                    </li>
-                  ))}
-                </ul>
+                {nearbyPlaces.length > 0 ? (
+                  <ul className="nearby-places-list">
+                    {nearbyPlaces.map((place) => (
+                      <li
+                        key={place.place_id}
+                        onClick={() => selectPlace(place)}
+                        className="nearby-place-item"
+                      >
+                        <strong>{place.name}</strong>
+                        {place.vicinity && <div>{place.vicinity}</div>}
+                        {place.rating && (
+                          <div className="place-rating">
+                            Rating: {place.rating} (
+                            {place.user_ratings_total || 0} reviews)
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="no-places-found">
+                    No nearby places found. Try a larger area.
+                  </div>
+                )}
                 <button
                   className="btn btn-close-nearby"
                   onClick={() => setShowNearbyPlaces(false)}

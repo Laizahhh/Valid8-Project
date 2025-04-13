@@ -96,8 +96,9 @@ export const AdminDashboard: React.FC = () => {
         style={{
           backgroundColor: "#f8f9fa",
           borderTop: "1px solid #dee2e6",
-          paddingRight: "3rem",
-        }}
+          paddingRight: "0rem",
+          paddingLeft: "1rem",
+        }} // Added paddingRight
       >
         <div className="container text-center">
           <p className="mb-0 text-muted" style={{ fontSize: "0.875rem" }}>

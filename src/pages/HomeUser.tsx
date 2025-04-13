@@ -268,7 +268,7 @@ export const HomeUser: React.FC<HomeUserProps> = ({ role }) => {
           backgroundColor: "#f8f9fa",
           borderTop: "1px solid #dee2e6",
           paddingRight: "0rem",
-          paddingLeft: "2rem",
+          paddingLeft: "1rem",
         }} // Added paddingRight
       >
         <div className="container text-center">

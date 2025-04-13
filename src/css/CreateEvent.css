@@ -139,3 +139,14 @@ h3 {
     background-color: #218838;
 }
 
+.place-rating {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 0.2rem;
+  }
+  
+  .no-places-found {
+    padding: 1rem;
+    text-align: center;
+    color: #666;
+  }
