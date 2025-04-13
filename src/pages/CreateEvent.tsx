@@ -61,7 +61,7 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
     const loadGoogleMaps = () => {
       if (!window.google) {
         const script = document.createElement("script");
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyD4-AX0Po1hh-Q-fYA6NN4bumyTOi8W1ec&libraries=places`;
+        script.src = ``;
         script.async = true;
         script.onload = initializeMap;
         script.onerror = () =>
