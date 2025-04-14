@@ -7,6 +7,7 @@ import {
   FaClipboard,
   FaBars,
   FaTimes,
+  FaThList,
 } from "react-icons/fa";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
 import userprofile from "../assets/images/userprofile.png";
@@ -20,12 +21,8 @@ export const NavbarSSG = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const expandSidebar = () => {
-    setIsExpanded(true);
-  };
-
-  const collapseSidebar = () => {
-    setIsExpanded(false);
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
   };
 
   const navLinks = [
@@ -54,8 +51,6 @@ export const NavbarSSG = () => {
         className={`ssg-sidebar ${sidebarOpen ? "open" : ""} ${
           isExpanded ? "expanded" : "collapsed"
         }`}
-        onMouseEnter={expandSidebar}
-        onMouseLeave={collapseSidebar}
       >
         {/* Header with Logo, Title, and Close Button */}
         <div className="ssg-sidebar-header">
@@ -77,6 +72,18 @@ export const NavbarSSG = () => {
         {/* Navigation Links */}
         <nav className="ssg-nav">
           <ul className="ssg-nav-menu">
+            {/* Menu Toggle Button */}
+            <li className="menu-toggle-item">
+              <button
+                className="ssg-nav-link menu-toggle-btn"
+                onClick={toggleExpand}
+                title={isExpanded ? "Collapse menu" : "Expand menu"}
+              >
+                <FaThList className="nav-icon" />
+                <span className="nav-text">Menu</span>
+              </button>
+            </li>
+
             {navLinks.map((item, index) => (
               <li key={index}>
                 <NavLink

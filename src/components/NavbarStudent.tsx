@@ -6,6 +6,7 @@ import {
   FaClipboardCheck,
   FaBars,
   FaTimes,
+  FaThList,
 } from "react-icons/fa";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
 import userprofile from "../assets/images/userprofile.png";
@@ -19,12 +20,8 @@ export const NavbarStudent = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const expandSidebar = () => {
-    setIsExpanded(true);
-  };
-
-  const collapseSidebar = () => {
-    setIsExpanded(false);
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
   };
 
   return (
@@ -46,8 +43,6 @@ export const NavbarStudent = () => {
         className={`student-sidebar ${sidebarOpen ? "open" : ""} ${
           isExpanded ? "expanded" : "collapsed"
         }`}
-        onMouseEnter={expandSidebar}
-        onMouseLeave={collapseSidebar}
       >
         {/* Header with Logo, Title, and Close Button */}
         <div className="student-sidebar-header">
@@ -65,6 +60,18 @@ export const NavbarStudent = () => {
         {/* Navigation Links */}
         <nav className="student-nav">
           <ul className="student-nav-menu">
+            {/* Menu Toggle Button */}
+            <li className="menu-toggle-item">
+              <button
+                className="student-nav-link menu-toggle-btn"
+                onClick={toggleExpand}
+                title={isExpanded ? "Collapse menu" : "Expand menu"}
+              >
+                <FaThList className="nav-icon" />
+                <span className="nav-text">Menu</span>
+              </button>
+            </li>
+
             <li>
               <NavLink
                 to="/student_home"

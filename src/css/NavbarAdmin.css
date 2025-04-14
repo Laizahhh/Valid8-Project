@@ -14,7 +14,7 @@
   color: var(--text-color);
   display: flex;
   flex-direction: column;
-  transition: transform var(--transition-speed) ease;
+  transition: transform var(--transition-speed) ease, width var(--transition-speed) ease;
   z-index: 1000;
   left: 0;
   top: 0;
@@ -114,6 +114,19 @@
   background-color: var(--active-bg);
   border-left: 3px solid var(--text-color);
   font-weight: bold;
+}
+
+/* Menu Toggle Button */
+.menu-toggle-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.menu-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
 }
 
 .nav-icon {
@@ -217,6 +230,11 @@
   .admin-sidebar.open .profile-text,
   .admin-sidebar.open .admin-title {
     display: block !important;
+  }
+
+  /* Hide menu toggle button on mobile */
+  .menu-toggle-item {
+    display: none;
   }
 }
 
