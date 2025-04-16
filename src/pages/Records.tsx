@@ -1,55 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavbarStudent } from "../components/NavbarStudent";
 import { NavbarStudentSSG } from "../components/NavbarStudentSSG";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
 import { NavbarSSG } from "../components/NavbarSSG";
 import { FaSearch } from "react-icons/fa";
+import { fetchStudentRecords } from "../api/recordsApi"; // Import the fetch function
 import "../css/Records.css";
 
 interface RecordsProps {
   role: string;
 }
 
-// Dummy student records
-const dummyRecords = [
-  {
-    studentId: "2025-001",
-    name: "Doe, John",
-    yearLevel: "2nd Year",
-    program: "BS Computer Science",
-    event: "Tech Conference",
-    status: "Attended",
-  },
-  {
-    studentId: "2025-002",
-    name: "Smith, Alice",
-    yearLevel: "3rd Year",
-    program: "BS Information Technology",
-    event: "AI Workshop",
-    status: "Absent",
-  },
-  {
-    studentId: "2025-003",
-    name: "Johnson, Michael",
-    yearLevel: "1st Year",
-    program: "BS Software Engineering",
-    event: "Hackathon",
-    status: "Attended",
-  },
-  {
-    studentId: "2025-004",
-    name: "Brown, Emma",
-    yearLevel: "4th Year",
-    program: "BS Data Science",
-    event: "Machine Learning Seminar",
-    status: "Pending",
-  },
-];
-
 export const Records: React.FC<RecordsProps> = ({ role }) => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [studentRecords, setStudentRecords] = useState<any[]>([]); // State to store student records
+  const [searchTerm, setSearchTerm] = useState(""); // For search filter
 
-  const filteredRecords = dummyRecords.filter((record) =>
+  // Fetch the student records when the component mounts
+  useEffect(() => {
+    const getRecords = async () => {
+      try {
+        const records = await fetchStudentRecords();
+        setStudentRecords(records); // Update state with the fetched records
+      } catch (error) {
+        console.error("Error fetching student records:", error);
+      }
+    };
+
+    getRecords();
+  }, []);
+
+  const filteredRecords = studentRecords.filter((record) =>
     record.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

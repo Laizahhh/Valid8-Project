@@ -777,7 +777,6 @@ export const Reports: React.FC = () => {
                 <button
                   onClick={() => handleDownloadPDFReport(selectedEvent)}
                   className="btn download-btn pdf-btn"
-                  style={{ marginLeft: "10px", backgroundColor: "#4285F4" }}
                 >
                   <FaDownload /> Download PDF Report
                 </button>

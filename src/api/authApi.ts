@@ -1,26 +1,18 @@
 // src/api/authApi.ts
+import axios from "axios";
+
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+// LOGIN FUNCTION
 export const login = async (email: string, password: string) => {
-  // Dummy user data
-  const users = [
-    { email: "admin@gmail.com", password: "admin123", roles: ["admin"] },
-    { email: "student@gmail.com", password: "student123", roles: ["student"] },
-    { email: "ssg@gmail.com", password: "ssg12345", roles: ["ssg"] },
-    { email: "event@gmail.com", password: "event123", roles: ["event-organizer"] },
-    { email: "studentssg@gmail.com", password: "studentssg123", roles: ["student", "ssg"] },
-    { email: "studentssgevent@gmail.com", password: "studentssgevent123", roles: ["student", "ssg", "event-organizer"] },
-  ];
+  try {
+    const response = await axios.post(`${BASE_URL}/api/auth/login`, {
+      email,
+      password,
+    });
 
-  // Check if user exists
-  const user = users.find((u) => u.email === email && u.password === password);
-
-  if (!user) {
-    throw new Error("Invalid email or password!");
+    return response.data; // expected: { token, roles, email }
+  } catch (error) {
+    throw error;
   }
-
-  // Return fake token & user data
-  return {
-    token: "fake-jwt-token",
-    email: user.email,
-    roles: user.roles,
-  };
 };

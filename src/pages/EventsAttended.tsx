@@ -1,49 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavbarStudent } from "../components/NavbarStudent";
 import { NavbarStudentSSG } from "../components/NavbarStudentSSG";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
 import { FaSearch } from "react-icons/fa";
+import { fetchEventsAttended } from "../api/eventsApi";
 import "../css/EventsAttended.css";
 
 interface EventsAttendedProps {
   role: string;
 }
 
-const dummyEvents = [
-  {
-    id: 1,
-    name: "Leadership Training",
-    date: "April 20, 2025",
-    location: "Auditorium",
-    status: "Completed",
-  },
-  {
-    id: 2,
-    name: "Tech Conference",
-    date: "May 5, 2025",
-    location: "Main Hall",
-    status: "Completed",
-  },
-  {
-    id: 3,
-    name: "Music Festival",
-    date: "June 15, 2025",
-    location: "Outdoor Stage",
-    status: "Completed",
-  },
-  {
-    id: 4,
-    name: "Charity Marathon",
-    date: "July 10, 2025",
-    location: "City Park",
-    status: "Completed",
-  },
-];
-
 export const EventsAttended: React.FC<EventsAttendedProps> = ({ role }) => {
+  const [events, setEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredEvents = dummyEvents.filter((event) =>
+  // Fetch events attended data from the backend
+  useEffect(() => {
+    const getEvents = async () => {
+      try {
+        const eventsData = await fetchEventsAttended();
+        setEvents(eventsData);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
+
+    getEvents();
+  }, []);
+
+  const filteredEvents = events.filter((event: any) =>
     event.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -88,13 +73,15 @@ export const EventsAttended: React.FC<EventsAttendedProps> = ({ role }) => {
             </thead>
             <tbody>
               {filteredEvents.length > 0 ? (
-                filteredEvents.map((event) => (
+                filteredEvents.map((event: any) => (
                   <tr key={event.id}>
                     <td data-label="Event Name">{event.name}</td>
                     <td data-label="Date">{event.date}</td>
                     <td data-label="Location">{event.location}</td>
                     <td data-label="Status">
-                      <span className="status-badge completed">
+                      <span
+                        className={`status-badge ${event.status.toLowerCase()}`}
+                      >
                         {event.status}
                       </span>
                     </td>
