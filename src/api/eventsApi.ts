@@ -1,24 +1,35 @@
-// src/api/eventsApi.ts
-import axios from "axios";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3003";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+export interface Event {
+  id: number;
+  name: string;
+  date: string;
+  location: string;
+  status: string;
+}
 
-// Fetch upcoming events function
-export const fetchUpcomingEvents = async () => {
+export const fetchUpcomingEvents = async (): Promise<Event[]> => {
   try {
-    const response = await axios.get(`${BASE_URL}/api/events/upcoming`);
-    return response.data;  // Assuming response is an array of upcoming events
+    const response = await fetch(`${BASE_URL}/events`);
+    
+    if (!response.ok) throw new Error('Network error');
+    
+    return await response.json();
   } catch (error) {
+    console.error("Error fetching upcoming events:", error);
     throw error;
   }
 };
 
-// Fetch events attended function
-export const fetchEventsAttended = async () => {
+export const fetchEventsAttended = async (): Promise<Event[]> => {
   try {
-    const response = await axios.get(`${BASE_URL}/api/events/attended`);
-    return response.data;  // Assuming response is an array of attended events
+    const response = await fetch(`${BASE_URL}/eventsAttended`);
+    
+    if (!response.ok) throw new Error('Network error');
+    
+    return await response.json();
   } catch (error) {
+    console.error("Error fetching attended events:", error);
     throw error;
   }
 };

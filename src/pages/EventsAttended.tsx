@@ -3,7 +3,7 @@ import { NavbarStudent } from "../components/NavbarStudent";
 import { NavbarStudentSSG } from "../components/NavbarStudentSSG";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
 import { FaSearch } from "react-icons/fa";
-import { fetchEventsAttended } from "../api/eventsApi";
+import { fetchEventsAttended, Event } from "../api/eventsApi";
 import "../css/EventsAttended.css";
 
 interface EventsAttendedProps {
@@ -11,26 +11,37 @@ interface EventsAttendedProps {
 }
 
 export const EventsAttended: React.FC<EventsAttendedProps> = ({ role }) => {
-  const [events, setEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Fetch events attended data from the backend
   useEffect(() => {
-    const getEvents = async () => {
+    const loadEvents = async () => {
+      setIsLoading(true);
       try {
-        const eventsData = await fetchEventsAttended();
-        setEvents(eventsData);
+        const fetchedEvents = await fetchEventsAttended();
+        console.log("Fetched events:", fetchedEvents);
+        setEvents(fetchedEvents);
       } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error("Error fetching attended events:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    getEvents();
+    loadEvents();
   }, []);
 
-  const filteredEvents = events.filter((event: any) =>
+  const filteredEvents = events.filter((event) =>
     event.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Helper function to determine badge class based on status
+  const getStatusBadgeClass = (status: string) => {
+    return status.toLowerCase() === "present"
+      ? "status-badge-present"
+      : "status-badge-absent";
+  };
 
   return (
     <div className="attended-page">
@@ -72,16 +83,18 @@ export const EventsAttended: React.FC<EventsAttendedProps> = ({ role }) => {
               </tr>
             </thead>
             <tbody>
-              {filteredEvents.length > 0 ? (
-                filteredEvents.map((event: any) => (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={4}>Loading events...</td>
+                </tr>
+              ) : filteredEvents.length > 0 ? (
+                filteredEvents.map((event) => (
                   <tr key={event.id}>
                     <td data-label="Event Name">{event.name}</td>
                     <td data-label="Date">{event.date}</td>
                     <td data-label="Location">{event.location}</td>
                     <td data-label="Status">
-                      <span
-                        className={`status-badge ${event.status.toLowerCase()}`}
-                      >
+                      <span className={getStatusBadgeClass(event.status)}>
                         {event.status}
                       </span>
                     </td>

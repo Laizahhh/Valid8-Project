@@ -40,7 +40,7 @@ const LoginForm = () => {
         localStorage.removeItem("rememberedEmail");
       }
 
-      // Role-based redirection
+      // Role-based redirection (unchanged)
       if (userData.roles.includes("admin")) {
         navigate("/admin_dashboard");
       } else if (
@@ -63,10 +63,7 @@ const LoginForm = () => {
         alert("No valid role found!");
       }
     } catch (error: any) {
-      alert(
-        error.response?.data?.message ||
-          "Login failed! Please check your credentials."
-      );
+      alert(error.message || "Login failed! Please check your credentials.");
     } finally {
       setIsLoading(false);
     }

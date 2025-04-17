@@ -27,6 +27,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
       setIsLoading(true);
       try {
         const fetchedEvents = await fetchUpcomingEvents();
+        console.log("Fetched events:", fetchedEvents);
         setEvents(fetchedEvents);
       } catch (error) {
         console.error("Error fetching events:", error);
@@ -88,7 +89,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
                 </tr>
               ) : filteredEvents.length > 0 ? (
                 filteredEvents.map((event, index) => (
-                  <tr key={index}>
+                  <tr key={event.id}>
                     <td data-label="Event Name">{event.name}</td>
                     <td data-label="Date">{event.date}</td>
                     <td data-label="Location">{event.location}</td>

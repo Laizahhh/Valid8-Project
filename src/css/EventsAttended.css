@@ -240,3 +240,27 @@
     padding: 10px 8px;
   }
 }
+
+/* Add these styles to your EventsAttended.css file */
+
+.status-badge-present {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-block;
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-badge-absent {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-block;
+  background-color: #d4edda;
+  color: #155724;
+  background-color: #f8d7da;
+  color: #721c24;
+}
