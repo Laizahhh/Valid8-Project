@@ -1,30 +1,26 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3003';
 
 export const login = async (email: string, password: string) => {
   try {
-    const response = await fetch(`${BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: email,
-        password: password
-      }),
-    });
+    // For mock API, we'll query all users and simulate authentication
+    const response = await fetch(`${BASE_URL}/users?email=${email}`);
     
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Login failed');
+    if (!response.ok) throw new Error('Network error');
+
+    const users = await response.json();
+    const user = users[0];
+
+    // Mock authentication logic
+    if (!user || user.password !== password) {
+      throw new Error('Invalid email or password');
     }
 
-    const data = await response.json();
-    
+    // Return data in your expected format
     return {
-      token: data.access_token,
-      roles: data.roles || [],
-      email: data.email || email,
-      id: data.user_id || data.id
+      token: user.token,
+      roles: user.roles,
+      email: user.email,
+      id: user.id
     };
 
   } catch (error) {
