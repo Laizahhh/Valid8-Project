@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AiFillEdit,
   AiFillCheckCircle,
-  AiFillCloseCircle,
   AiOutlineSync,
   AiOutlineCalendar,
-  AiOutlineDown,
+  AiFillDelete,
 } from "react-icons/ai";
 import { NavbarEventOrganizer } from "../components/NavbarEventOrganizer";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
@@ -18,6 +17,7 @@ interface ManageEventProps {
 }
 
 interface Event {
+  id: string; // Added id field for API operations
   name: string;
   date: string;
   location: string;
@@ -26,47 +26,52 @@ interface Event {
 
 export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [events, setEvents] = useState<Event[]>([
-    {
-      name: "Sports Fest",
-      date: "2025-04-10",
-      location: "University Gymnasium",
-      status: "Upcoming",
-    },
-    {
-      name: "Cultural Night",
-      date: "2025-05-15",
-      location: "Main Auditorium",
-      status: "Upcoming",
-    },
-    {
-      name: "Graduation Ceremony",
-      date: "2025-06-20",
-      location: "Grand Ballroom",
-      status: "Upcoming",
-    },
-  ]);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
 
-  const [isCancelModalOpen, setCancelModalOpen] = useState(false);
-  const [cancelIndex, setCancelIndex] = useState<number | null>(null);
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
 
   const [isCompleteModalOpen, setCompleteModalOpen] = useState(false);
-  const [completeIndex, setCompleteIndex] = useState<number | null>(null);
+  const [eventToComplete, setEventToComplete] = useState<string | null>(null);
 
   const [isUpcomingModalOpen, setUpcomingModalOpen] = useState(false);
-  const [upcomingIndex, setUpcomingIndex] = useState<number | null>(null);
+  const [eventToUpcoming, setEventToUpcoming] = useState<string | null>(null);
 
-  const [isOngoingModalOpen, setOngoingModalOpen] = useState(false);
-  const [ongoingIndex, setOngoingIndex] = useState<number | null>(null);
+  const [isActiveModalOpen, setActiveModalOpen] = useState(false);
+  const [eventToActive, setEventToActive] = useState<string | null>(null);
 
   const [dropdownOpenIndex, setDropdownOpenIndex] = useState<number | null>(
     null
   );
 
+  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3003";
+
+  // Fetch events from API
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/upcomingEvents`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch events");
+        }
+        const data = await response.json();
+        setEvents(data);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
   const filteredEvents = events.filter((event) =>
     event.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -75,16 +80,14 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
     setDropdownOpenIndex(dropdownOpenIndex === index ? null : index);
   };
 
-  const openEditModal = (event: Event, index: number) => {
+  const openEditModal = (event: Event) => {
     setEditingEvent({ ...event });
-    setEditIndex(index);
     setEditModalOpen(true);
   };
 
   const closeEditModal = () => {
     setEditModalOpen(false);
     setEditingEvent(null);
-    setEditIndex(null);
   };
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,20 +96,85 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
     }
   };
 
-  const saveEditedEvent = () => {
-    if (editingEvent !== null && editIndex !== null) {
-      const updatedEvents = [...events];
-      updatedEvents[editIndex] = editingEvent;
-      setEvents(updatedEvents);
+  const saveEditedEvent = async () => {
+    if (!editingEvent) return;
+
+    try {
+      const response = await fetch(
+        `${BASE_URL}/upcomingEvents/${editingEvent.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(editingEvent),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update event");
+      }
+
+      const updatedEvent = await response.json();
+      setEvents(
+        events.map((event) =>
+          event.id === updatedEvent.id ? updatedEvent : event
+        )
+      );
       closeEditModal();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update event");
     }
   };
+  const updateEventStatus = async (eventId: string, newStatus: string) => {
+    try {
+      // 1. Update the event status directly in the upcomingEvents array
+      const response = await fetch(`${BASE_URL}/upcomingEvents/${eventId}`, {
+        method: "PATCH", // Using PATCH to update only the status field
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
 
-  const updateEventStatus = (index: number, newStatus: string) => {
-    const updatedEvents = [...events];
-    updatedEvents[index].status = newStatus;
-    setEvents(updatedEvents);
-    setDropdownOpenIndex(null);
+      if (!response.ok) throw new Error("Failed to update status");
+
+      // Update local state
+      setEvents(
+        events.map((event) =>
+          event.id === eventId ? { ...event, status: newStatus } : event
+        )
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update status");
+    } finally {
+      setDropdownOpenIndex(null);
+      setActiveModalOpen(false);
+      setUpcomingModalOpen(false);
+      setCompleteModalOpen(false);
+    }
+  };
+  const handleDeleteEvent = async () => {
+    if (!eventToDelete) return;
+
+    try {
+      const response = await fetch(
+        `${BASE_URL}/upcomingEvents/${eventToDelete}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete event");
+      }
+
+      setEvents(events.filter((event) => event.id !== eventToDelete));
+      setDeleteModalOpen(false);
+      setEventToDelete(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete event");
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -115,7 +183,7 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
       case "Upcoming":
         badgeClass = "badge bg-primary";
         break;
-      case "Ongoing":
+      case "Active":
         badgeClass = "badge bg-warning text-dark";
         break;
       case "Completed":
@@ -131,6 +199,36 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
   };
 
   Modal.setAppElement("#root");
+
+  if (isLoading) {
+    return (
+      <div className="manage-events-page">
+        {role === "student-ssg-eventorganizer" ? (
+          <NavbarStudentSSGEventOrganizer />
+        ) : (
+          <NavbarEventOrganizer />
+        )}
+        <div className="manage-events-container">
+          <div className="loading-spinner">Loading events...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="manage-events-page">
+        {role === "student-ssg-eventorganizer" ? (
+          <NavbarStudentSSGEventOrganizer />
+        ) : (
+          <NavbarEventOrganizer />
+        )}
+        <div className="manage-events-container">
+          <div className="error-message">Error: {error}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="manage-events-page">
@@ -175,7 +273,7 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
               </thead>
               <tbody>
                 {filteredEvents.map((event, index) => (
-                  <tr key={index}>
+                  <tr key={event.id}>
                     <td data-label="Event Name">{event.name}</td>
                     <td data-label="Date">
                       {new Date(event.date).toLocaleDateString("en-US", {
@@ -190,7 +288,7 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
                       <div className="button-group">
                         <button
                           className="btn btn-outline-primary btn-sm"
-                          onClick={() => openEditModal(event, index)}
+                          onClick={() => openEditModal(event)}
                         >
                           <AiFillEdit /> Edit
                         </button>
@@ -202,6 +300,15 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
                             Status
                           </button>
                         </div>
+                        <button
+                          className="btn btn-outline-danger btn-sm"
+                          onClick={() => {
+                            setEventToDelete(event.id);
+                            setDeleteModalOpen(true);
+                          }}
+                        >
+                          <AiFillDelete /> Delete
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -209,7 +316,9 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
                 {filteredEvents.length === 0 && (
                   <tr>
                     <td colSpan={5} className="no-results">
-                      No matching events found. Try a different search term.
+                      {events.length === 0
+                        ? "No events found."
+                        : "No matching events found. Try a different search term."}
                     </td>
                   </tr>
                 )}
@@ -220,7 +329,7 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
           {/* Dropdown menus rendered outside the table */}
           {filteredEvents.map((event, index) => (
             <div
-              key={`dropdown-${index}`}
+              key={`dropdown-${event.id}`}
               className={`status-dropdown-menu-container ${
                 dropdownOpenIndex === index ? "visible" : ""
               }`}
@@ -249,7 +358,7 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
                       event.status === "Upcoming" ? "active" : ""
                     }`}
                     onClick={() => {
-                      setUpcomingIndex(index);
+                      setEventToUpcoming(event.id);
                       setUpcomingModalOpen(true);
                     }}
                   >
@@ -257,36 +366,25 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
                   </button>
                   <button
                     className={`dropdown-item ${
-                      event.status === "Ongoing" ? "active" : ""
+                      event.status === "Active" ? "active" : ""
                     }`}
                     onClick={() => {
-                      setOngoingIndex(index);
-                      setOngoingModalOpen(true);
+                      setEventToActive(event.id);
+                      setActiveModalOpen(true);
                     }}
                   >
-                    <AiOutlineSync /> Ongoing
+                    <AiOutlineSync /> Active
                   </button>
                   <button
                     className={`dropdown-item ${
                       event.status === "Completed" ? "active" : ""
                     }`}
                     onClick={() => {
-                      setCompleteIndex(index);
+                      setEventToComplete(event.id);
                       setCompleteModalOpen(true);
                     }}
                   >
                     <AiFillCheckCircle /> Complete
-                  </button>
-                  <button
-                    className={`dropdown-item ${
-                      event.status === "Canceled" ? "active" : ""
-                    }`}
-                    onClick={() => {
-                      setCancelIndex(index);
-                      setCancelModalOpen(true);
-                    }}
-                  >
-                    <AiFillCloseCircle /> Cancel
                   </button>
                 </div>
               )}
@@ -377,9 +475,8 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
             <button
               className="btn btn-primary"
               onClick={() => {
-                if (upcomingIndex !== null) {
-                  updateEventStatus(upcomingIndex, "Upcoming");
-                  setUpcomingModalOpen(false);
+                if (eventToUpcoming) {
+                  updateEventStatus(eventToUpcoming, "Upcoming");
                 }
               }}
             >
@@ -389,8 +486,8 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
         </Modal>
 
         <Modal
-          isOpen={isOngoingModalOpen}
-          onRequestClose={() => setOngoingModalOpen(false)}
+          isOpen={isActiveModalOpen}
+          onRequestClose={() => setActiveModalOpen(false)}
           className="confirmation-modal"
           overlayClassName="modal-overlay"
         >
@@ -398,21 +495,20 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
             <h3>Confirm Status Change</h3>
           </div>
           <div className="modal-body">
-            <p>Are you sure you want to mark this event as ongoing?</p>
+            <p>Are you sure you want to mark this event as active?</p>
           </div>
           <div className="modal-footer">
             <button
               className="btn btn-outline-secondary"
-              onClick={() => setOngoingModalOpen(false)}
+              onClick={() => setActiveModalOpen(false)}
             >
               Cancel
             </button>
             <button
               className="btn btn-warning"
               onClick={() => {
-                if (ongoingIndex !== null) {
-                  updateEventStatus(ongoingIndex, "Ongoing");
-                  setOngoingModalOpen(false);
+                if (eventToActive) {
+                  updateEventStatus(eventToActive, "Active");
                 }
               }}
             >
@@ -443,9 +539,8 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
             <button
               className="btn btn-success"
               onClick={() => {
-                if (completeIndex !== null) {
-                  updateEventStatus(completeIndex, "Completed");
-                  setCompleteModalOpen(false);
+                if (eventToComplete) {
+                  updateEventStatus(eventToComplete, "Completed");
                 }
               }}
             >
@@ -454,35 +549,31 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
           </div>
         </Modal>
 
+        {/* Delete Event Modal */}
         <Modal
-          isOpen={isCancelModalOpen}
-          onRequestClose={() => setCancelModalOpen(false)}
+          isOpen={isDeleteModalOpen}
+          onRequestClose={() => setDeleteModalOpen(false)}
           className="confirmation-modal"
           overlayClassName="modal-overlay"
         >
           <div className="modal-header">
-            <h3>Confirm Status Change</h3>
+            <h3>Confirm Deletion</h3>
           </div>
           <div className="modal-body">
-            <p>Are you sure you want to cancel this event?</p>
+            <p>
+              Are you sure you want to delete this event? This action cannot be
+              undone.
+            </p>
           </div>
           <div className="modal-footer">
             <button
               className="btn btn-outline-secondary"
-              onClick={() => setCancelModalOpen(false)}
+              onClick={() => setDeleteModalOpen(false)}
             >
               Cancel
             </button>
-            <button
-              className="btn btn-danger"
-              onClick={() => {
-                if (cancelIndex !== null) {
-                  updateEventStatus(cancelIndex, "Canceled");
-                  setCancelModalOpen(false);
-                }
-              }}
-            >
-              Confirm
+            <button className="btn btn-danger" onClick={handleDeleteEvent}>
+              Delete
             </button>
           </div>
         </Modal>

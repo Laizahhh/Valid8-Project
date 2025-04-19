@@ -11,6 +11,7 @@ interface UpcomingEventsProps {
 }
 
 interface Event {
+  id: number; // Added id field
   name: string;
   date: string;
   location: string;
@@ -39,8 +40,11 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
     loadEvents();
   }, []);
 
-  const filteredEvents = events.filter((event) =>
-    event.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // In your UpcomingEvents component, filter the events by status
+  const filteredEvents = events.filter(
+    (event) =>
+      event.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      event.status === "Upcoming"
   );
 
   return (
@@ -88,7 +92,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
                   <td colSpan={4}>Loading events...</td>
                 </tr>
               ) : filteredEvents.length > 0 ? (
-                filteredEvents.map((event, index) => (
+                filteredEvents.map((event) => (
                   <tr key={event.id}>
                     <td data-label="Event Name">{event.name}</td>
                     <td data-label="Date">{event.date}</td>

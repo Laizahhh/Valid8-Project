@@ -10,9 +10,13 @@ interface EventsAttendedProps {
   role: string;
 }
 
+interface AttendanceEvent extends Event {
+  attendanceStatus: "Present" | "Absent"; // More specific type for attendance
+}
+
 export const EventsAttended: React.FC<EventsAttendedProps> = ({ role }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<AttendanceEvent[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -20,8 +24,12 @@ export const EventsAttended: React.FC<EventsAttendedProps> = ({ role }) => {
       setIsLoading(true);
       try {
         const fetchedEvents = await fetchEventsAttended();
-        console.log("Fetched events:", fetchedEvents);
-        setEvents(fetchedEvents);
+        // Transform status to attendance status if needed
+        const attendanceEvents = fetchedEvents.map((event) => ({
+          ...event,
+          attendanceStatus: event.status === "Completed" ? "Present" : "Absent",
+        }));
+        setEvents(attendanceEvents);
       } catch (error) {
         console.error("Error fetching attended events:", error);
       } finally {
@@ -36,9 +44,9 @@ export const EventsAttended: React.FC<EventsAttendedProps> = ({ role }) => {
     event.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Helper function to determine badge class based on status
-  const getStatusBadgeClass = (status: string) => {
-    return status.toLowerCase() === "present"
+  // Helper function to determine badge class based on attendance status
+  const getAttendanceBadgeClass = (status: "Present" | "Absent") => {
+    return status === "Present"
       ? "status-badge-present"
       : "status-badge-absent";
   };
@@ -56,7 +64,7 @@ export const EventsAttended: React.FC<EventsAttendedProps> = ({ role }) => {
       <div className="attended-container">
         <div className="attended-header">
           <h2>Events Attended</h2>
-          <p className="subtitle">View all events you've attended</p>
+          <p className="subtitle">View your event attendance records</p>
         </div>
 
         <div className="search-filter-section">
@@ -79,23 +87,34 @@ export const EventsAttended: React.FC<EventsAttendedProps> = ({ role }) => {
                 <th>Event Name</th>
                 <th>Date</th>
                 <th>Location</th>
-                <th>Status</th>
+                <th>Attendance Status</th> {/* Changed from Status */}
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={4}>Loading events...</td>
+                  <td colSpan={4}>Loading attendance records...</td>
                 </tr>
               ) : filteredEvents.length > 0 ? (
                 filteredEvents.map((event) => (
                   <tr key={event.id}>
                     <td data-label="Event Name">{event.name}</td>
-                    <td data-label="Date">{event.date}</td>
+                    <td data-label="Date">
+                      {new Date(event.date).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </td>
                     <td data-label="Location">{event.location}</td>
-                    <td data-label="Status">
-                      <span className={getStatusBadgeClass(event.status)}>
-                        {event.status}
+                    <td data-label="Attendance Status">
+                      <span
+                        className={getAttendanceBadgeClass(
+                          event.attendanceStatus
+                        )}
+                      >
+                        {event.attendanceStatus}
+                        {event.attendanceStatus === "Present" ? " ✅" : " ❌"}
                       </span>
                     </td>
                   </tr>
@@ -104,8 +123,8 @@ export const EventsAttended: React.FC<EventsAttendedProps> = ({ role }) => {
                 <tr>
                   <td colSpan={4} className="no-results">
                     {searchTerm
-                      ? "No matching events found"
-                      : "You haven't attended any events yet"}
+                      ? "No matching attendance records found"
+                      : "No attendance records available"}
                   </td>
                 </tr>
               )}
