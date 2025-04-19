@@ -4,38 +4,94 @@ import { NavbarStudentSSG } from "../components/NavbarStudentSSG";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
 import { NavbarSSG } from "../components/NavbarSSG";
 import { FaSearch } from "react-icons/fa";
-import { fetchStudentRecords } from "../api/recordsApi"; // Import the fetch function
 import "../css/Records.css";
 
 interface RecordsProps {
   role: string;
 }
 
+interface StudentRecord {
+  id: string;
+  studentId: string;
+  name: string;
+  yearLevel: string;
+  program: string;
+  eventId: string;
+  eventName: string;
+  attendanceStatus: "Present" | "Absent";
+  timeIn?: string;
+  timeOut?: string;
+}
+
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3003";
+
 export const Records: React.FC<RecordsProps> = ({ role }) => {
-  const [studentRecords, setStudentRecords] = useState<any[]>([]); // State to store student records
-  const [searchTerm, setSearchTerm] = useState(""); // For search filter
+  const [studentRecords, setStudentRecords] = useState<StudentRecord[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch the student records when the component mounts
-  useEffect(() => {
-    const getRecords = async () => {
-      try {
-        const records = await fetchStudentRecords();
-        setStudentRecords(records); // Update state with the fetched records
-      } catch (error) {
-        console.error("Error fetching student records:", error);
+  // Fetch student records from API
+  const fetchStudentRecords = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${BASE_URL}/eventsAttended`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
 
-    getRecords();
+      const eventsData = await response.json();
+
+      // Transform the API data to match our StudentRecord interface
+      const records: StudentRecord[] = eventsData.flatMap((event: any) => {
+        return event.attendees.map((attendee: any) => ({
+          id: `${event.id}-${attendee.userId}`,
+          studentId: attendee.userId.toString(),
+          name: attendee.email.split("@")[0].replace(".", " "), // Format name from email
+          yearLevel: attendee.yearLevel || "N/A", // Dynamic from API
+          program: event.programs[0]?.name || "N/A",
+          eventId: event.id,
+          eventName: event.name,
+          attendanceStatus: event.attendanceStatus,
+          timeIn: attendee.timeIn,
+          timeOut: attendee.timeOut,
+        }));
+      });
+
+      setStudentRecords(records);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch records");
+      console.error("Fetch error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStudentRecords();
   }, []);
 
-  const filteredRecords = studentRecords.filter((record) =>
-    record.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredRecords = studentRecords.filter(
+    (record) =>
+      record.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      record.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      record.eventName.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const getAttendanceBadgeClass = (status: "Present" | "Absent") => {
+    return status === "Present"
+      ? "status-badge-present"
+      : "status-badge-absent";
+  };
+
+  const handleRefresh = () => {
+    fetchStudentRecords();
+  };
 
   return (
     <div className="records-page">
-      {/* Dynamically select the navbar based on the role */}
       {role === "student-ssg" ? (
         <NavbarStudentSSG />
       ) : role === "student-ssg-eventorganizer" ? (
@@ -48,8 +104,19 @@ export const Records: React.FC<RecordsProps> = ({ role }) => {
 
       <div className="records-container">
         <div className="records-header">
-          <h2>Student Records</h2>
-          <p className="subtitle">View and manage student attendance records</p>
+          <h2>Student Attendance Records</h2>
+          <div className="header-controls">
+            <p className="subtitle">
+              View and manage student attendance records
+            </p>
+            <button
+              className="btn btn-refresh"
+              onClick={handleRefresh}
+              disabled={isLoading}
+            >
+              {isLoading ? "Refreshing..." : "Refresh Data"}
+            </button>
+          </div>
         </div>
 
         <div className="search-filter-section">
@@ -57,7 +124,7 @@ export const Records: React.FC<RecordsProps> = ({ role }) => {
             <FaSearch className="search-icon" />
             <input
               type="text"
-              placeholder="Search students..."
+              placeholder="Search by name, ID, or event..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
@@ -65,40 +132,82 @@ export const Records: React.FC<RecordsProps> = ({ role }) => {
           </div>
         </div>
 
+        {error && (
+          <div className="alert alert-danger">
+            Error loading records: {error}
+          </div>
+        )}
+
         <div className="table-responsive">
           <table className="records-table">
             <thead>
               <tr>
                 <th>Student ID</th>
                 <th>Name</th>
-                <th>Year Level</th>
+                <th>Year</th>
                 <th>Program</th>
                 <th>Event</th>
-                <th>Status</th>
+                <th>Attendance</th>
+                <th>Time In</th>
+                <th>Time Out</th>
               </tr>
             </thead>
             <tbody>
-              {filteredRecords.length > 0 ? (
-                filteredRecords.map((record, index) => (
-                  <tr key={index}>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={8} className="loading-row">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredRecords.length > 0 ? (
+                filteredRecords.map((record) => (
+                  <tr key={record.id}>
                     <td data-label="Student ID">{record.studentId}</td>
                     <td data-label="Name">{record.name}</td>
-                    <td data-label="Year Level">{record.yearLevel}</td>
+                    <td data-label="Year">{record.yearLevel}</td>
                     <td data-label="Program">{record.program}</td>
-                    <td data-label="Event">{record.event}</td>
-                    <td data-label="Status">
+                    <td data-label="Event">{record.eventName}</td>
+                    <td data-label="Attendance">
                       <span
-                        className={`status-badge ${record.status.toLowerCase()}`}
+                        className={getAttendanceBadgeClass(
+                          record.attendanceStatus
+                        )}
                       >
-                        {record.status}
+                        {record.attendanceStatus}
+                        {record.attendanceStatus === "Present" ? " ✅" : " ❌"}
                       </span>
+                    </td>
+                    {/* Updated Time In/Out cells */}
+                    <td data-label="Time In">
+                      {
+                        record.attendanceStatus === "Present" && record.timeIn
+                          ? new Date(record.timeIn).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "Not Attended" // 👈 Placeholder for absent/no data
+                      }
+                    </td>
+                    <td data-label="Time Out">
+                      {
+                        record.attendanceStatus === "Present" && record.timeOut
+                          ? new Date(record.timeOut).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "Not Attended" // 👈 Placeholder for absent/no data
+                      }
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="no-results">
-                    No matching records found
+                  <td colSpan={8} className="no-results">
+                    {searchTerm
+                      ? "No matching records found"
+                      : "No attendance records available"}
                   </td>
                 </tr>
               )}
