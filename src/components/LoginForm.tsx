@@ -21,6 +21,7 @@ const LoginForm = () => {
   }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
+    console.log("Logging in");
     event.preventDefault();
     setIsLoading(true);
 
