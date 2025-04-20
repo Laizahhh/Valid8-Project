@@ -15,11 +15,13 @@ export const login = async (email: string, password: string) => {
 
     return {
       token: user.token,
-      roles: user.roles, // <-- Now matches plural "roles" from db.json
+      roles: user.roles,
       email: user.email,
       id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
+      // Include profile image if available
+      ...(user.profileImage && { profileImage: user.profileImage }),
       // Include student-specific fields if available
       ...(user.studentId && { 
         studentId: user.studentId,
