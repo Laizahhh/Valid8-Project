@@ -10,7 +10,7 @@ export interface Event {
 
 export const fetchUpcomingEvents = async (): Promise<Event[]> => {
   try {
-    const response = await fetch(`${BASE_URL}/events/upcoming`);
+    const response = await fetch(`${BASE_URL}/upcomingEvents`);
     
     if (!response.ok) throw new Error('Network error');
     
@@ -23,7 +23,7 @@ export const fetchUpcomingEvents = async (): Promise<Event[]> => {
 
 export const fetchEventsAttended = async (): Promise<Event[]> => {
   try {
-    const response = await fetch(`${BASE_URL}/events/attended`);
+    const response = await fetch(`${BASE_URL}/eventsAttended`);
     
     if (!response.ok) throw new Error('Network error');
     

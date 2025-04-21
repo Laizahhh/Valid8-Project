@@ -46,18 +46,25 @@ export const Records: React.FC<RecordsProps> = ({ role }) => {
 
       // Transform the API data to match our StudentRecord interface
       const records: StudentRecord[] = eventsData.flatMap((event: any) => {
-        return event.attendees.map((attendee: any) => ({
-          id: `${event.id}-${attendee.userId}`,
-          studentId: attendee.userId.toString(),
-          name: attendee.email.split("@")[0].replace(".", " "), // Format name from email
-          yearLevel: attendee.yearLevel || "N/A", // Dynamic from API
-          program: event.programs[0]?.name || "N/A",
-          eventId: event.id,
-          eventName: event.name,
-          attendanceStatus: event.attendanceStatus,
-          timeIn: attendee.timeIn,
-          timeOut: attendee.timeOut,
-        }));
+        // Check if programs exists and has attendees
+        if (!event.programs || !event.programs.length) return [];
+
+        return event.programs.flatMap((program: any) => {
+          // Check if attendees exists
+          const attendees = program.attendees || [];
+          return attendees.map((attendeeId: string) => ({
+            id: `${event.id}-${attendeeId}`,
+            studentId: attendeeId,
+            name: "Unknown", // You'll need to get this from users data
+            yearLevel: "N/A", // You'll need to get this from users data
+            program: program.name || "N/A",
+            eventId: event.id,
+            eventName: event.name,
+            attendanceStatus: "Present", // Default to present since they're in attendees
+            timeIn: "", // You'll need to get this from somewhere
+            timeOut: "", // You'll need to get this from somewhere
+          }));
+        });
       });
 
       setStudentRecords(records);
