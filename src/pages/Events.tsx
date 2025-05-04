@@ -2,37 +2,48 @@ import { useState, useEffect } from "react";
 import { NavbarAdmin } from "../components/NavbarAdmin";
 import { NavbarStudentSSG } from "../components/NavbarStudentSSG";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
-import { FaFilter, FaSearch, FaDownload } from "react-icons/fa";
+import { NavbarSSG } from "../components/NavbarSSG";
+import { FaFilter, FaSearch } from "react-icons/fa";
+import { fetchEventsByStatus } from "../api/eventsApi";
 import "../css/Events.css";
-import NavbarSSG from "../components/NavbarSSG";
-
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3003";
 
 interface EventsProps {
   role: string;
 }
 
-interface Event {
+interface Department {
   id: number;
   name: string;
-  date: string;
-  location: string;
-  status: string;
-  programs?: Program[];
 }
 
 interface Program {
+  id: number;
   name: string;
-  attendees: string[];
-  absentees: string[];
+}
+
+interface SSGProfile {
+  id: number;
+  position: string;
+}
+
+interface Event {
+  id: number;
+  name: string;
+  location: string;
+  start_datetime: string;
+  end_datetime: string;
+  status: "upcoming" | "ongoing" | "completed" | "cancelled";
+  departments?: Department[];
+  programs?: Program[];
+  ssg_members?: SSGProfile[];
 }
 
 export const Events: React.FC<EventsProps> = ({ role }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState<
+    "all" | "upcoming" | "ongoing" | "completed"
+  >("all");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [selectedProgram, setSelectedProgram] = useState("All");
   const [isMobile, setIsMobile] = useState(false);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,90 +54,56 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
       setIsMobile(window.innerWidth < 768);
     };
 
-    // Initial check
     checkIfMobile();
-
-    // Set up event listener for window resize
     window.addEventListener("resize", checkIfMobile);
-
-    // Clean up
     return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
-  // Fetch events data
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-
-        const [upcomingResponse, activeResponse, attendedResponse] =
-          await Promise.all([
-            fetch(`${BASE_URL}/upcomingEvents`),
-            fetch(`${BASE_URL}/activeEvents`),
-            fetch(`${BASE_URL}/eventsAttended`),
-          ]);
-
-        if (
-          !upcomingResponse.ok ||
-          !activeResponse.ok ||
-          !attendedResponse.ok
-        ) {
-          throw new Error("Failed to fetch data from the server");
-        }
-
-        const upcomingData = await upcomingResponse.json();
-        const activeData = await activeResponse.json();
-        const attendedData = await attendedResponse.json();
-
-        // Transform attended events to have consistent status
-        const transformedAttendedData = attendedData.map((event: any) => ({
-          ...event,
-          status:
-            event.status === "Present" || event.status === "Absent"
-              ? "Past"
-              : event.status,
-        }));
-
-        // Combine all events
-        const combinedEvents = [
-          ...upcomingData,
-          ...activeData,
-          ...transformedAttendedData,
-        ];
-
-        setEvents(combinedEvents);
-        setLoading(false);
+        const [upcoming, ongoing, completed] = await Promise.all([
+          fetchEventsByStatus("upcoming"),
+          fetchEventsByStatus("ongoing"),
+          fetchEventsByStatus("completed"),
+        ]);
+        setEvents([...upcoming, ...ongoing, ...completed]);
       } catch (err) {
-        setError("Failed to fetch events data. Please try again later.");
-        setLoading(false);
+        setError("Failed to fetch events. Please try again later.");
         console.error("Error fetching events:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchEvents();
-  }, [role]);
+  }, []);
+
+  const formatDateTime = (datetime: string) => {
+    const date = new Date(datetime);
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   const filteredEvents = events
     .filter((event) =>
       event.name.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .filter((event) => {
-      if (filter === "upcoming") return event.status === "Upcoming";
-      if (filter === "active") return event.status === "Active";
-      if (filter === "past") return event.status === "Past";
+      if (filter === "upcoming") return event.status === "upcoming";
+      if (filter === "ongoing") return event.status === "ongoing";
+      if (filter === "completed") return event.status === "completed";
       return true;
     });
 
-  const handleEventClick = (event: Event) => {
-    if (event.status === "Past") {
-      setSelectedEvent(event);
-      setSelectedProgram("All");
-    }
-  };
-
   return (
     <div className="events-page">
-      {/* Navbar Conditional Rendering */}
       {role === "admin" && <NavbarAdmin />}
       {role === "student-ssg" && <NavbarStudentSSG />}
       {role === "ssg" && <NavbarSSG />}
@@ -140,7 +117,6 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
           <p className="subtitle">View and manage all events</p>
         </div>
 
-        {/* Search and Filter Section */}
         <div className="search-filter-section">
           <div className="search-box">
             <FaSearch className="search-icon" />
@@ -182,47 +158,45 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
                     setDropdownOpen(false);
                   }}
                 >
-                  Upcoming Events
+                  Upcoming
                 </button>
                 <button
                   className={`dropdown-item ${
-                    filter === "active" ? "active" : ""
+                    filter === "ongoing" ? "active" : ""
                   }`}
                   onClick={() => {
-                    setFilter("active");
+                    setFilter("ongoing");
                     setDropdownOpen(false);
                   }}
                 >
-                  Active Events
+                  Ongoing
                 </button>
                 <button
                   className={`dropdown-item ${
-                    filter === "past" ? "active" : ""
+                    filter === "completed" ? "active" : ""
                   }`}
                   onClick={() => {
-                    setFilter("past");
+                    setFilter("completed");
                     setDropdownOpen(false);
                   }}
                 >
-                  Past Events
+                  Completed
                 </button>
               </div>
             )}
           </div>
         </div>
 
-        {/* Loading and Error States */}
         {loading && <div className="loading-indicator">Loading events...</div>}
         {error && <div className="error-message">{error}</div>}
 
-        {/* Events Table */}
         {!loading && !error && (
           <div className="table-responsive">
             <table className="events-table">
               <thead>
                 <tr>
                   <th>Event Name</th>
-                  <th>Date</th>
+                  <th>Date & Time</th>
                   <th>Location</th>
                   <th>Status</th>
                 </tr>
@@ -230,19 +204,17 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
               <tbody>
                 {filteredEvents.length > 0 ? (
                   filteredEvents.map((event) => (
-                    <tr
-                      key={event.id}
-                      onClick={() => handleEventClick(event)}
-                      className={event.status === "Past" ? "clickable-row" : ""}
-                    >
+                    <tr key={event.id}>
                       <td data-label="Event Name">{event.name}</td>
-                      <td data-label="Date">{event.date}</td>
+                      <td data-label="Date & Time">
+                        {formatDateTime(event.start_datetime)} -{" "}
+                        {formatDateTime(event.end_datetime)}
+                      </td>
                       <td data-label="Location">{event.location}</td>
                       <td data-label="Status">
-                        <span
-                          className={`status-badge ${event.status.toLowerCase()}`}
-                        >
-                          {event.status}
+                        <span className={`status-badge ${event.status}`}>
+                          {event.status.charAt(0).toUpperCase() +
+                            event.status.slice(1)}
                         </span>
                       </td>
                     </tr>

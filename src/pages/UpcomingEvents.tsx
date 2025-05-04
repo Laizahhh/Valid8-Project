@@ -3,19 +3,38 @@ import { NavbarStudent } from "../components/NavbarStudent";
 import { NavbarStudentSSG } from "../components/NavbarStudentSSG";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
 import { FaSearch } from "react-icons/fa";
-import { fetchUpcomingEvents } from "../api/eventsApi";
+import { fetchEventsByStatus } from "../api/eventsApi";
 import "../css/UpcomingEvents.css";
 
 interface UpcomingEventsProps {
   role: string;
 }
 
-interface Event {
-  id: number; // Added id field
+interface Department {
+  id: number;
   name: string;
-  date: string;
+}
+
+interface Program {
+  id: number;
+  name: string;
+}
+
+interface SSGProfile {
+  id: number;
+  position: string;
+}
+
+interface Event {
+  id: number;
+  name: string;
   location: string;
-  status: string;
+  start_datetime: string;
+  end_datetime: string;
+  status: "upcoming" | "ongoing" | "completed" | "cancelled";
+  departments?: Department[];
+  programs?: Program[];
+  ssg_members?: SSGProfile[];
 }
 
 export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
@@ -27,8 +46,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
     const loadEvents = async () => {
       setIsLoading(true);
       try {
-        const fetchedEvents = await fetchUpcomingEvents();
-        console.log("Fetched events:", fetchedEvents);
+        const fetchedEvents = await fetchEventsByStatus("upcoming");
         setEvents(fetchedEvents);
       } catch (error) {
         console.error("Error fetching events:", error);
@@ -40,11 +58,21 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
     loadEvents();
   }, []);
 
-  // In your UpcomingEvents component, filter the events by status
+  const formatDateTime = (datetime: string) => {
+    const date = new Date(datetime);
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const filteredEvents = events.filter(
     (event) =>
       event.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      event.status === "Upcoming"
+      event.status === "upcoming"
   );
 
   return (
@@ -81,7 +109,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
             <thead>
               <tr>
                 <th>Event Name</th>
-                <th>Date</th>
+                <th>Date & Time</th>
                 <th>Location</th>
                 <th>Status</th>
               </tr>
@@ -95,13 +123,15 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
                 filteredEvents.map((event) => (
                   <tr key={event.id}>
                     <td data-label="Event Name">{event.name}</td>
-                    <td data-label="Date">{event.date}</td>
+                    <td data-label="Date & Time">
+                      {formatDateTime(event.start_datetime)} -{" "}
+                      {formatDateTime(event.end_datetime)}
+                    </td>
                     <td data-label="Location">{event.location}</td>
                     <td data-label="Status">
-                      <span
-                        className={`status-badge ${event.status.toLowerCase()}`}
-                      >
-                        {event.status}
+                      <span className={`status-badge ${event.status}`}>
+                        {event.status.charAt(0).toUpperCase() +
+                          event.status.slice(1)}
                       </span>
                     </td>
                   </tr>
@@ -109,7 +139,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
               ) : (
                 <tr>
                   <td colSpan={4} className="no-results">
-                    No matching events found
+                    No upcoming events found
                   </td>
                 </tr>
               )}

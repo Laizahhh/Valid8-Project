@@ -21,7 +21,6 @@ const LoginForm = () => {
   }, []);
 
   const handleSubmit = async (event: React.FormEvent) => {
-    console.log("Logging in");
     event.preventDefault();
     setIsLoading(true);
 
@@ -41,17 +40,18 @@ const LoginForm = () => {
         localStorage.removeItem("rememberedEmail");
       }
 
-      // Role-based redirection (unchanged)
+      // Role-based redirection
       if (userData.roles.includes("admin")) {
         navigate("/admin_dashboard");
       } else if (
-        ["student", "ssg", "event-organizer"].every((role) =>
-          userData.roles.includes(role)
-        )
+        userData.roles.includes("student") &&
+        userData.roles.includes("ssg") &&
+        userData.roles.includes("event-organizer")
       ) {
         navigate("/student_ssg_eventorganizer_dashboard");
       } else if (
-        ["student", "ssg"].every((role) => userData.roles.includes(role))
+        userData.roles.includes("student") &&
+        userData.roles.includes("ssg")
       ) {
         navigate("/student_ssg_dashboard");
       } else if (userData.roles.includes("student")) {

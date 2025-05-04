@@ -1,4 +1,5 @@
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3003';
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 
 export const login = async (email: string, password: string) => {
   try {
@@ -6,29 +7,35 @@ export const login = async (email: string, password: string) => {
     email = email.trim();
     password = password.trim();
 
-    const response = await fetch(`${BASE_URL}/users?email=${email}`);
-    if (!response.ok) throw new Error('Network error');
+    const response = await fetch(`${BASE_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-    const users = await response.json();
-    const user = users.find(u => u.email === email && u.password === password);
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Incorrect email or password');
+      }
+      throw new Error(`Network error: ${response.status}`);
+    }
 
-    if (!user) throw new Error('Invalid credentials');
+    const data = await response.json();
 
     return {
-      token: user.token,
-      roles: user.roles,
-      email: user.email,
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      ...(user.profileImage && { profileImage: user.profileImage }),
-      ...(user.studentId && { 
-        studentId: user.studentId,
-        yearLevel: user.yearLevel,
-        program: user.program  
-      })
+      token: data.access_token,
+      tokenType: data.token_type,
+      email: data.email,
+      roles: data.roles,
+      id: data.user_id,
+      firstName: data.first_name,
+      lastName: data.last_name,
+      // Include any other fields you're returning from backend
     };
   } catch (error) {
+    console.error('Login error:', error);
     throw new Error(
       error instanceof Error ? error.message : 'Authentication failed'
     );
