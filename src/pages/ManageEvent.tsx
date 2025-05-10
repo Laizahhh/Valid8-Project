@@ -1,66 +1,205 @@
 import { useState, useEffect } from "react";
-import {
-  AiFillEdit,
-  AiFillCheckCircle,
-  AiOutlineSync,
-  AiOutlineCalendar,
-  AiFillDelete,
-} from "react-icons/ai";
 import { NavbarEventOrganizer } from "../components/NavbarEventOrganizer";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
-import search_logo from "../assets/images/search_logo.png";
 import Modal from "react-modal";
 import "../css/ManageEvent.css";
+import { useNavigate } from "react-router-dom";
 
 interface ManageEventProps {
   role: string;
 }
 
-interface Event {
-  id: string; // Added id field for API operations
+interface Department {
+  id: number;
   name: string;
-  date: string;
+}
+
+interface Program {
+  id: number;
+  name: string;
+  department_ids: number[];
+}
+
+interface User {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
+interface SSGMember {
+  user_id: number;
+  position: string;
+  user: User;
+}
+
+// Match the enum from FastAPI
+enum EventStatus {
+  UPCOMING = "UPCOMING",
+  ONGOING = "ONGOING",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+}
+
+// Updated to match the API structure
+interface Event {
+  id: number;
+  name: string;
+  start_datetime: string;
+  end_datetime: string;
   location: string;
-  status: string;
+  status: string; // Will match EventStatus values
+  departments: Department[];
+  programs: Program[];
+  ssg_members: SSGMember[];
+
+  // For form handling - not in the API response
+  department_ids?: number[];
+  program_ids?: number[];
+  ssg_member_ids?: number[];
 }
 
 export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [events, setEvents] = useState<Event[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [ssgMembers, setSSGMembers] = useState<SSGMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
-
   const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
+  const [isStatusModalOpen, setStatusModalOpen] = useState(false);
+  const [statusToUpdate, setStatusToUpdate] = useState<string | null>(null);
+  const [eventToUpdate, setEventToUpdate] = useState<number | null>(null);
 
-  const [isCompleteModalOpen, setCompleteModalOpen] = useState(false);
-  const [eventToComplete, setEventToComplete] = useState<string | null>(null);
+  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  const [isUpcomingModalOpen, setUpcomingModalOpen] = useState(false);
-  const [eventToUpcoming, setEventToUpcoming] = useState<string | null>(null);
+  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      navigate("/login");
+      throw new Error("No authentication token found");
+    }
 
-  const [isActiveModalOpen, setActiveModalOpen] = useState(false);
-  const [eventToActive, setEventToActive] = useState<string | null>(null);
+    const headers = {
+      ...options.headers,
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
 
-  const [dropdownOpenIndex, setDropdownOpenIndex] = useState<number | null>(
-    null
-  );
+    try {
+      const response = await fetch(url, { ...options, headers });
 
-  const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3003";
+      if (response.status === 401) {
+        localStorage.removeItem("authToken");
+        navigate("/login");
+        throw new Error("Session expired. Please login again.");
+      }
 
-  // Fetch events from API
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          errorData?.detail || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      return response;
+    } catch (err) {
+      console.error(`Error fetching ${url}:`, err);
+      throw err;
+    }
+  };
+
+  // Fetch all required data
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchAllData = async () => {
+      setIsLoading(true);
       try {
-        const response = await fetch(`${BASE_URL}/upcomingEvents`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch events");
+        // Fetch events with relations - FastAPI returns complete objects
+        const eventsResponse = await fetchWithAuth(`${BASE_URL}/events`);
+        const eventsData = await eventsResponse.json();
+
+        // Add derived fields for form handling with error handling
+        const transformedEvents = (
+          Array.isArray(eventsData) ? eventsData : []
+        ).map((event: Event) => {
+          try {
+            return {
+              ...event,
+              department_ids: Array.isArray(event.departments)
+                ? event.departments
+                    .filter((d) => d)
+                    .map((d: Department) => d.id)
+                : [],
+              program_ids: Array.isArray(event.programs)
+                ? event.programs.filter((p) => p).map((p: Program) => p.id)
+                : [],
+              ssg_member_ids: Array.isArray(event.ssg_members)
+                ? event.ssg_members
+                    .filter((m) => m && m.user_id)
+                    .map((m: SSGMember) => m.user_id)
+                : [],
+            };
+          } catch (err) {
+            console.error("Error processing event data:", err, event);
+            // Return a minimal valid event object if there's an error
+            return {
+              ...event,
+              department_ids: [],
+              program_ids: [],
+              ssg_member_ids: [],
+            };
+          }
+        });
+
+        setEvents(transformedEvents);
+
+        // Fetch departments
+        const deptResponse = await fetchWithAuth(`${BASE_URL}/departments`);
+        const deptData = await deptResponse.json();
+        setDepartments(deptData);
+
+        // Fetch programs
+        const programsResponse = await fetchWithAuth(`${BASE_URL}/programs`);
+        const programsData = await programsResponse.json();
+        setPrograms(programsData);
+
+        // Fetch SSG members with comprehensive error handling
+        try {
+          const ssgResponse = await fetchWithAuth(
+            `${BASE_URL}/users/ssg-members`
+          );
+
+          // Check if response is empty or null before parsing
+          const text = await ssgResponse.text();
+          let ssgData = [];
+
+          try {
+            if (text && text.trim() !== "" && text !== "null") {
+              ssgData = JSON.parse(text);
+            }
+          } catch (parseErr) {
+            console.error("Error parsing SSG members JSON:", parseErr);
+          }
+
+          // Ensure we have the expected data structure and validate each member has a user property
+          const validMembers = Array.isArray(ssgData)
+            ? ssgData.filter(
+                (member) => member && typeof member === "object" && member.user
+              )
+            : [];
+
+          setSSGMembers(validMembers);
+        } catch (ssgErr) {
+          console.error("Error fetching SSG members:", ssgErr);
+          // Don't fail the entire component, just set empty array
+          setSSGMembers([]);
         }
-        const data = await response.json();
-        setEvents(data);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "An unknown error occurred"
@@ -70,18 +209,24 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
       }
     };
 
-    fetchEvents();
-  }, []);
-  const filteredEvents = events.filter((event) =>
-    event.name.toLowerCase().includes(searchTerm.toLowerCase())
+    fetchAllData();
+  }, [BASE_URL, navigate]);
+
+  // Filter events based on search term
+  const filteredEvents = events.filter(
+    (event) =>
+      event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.location.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const toggleDropdown = (index: number) => {
-    setDropdownOpenIndex(dropdownOpenIndex === index ? null : index);
-  };
-
-  const openEditModal = (event: Event) => {
-    setEditingEvent({ ...event });
+  // Event handlers
+  const openEditModal = (item: Event) => {
+    setEditingEvent({
+      ...item,
+      department_ids: item.departments?.map((d) => d.id) || [],
+      program_ids: item.programs?.map((p) => p.id) || [],
+      ssg_member_ids: item.ssg_members?.map((m) => m.user_id) || [],
+    });
     setEditModalOpen(true);
   };
 
@@ -90,7 +235,9 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
     setEditingEvent(null);
   };
 
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     if (editingEvent) {
       setEditingEvent({ ...editingEvent, [e.target.name]: e.target.value });
     }
@@ -100,25 +247,40 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
     if (!editingEvent) return;
 
     try {
-      const response = await fetch(
-        `${BASE_URL}/upcomingEvents/${editingEvent.id}`,
+      // Format data to match FastAPI expectations
+      const updatePayload = {
+        name: editingEvent.name,
+        location: editingEvent.location,
+        start_datetime: editingEvent.start_datetime,
+        end_datetime: editingEvent.end_datetime,
+        department_ids: editingEvent.department_ids,
+        program_ids: editingEvent.program_ids,
+        ssg_member_ids: editingEvent.ssg_member_ids,
+      };
+
+      const response = await fetchWithAuth(
+        `${BASE_URL}/events/${editingEvent.id}`,
         {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(editingEvent),
+          method: "PATCH",
+          body: JSON.stringify(updatePayload),
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to update event");
-      }
-
       const updatedEvent = await response.json();
+
+      // Transform the updated event to include IDs for form handling
+      const transformedEvent = {
+        ...updatedEvent,
+        department_ids:
+          updatedEvent.departments?.map((d: Department) => d.id) || [],
+        program_ids: updatedEvent.programs?.map((p: Program) => p.id) || [],
+        ssg_member_ids:
+          updatedEvent.ssg_members?.map((m: SSGMember) => m.user_id) || [],
+      };
+
       setEvents(
         events.map((event) =>
-          event.id === updatedEvent.id ? updatedEvent : event
+          event.id === transformedEvent.id ? transformedEvent : event
         )
       );
       closeEditModal();
@@ -126,52 +288,59 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
       setError(err instanceof Error ? err.message : "Failed to update event");
     }
   };
-  const updateEventStatus = async (eventId: string, newStatus: string) => {
-    try {
-      // 1. Update the event status directly in the upcomingEvents array
-      const response = await fetch(`${BASE_URL}/upcomingEvents/${eventId}`, {
-        method: "PATCH", // Using PATCH to update only the status field
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
 
-      if (!response.ok) throw new Error("Failed to update status");
-
-      // Update local state
-      setEvents(
-        events.map((event) =>
-          event.id === eventId ? { ...event, status: newStatus } : event
-        )
-      );
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update status");
-    } finally {
-      setDropdownOpenIndex(null);
-      setActiveModalOpen(false);
-      setUpcomingModalOpen(false);
-      setCompleteModalOpen(false);
-    }
-  };
-  const handleDeleteEvent = async () => {
-    if (!eventToDelete) return;
+  // Alternative implementation to use the new endpoint
+  const updateEventStatus = async () => {
+    if (!eventToUpdate || !statusToUpdate) return;
 
     try {
-      const response = await fetch(
-        `${BASE_URL}/upcomingEvents/${eventToDelete}`,
+      // Convert statusToUpdate to lowercase to match API expectations
+      const lowercaseStatus = statusToUpdate.toLowerCase();
+
+      // Send as query parameter, exactly matching the Swagger example
+      await fetchWithAuth(
+        `${BASE_URL}/events/${eventToUpdate}/status?status=${lowercaseStatus}`,
         {
-          method: "DELETE",
+          method: "PATCH",
+          headers: {
+            accept: "application/json",
+            // Authorization header is added by fetchWithAuth
+          },
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to delete event");
-      }
+      // Update local state (keep using the original statusToUpdate for consistency in UI)
+      setEvents(
+        events.map((event) =>
+          event.id === eventToUpdate
+            ? { ...event, status: statusToUpdate }
+            : event
+        )
+      );
 
-      setEvents(events.filter((event) => event.id !== eventToDelete));
+      console.log("Status update successful");
+    } catch (err) {
+      console.error("Status update error:", err);
+      setError(err instanceof Error ? err.message : "Failed to update status");
+    } finally {
+      setStatusModalOpen(false);
+      setEventToUpdate(null);
+      setStatusToUpdate(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      await fetchWithAuth(`${BASE_URL}/events/${itemToDelete}`, {
+        method: "DELETE",
+      });
+
+      // Update local state
+      setEvents(events.filter((event) => event.id !== itemToDelete));
       setDeleteModalOpen(false);
-      setEventToDelete(null);
+      setItemToDelete(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete event");
     }
@@ -179,17 +348,17 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
 
   const getStatusBadge = (status: string) => {
     let badgeClass = "";
-    switch (status) {
-      case "Upcoming":
+    switch (status.toLowerCase()) {
+      case "upcoming":
         badgeClass = "badge bg-primary";
         break;
-      case "Active":
+      case "ongoing":
         badgeClass = "badge bg-warning text-dark";
         break;
-      case "Completed":
+      case "completed":
         badgeClass = "badge bg-success";
         break;
-      case "Canceled":
+      case "cancelled":
         badgeClass = "badge bg-danger";
         break;
       default:
@@ -198,18 +367,64 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
     return <span className={badgeClass}>{status}</span>;
   };
 
-  Modal.setAppElement("#root");
+  // Helper function to format date for better display
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  // Helper functions for displaying related entities
+  const getDepartmentNames = (deps?: Department[]) => {
+    if (!deps || deps.length === 0) return "None";
+    console.log("Available programs:", getProgramNames(programs));
+    return deps.map((dept) => dept.name).join(", ");
+  };
+
+  const getProgramNames = (progs?: Program[]) => {
+    if (!progs || progs.length === 0) return "None";
+    return progs.map((prog) => prog.name).join(", ");
+  };
+
+  const getSSGMemberNames = (members?: SSGMember[]) => {
+    if (!members || members.length === 0) return "None";
+    console.log("Available programs:", getSSGMemberNames(ssgMembers));
+    return members
+      .filter((member) => member && member.user)
+      .map(
+        (member) =>
+          `${member.user?.first_name || "Unknown"} ${
+            member.user?.last_name || ""
+          } (${member.position || "Unknown"})`
+      )
+      .join(", ");
+  };
+
+  // This makes the modal more accessible but can be commented out if causing issues
+  try {
+    Modal.setAppElement("#root");
+  } catch (error) {
+    console.warn(
+      "Could not set app element for Modal. This might affect accessibility:",
+      error
+    );
+  }
 
   if (isLoading) {
     return (
-      <div className="manage-events-page">
+      <div className="app-container">
         {role === "student-ssg-eventorganizer" ? (
           <NavbarStudentSSGEventOrganizer />
         ) : (
           <NavbarEventOrganizer />
         )}
-        <div className="manage-events-container">
-          <div className="loading-spinner">Loading events...</div>
+        <div className="content-wrapper">
+          <div className="loading-spinner">
+            <div className="spinner"></div>
+            <p>Loading events...</p>
+          </div>
         </div>
       </div>
     );
@@ -217,367 +432,429 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
 
   if (error) {
     return (
-      <div className="manage-events-page">
+      <div className="app-container">
         {role === "student-ssg-eventorganizer" ? (
           <NavbarStudentSSGEventOrganizer />
         ) : (
           <NavbarEventOrganizer />
         )}
-        <div className="manage-events-container">
-          <div className="error-message">Error: {error}</div>
+        <div className="content-wrapper">
+          <div className="error-message">
+            <p>❌ Error: {error}</p>
+            <button
+              className="btn btn-primary"
+              onClick={() => window.location.reload()}
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="manage-events-page">
+    <div className="app-container">
       {role === "student-ssg-eventorganizer" ? (
         <NavbarStudentSSGEventOrganizer />
       ) : (
         <NavbarEventOrganizer />
       )}
 
-      <div className="manage-events-container">
-        <header className="manage-events-header">
-          <h2>Event Management</h2>
-          <p className="subtitle">
-            Manage and update university events and their status
-          </p>
-        </header>
-
-        <div className="search-container">
-          <div className="search-box">
-            <img src={search_logo} alt="search" className="search-icon" />
+      <div className="content-wrapper">
+        <div className="page-header">
+          <h1>Manage Events</h1>
+          <div className="search-container">
             <input
               type="search"
-              placeholder="Search events by name..."
-              className="search-input"
+              placeholder="Search events or locations..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
             />
           </div>
         </div>
 
-        <div className="table-responsive-container">
-          <div className="table-responsive">
-            <table className="events-table">
-              <thead>
-                <tr>
-                  <th>Event Name</th>
-                  <th>Date</th>
-                  <th>Location</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredEvents.map((event, index) => (
-                  <tr key={event.id}>
-                    <td data-label="Event Name">{event.name}</td>
-                    <td data-label="Date">
-                      {new Date(event.date).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </td>
-                    <td data-label="Location">{event.location}</td>
-                    <td data-label="Status">{getStatusBadge(event.status)}</td>
-                    <td data-label="Actions" className="actions-cell">
-                      <div className="button-group">
-                        <button
-                          className="btn btn-outline-primary btn-sm"
-                          onClick={() => openEditModal(event)}
-                        >
-                          <AiFillEdit /> Edit
-                        </button>
-                        <div className="status-dropdown-container">
-                          <button
-                            className="btn btn-outline-secondary btn-sm dropdown-toggle"
-                            onClick={() => toggleDropdown(index)}
-                          >
-                            Status
-                          </button>
-                        </div>
-                        <button
-                          className="btn btn-outline-danger btn-sm"
-                          onClick={() => {
-                            setEventToDelete(event.id);
-                            setDeleteModalOpen(true);
-                          }}
-                        >
-                          <AiFillDelete /> Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {filteredEvents.length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="no-results">
-                      {events.length === 0
-                        ? "No events found."
-                        : "No matching events found. Try a different search term."}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        {filteredEvents.length === 0 ? (
+          <div className="no-results">
+            <p>No events found. Try a different search term.</p>
           </div>
+        ) : (
+          <div className="event-cards">
+            {filteredEvents.map((event) => (
+              <div className="event-card" key={event.id}>
+                <div className="event-header">
+                  <h3>{event.name}</h3>
+                  {getStatusBadge(event.status)}
+                </div>
 
-          {/* Dropdown menus rendered outside the table */}
-          {filteredEvents.map((event, index) => (
-            <div
-              key={`dropdown-${event.id}`}
-              className={`status-dropdown-menu-container ${
-                dropdownOpenIndex === index ? "visible" : ""
-              }`}
-              style={{
-                position: "absolute",
-                top:
-                  document
-                    .querySelector(
-                      `tr:nth-child(${index + 1}) .status-dropdown-container`
-                    )
-                    ?.getBoundingClientRect().bottom +
-                  window.scrollY +
-                  "px",
-                left:
-                  document
-                    .querySelector(
-                      `tr:nth-child(${index + 1}) .status-dropdown-container`
-                    )
-                    ?.getBoundingClientRect().left + "px",
-              }}
-            >
-              {dropdownOpenIndex === index && (
-                <div className="status-dropdown-menu">
+                <div className="event-details">
+                  <p>
+                    <strong>Date:</strong> {formatDate(event.start_datetime)}
+                  </p>
+                  <p>
+                    <strong>Location:</strong> {event.location}
+                  </p>
+                  <p className="departments">
+                    <strong>Departments:</strong>{" "}
+                    {getDepartmentNames(event.departments)}
+                  </p>
+                </div>
+
+                <div className="event-actions">
                   <button
-                    className={`dropdown-item ${
-                      event.status === "Upcoming" ? "active" : ""
-                    }`}
-                    onClick={() => {
-                      setEventToUpcoming(event.id);
-                      setUpcomingModalOpen(true);
-                    }}
+                    className="btn btn-edit"
+                    onClick={() => openEditModal(event)}
                   >
-                    <AiOutlineCalendar /> Upcoming
+                    Edit
                   </button>
+
+                  {/* Replace the existing dropdown with this updated version */}
+                  <select
+                    className="status-select"
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        setEventToUpdate(event.id);
+                        setStatusToUpdate(e.target.value);
+                        setStatusModalOpen(true);
+                      }
+                    }}
+                    value=""
+                  >
+                    <option value="" disabled>
+                      Change Status
+                    </option>
+                    <option value="upcoming">Upcoming</option>
+                    <option value="ongoing">Ongoing</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+
                   <button
-                    className={`dropdown-item ${
-                      event.status === "Active" ? "active" : ""
-                    }`}
+                    className="btn btn-delete"
                     onClick={() => {
-                      setEventToActive(event.id);
-                      setActiveModalOpen(true);
+                      setItemToDelete(event.id);
+                      setDeleteModalOpen(true);
                     }}
                   >
-                    <AiOutlineSync /> Active
-                  </button>
-                  <button
-                    className={`dropdown-item ${
-                      event.status === "Completed" ? "active" : ""
-                    }`}
-                    onClick={() => {
-                      setEventToComplete(event.id);
-                      setCompleteModalOpen(true);
-                    }}
-                  >
-                    <AiFillCheckCircle /> Complete
+                    Delete
                   </button>
                 </div>
-              )}
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Edit Event Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onRequestClose={closeEditModal}
+        className="modal-content"
+        overlayClassName="modal-overlay"
+        ariaHideApp={false}
+        contentLabel="Edit Event Modal"
+        style={{
+          overlay: {
+            backgroundColor: "rgba(0, 0, 0, 0.75)", // Darker background for better contrast
+            zIndex: 1000,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: "1rem",
+          },
+          content: {
+            position: "relative",
+            inset: "auto", // Removes default positioning
+            background: "white", // Explicit white background
+            borderRadius: "var(--border-radius)",
+            padding: 0,
+            maxWidth: "550px",
+            width: "100%",
+            maxHeight: "90vh",
+            overflow: "auto",
+            margin: "0",
+            border: "none",
+            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.5)", // Stronger shadow for depth
+          },
+        }}
+      >
+        <div className="modal-header">
+          <h2>Edit Event</h2>
+          <button onClick={closeEditModal} className="close-button">
+            ×
+          </button>
         </div>
 
-        {/* Edit Modal */}
-        <Modal
-          isOpen={isEditModalOpen}
-          onRequestClose={closeEditModal}
-          className="edit-modal"
-          overlayClassName="modal-overlay"
-        >
-          <div className="modal-header">
-            <h3>Edit Event Details</h3>
-            <button onClick={closeEditModal} className="close-button">
-              &times;
-            </button>
+        <div className="modal-body">
+          <div className="form-group">
+            <label htmlFor="event-name">Event Name</label>
+            <input
+              type="text"
+              id="event-name"
+              name="name"
+              value={editingEvent?.name || ""}
+              onChange={handleEditChange}
+              placeholder="Enter event name"
+            />
           </div>
-          <div className="modal-body">
+
+          <div className="form-row">
             <div className="form-group">
-              <label htmlFor="event-name">Event Name</label>
+              <label htmlFor="event-start">Start Date & Time</label>
               <input
-                type="text"
-                id="event-name"
-                name="name"
-                className="form-control"
-                value={editingEvent?.name || ""}
-                onChange={handleEditChange}
-                placeholder="Enter event name"
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="event-date">Date</label>
-              <input
-                type="date"
-                id="event-date"
-                name="date"
-                className="form-control"
-                value={editingEvent?.date || ""}
+                type="datetime-local"
+                id="event-start"
+                name="start_datetime"
+                value={
+                  editingEvent?.start_datetime
+                    ? new Date(editingEvent.start_datetime)
+                        .toISOString()
+                        .slice(0, 16)
+                    : ""
+                }
                 onChange={handleEditChange}
               />
             </div>
+
             <div className="form-group">
-              <label htmlFor="event-location">Location</label>
+              <label htmlFor="event-end">End Date & Time</label>
               <input
-                type="text"
-                id="event-location"
-                name="location"
-                className="form-control"
-                value={editingEvent?.location || ""}
+                type="datetime-local"
+                id="event-end"
+                name="end_datetime"
+                value={
+                  editingEvent?.end_datetime
+                    ? new Date(editingEvent.end_datetime)
+                        .toISOString()
+                        .slice(0, 16)
+                    : ""
+                }
                 onChange={handleEditChange}
-                placeholder="Enter event location"
               />
             </div>
           </div>
-          <div className="modal-footer">
-            <button className="btn btn-secondary" onClick={closeEditModal}>
-              Cancel
-            </button>
-            <button className="btn btn-primary" onClick={saveEditedEvent}>
-              Save Changes
-            </button>
-          </div>
-        </Modal>
 
-        {/* Status Change Modals */}
-        <Modal
-          isOpen={isUpcomingModalOpen}
-          onRequestClose={() => setUpcomingModalOpen(false)}
-          className="confirmation-modal"
-          overlayClassName="modal-overlay"
-        >
-          <div className="modal-header">
-            <h3>Confirm Status Change</h3>
+          <div className="form-group">
+            <label htmlFor="event-location">Location</label>
+            <input
+              type="text"
+              id="event-location"
+              name="location"
+              value={editingEvent?.location || ""}
+              onChange={handleEditChange}
+              placeholder="Enter event location"
+            />
           </div>
-          <div className="modal-body">
-            <p>Are you sure you want to mark this event as upcoming?</p>
-          </div>
-          <div className="modal-footer">
-            <button
-              className="btn btn-outline-secondary"
-              onClick={() => setUpcomingModalOpen(false)}
-            >
-              Cancel
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                if (eventToUpcoming) {
-                  updateEventStatus(eventToUpcoming, "Upcoming");
-                }
+
+          <div className="form-group">
+            <label>Departments</label>
+            <select
+              multiple
+              className="select-multiple"
+              value={editingEvent?.department_ids?.map(String) || []}
+              onChange={(e) => {
+                const options = Array.from(e.target.selectedOptions, (option) =>
+                  Number(option.value)
+                );
+                setEditingEvent((prev) =>
+                  prev ? { ...prev, department_ids: options } : null
+                );
               }}
             >
-              Confirm
-            </button>
+              {departments.map((dept) => (
+                <option key={dept.id} value={String(dept.id)}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
+            <small>Hold Ctrl/Cmd to select multiple</small>
           </div>
-        </Modal>
 
-        <Modal
-          isOpen={isActiveModalOpen}
-          onRequestClose={() => setActiveModalOpen(false)}
-          className="confirmation-modal"
-          overlayClassName="modal-overlay"
-        >
-          <div className="modal-header">
-            <h3>Confirm Status Change</h3>
-          </div>
-          <div className="modal-body">
-            <p>Are you sure you want to mark this event as active?</p>
-          </div>
-          <div className="modal-footer">
-            <button
-              className="btn btn-outline-secondary"
-              onClick={() => setActiveModalOpen(false)}
-            >
-              Cancel
-            </button>
-            <button
-              className="btn btn-warning"
-              onClick={() => {
-                if (eventToActive) {
-                  updateEventStatus(eventToActive, "Active");
-                }
+          <div className="form-group">
+            <label>Programs</label>
+            <select
+              multiple
+              className="select-multiple"
+              value={editingEvent?.program_ids?.map(String) || []}
+              onChange={(e) => {
+                const options = Array.from(e.target.selectedOptions, (option) =>
+                  Number(option.value)
+                );
+                setEditingEvent((prev) =>
+                  prev ? { ...prev, program_ids: options } : null
+                );
               }}
             >
-              Confirm
-            </button>
+              {programs.map((program) => (
+                <option key={program.id} value={String(program.id)}>
+                  {program.name}
+                </option>
+              ))}
+            </select>
+            <small>Hold Ctrl/Cmd to select multiple</small>
           </div>
-        </Modal>
 
-        <Modal
-          isOpen={isCompleteModalOpen}
-          onRequestClose={() => setCompleteModalOpen(false)}
-          className="confirmation-modal"
-          overlayClassName="modal-overlay"
-        >
-          <div className="modal-header">
-            <h3>Confirm Status Change</h3>
-          </div>
-          <div className="modal-body">
-            <p>Are you sure you want to mark this event as completed?</p>
-          </div>
-          <div className="modal-footer">
-            <button
-              className="btn btn-outline-secondary"
-              onClick={() => setCompleteModalOpen(false)}
-            >
-              Cancel
-            </button>
-            <button
-              className="btn btn-success"
-              onClick={() => {
-                if (eventToComplete) {
-                  updateEventStatus(eventToComplete, "Completed");
-                }
+          <div className="form-group">
+            <label>SSG Members</label>
+            <select
+              multiple
+              className="select-multiple"
+              value={editingEvent?.ssg_member_ids?.map(String) || []}
+              onChange={(e) => {
+                const options = Array.from(e.target.selectedOptions, (option) =>
+                  Number(option.value)
+                );
+                setEditingEvent((prev) =>
+                  prev ? { ...prev, ssg_member_ids: options } : null
+                );
               }}
             >
-              Confirm
-            </button>
+              {ssgMembers
+                .filter((member) => member && member.user)
+                .map((member) => (
+                  <option key={member.user_id} value={String(member.user_id)}>
+                    {member.user?.first_name || "Unknown"}{" "}
+                    {member.user?.last_name || ""} (
+                    {member.position || "Unknown"})
+                  </option>
+                ))}
+            </select>
+            <small>Hold Ctrl/Cmd to select multiple</small>
           </div>
-        </Modal>
+        </div>
 
-        {/* Delete Event Modal */}
-        <Modal
-          isOpen={isDeleteModalOpen}
-          onRequestClose={() => setDeleteModalOpen(false)}
-          className="confirmation-modal"
-          overlayClassName="modal-overlay"
-        >
-          <div className="modal-header">
-            <h3>Confirm Deletion</h3>
-          </div>
-          <div className="modal-body">
-            <p>
-              Are you sure you want to delete this event? This action cannot be
-              undone.
-            </p>
-          </div>
-          <div className="modal-footer">
-            <button
-              className="btn btn-outline-secondary"
-              onClick={() => setDeleteModalOpen(false)}
-            >
-              Cancel
-            </button>
-            <button className="btn btn-danger" onClick={handleDeleteEvent}>
-              Delete
-            </button>
-          </div>
-        </Modal>
-      </div>
+        <div className="modal-footer">
+          <button className="btn btn-cancel" onClick={closeEditModal}>
+            Cancel
+          </button>
+          <button className="btn btn-save" onClick={saveEditedEvent}>
+            Save Changes
+          </button>
+        </div>
+      </Modal>
+
+      {/* Status Change Modal */}
+      <Modal
+        isOpen={isStatusModalOpen}
+        onRequestClose={() => setStatusModalOpen(false)}
+        className="modal-content modal-sm"
+        overlayClassName="modal-overlay"
+        ariaHideApp={false}
+        contentLabel="Status Update Modal"
+        style={{
+          overlay: {
+            backgroundColor: "rgba(0, 0, 0, 0.75)",
+            zIndex: 1000,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: "1rem",
+          },
+          content: {
+            position: "relative",
+            inset: "auto",
+            background: "white",
+            borderRadius: "var(--border-radius)",
+            padding: 0,
+            maxWidth: "400px",
+            width: "100%",
+            margin: "0",
+            border: "none",
+            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.5)",
+          },
+        }}
+      >
+        <div className="modal-header">
+          <h2>Update Status</h2>
+          <button
+            onClick={() => setStatusModalOpen(false)}
+            className="close-button"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="modal-body">
+          <p>
+            Are you sure you want to change this event's status to{" "}
+            <strong>{statusToUpdate?.toLowerCase()}</strong>?
+          </p>
+        </div>
+
+        <div className="modal-footer">
+          <button
+            className="btn btn-cancel"
+            onClick={() => setStatusModalOpen(false)}
+          >
+            Cancel
+          </button>
+          <button className="btn btn-save" onClick={updateEventStatus}>
+            Update Status
+          </button>
+        </div>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onRequestClose={() => setDeleteModalOpen(false)}
+        className="modal-content modal-sm"
+        overlayClassName="modal-overlay"
+        ariaHideApp={false}
+        contentLabel="Delete Confirmation Modal"
+        style={{
+          overlay: {
+            backgroundColor: "rgba(0, 0, 0, 0.75)",
+            zIndex: 1000,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: "1rem",
+          },
+          content: {
+            position: "relative",
+            inset: "auto",
+            background: "white",
+            borderRadius: "var(--border-radius)",
+            padding: 0,
+            maxWidth: "400px",
+            width: "100%",
+            margin: "0",
+            border: "none",
+            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.5)",
+          },
+        }}
+      >
+        <div className="modal-header">
+          <h2>Delete Event</h2>
+          <button
+            onClick={() => setDeleteModalOpen(false)}
+            className="close-button"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="modal-body">
+          <p>
+            Are you sure you want to delete this event? This action cannot be
+            undone.
+          </p>
+        </div>
+
+        <div className="modal-footer">
+          <button
+            className="btn btn-cancel"
+            onClick={() => setDeleteModalOpen(false)}
+          >
+            Cancel
+          </button>
+          <button className="btn btn-delete" onClick={handleDelete}>
+            Delete
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 };

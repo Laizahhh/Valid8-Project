@@ -41,7 +41,7 @@ interface Event {
 export const Events: React.FC<EventsProps> = ({ role }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState<
-    "all" | "upcoming" | "ongoing" | "completed"
+    "all" | "upcoming" | "ongoing" | "completed" | "cancelled"
   >("all");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -63,12 +63,13 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const [upcoming, ongoing, completed] = await Promise.all([
+        const [upcoming, ongoing, completed, cancelled] = await Promise.all([
           fetchEventsByStatus("upcoming"),
           fetchEventsByStatus("ongoing"),
           fetchEventsByStatus("completed"),
+          fetchEventsByStatus("cancelled"),
         ]);
-        setEvents([...upcoming, ...ongoing, ...completed]);
+        setEvents([...upcoming, ...ongoing, ...completed, ...cancelled]);
       } catch (err) {
         setError("Failed to fetch events. Please try again later.");
         console.error("Error fetching events:", err);
@@ -91,6 +92,14 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
     });
   };
 
+  const formatDepartments = (departments: Department[] = []) => {
+    return departments.map((d) => d.name).join(", ") || "N/A";
+  };
+
+  const formatPrograms = (programs: Program[] = []) => {
+    return programs.map((p) => p.name).join(", ") || "N/A";
+  };
+
   const filteredEvents = events
     .filter((event) =>
       event.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -99,6 +108,7 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
       if (filter === "upcoming") return event.status === "upcoming";
       if (filter === "ongoing") return event.status === "ongoing";
       if (filter === "completed") return event.status === "completed";
+      if (filter === "cancelled") return event.status === "cancelled";
       return true;
     });
 
@@ -182,6 +192,17 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
                 >
                   Completed
                 </button>
+                <button
+                  className={`dropdown-item ${
+                    filter === "cancelled" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setFilter("cancelled");
+                    setDropdownOpen(false);
+                  }}
+                >
+                  Cancelled
+                </button>
               </div>
             )}
           </div>
@@ -196,6 +217,8 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
               <thead>
                 <tr>
                   <th>Event Name</th>
+                  <th>Department(s)</th>
+                  <th>Program(s)</th>
                   <th>Date & Time</th>
                   <th>Location</th>
                   <th>Status</th>
@@ -206,6 +229,12 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
                   filteredEvents.map((event) => (
                     <tr key={event.id}>
                       <td data-label="Event Name">{event.name}</td>
+                      <td data-label="Department(s)">
+                        {formatDepartments(event.departments)}
+                      </td>
+                      <td data-label="Program(s)">
+                        {formatPrograms(event.programs)}
+                      </td>
                       <td data-label="Date & Time">
                         {formatDateTime(event.start_datetime)} -{" "}
                         {formatDateTime(event.end_datetime)}
@@ -221,7 +250,7 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="no-results">
+                    <td colSpan={6} className="no-results">
                       No matching events found
                     </td>
                   </tr>

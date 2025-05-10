@@ -69,6 +69,14 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
     });
   };
 
+  const formatDepartments = (departments: Department[] = []) => {
+    return departments.map((d) => d.name).join(", ") || "N/A";
+  };
+
+  const formatPrograms = (programs: Program[] = []) => {
+    return programs.map((p) => p.name).join(", ") || "N/A";
+  };
+
   const filteredEvents = events.filter(
     (event) =>
       event.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -109,6 +117,8 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
             <thead>
               <tr>
                 <th>Event Name</th>
+                <th>Department(s)</th>
+                <th>Program(s)</th>
                 <th>Date & Time</th>
                 <th>Location</th>
                 <th>Status</th>
@@ -117,12 +127,18 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={4}>Loading events...</td>
+                  <td colSpan={6}>Loading events...</td>
                 </tr>
               ) : filteredEvents.length > 0 ? (
                 filteredEvents.map((event) => (
                   <tr key={event.id}>
                     <td data-label="Event Name">{event.name}</td>
+                    <td data-label="Department(s)">
+                      {formatDepartments(event.departments)}
+                    </td>
+                    <td data-label="Program(s)">
+                      {formatPrograms(event.programs)}
+                    </td>
                     <td data-label="Date & Time">
                       {formatDateTime(event.start_datetime)} -{" "}
                       {formatDateTime(event.end_datetime)}
@@ -138,7 +154,7 @@ export const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ role }) => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={4} className="no-results">
+                  <td colSpan={6} className="no-results">
                     No upcoming events found
                   </td>
                 </tr>
