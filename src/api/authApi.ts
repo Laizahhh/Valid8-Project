@@ -24,6 +24,16 @@ export const login = async (email: string, password: string) => {
 
     const data = await response.json();
 
+    // Store the token and user data
+    localStorage.setItem('authToken', data.access_token);
+    localStorage.setItem('userData', JSON.stringify({
+      email: data.email,
+      roles: data.roles,
+      id: data.user_id,
+      firstName: data.first_name,
+      lastName: data.last_name,
+    }));
+
     return {
       token: data.access_token,
       tokenType: data.token_type,
@@ -32,7 +42,6 @@ export const login = async (email: string, password: string) => {
       id: data.user_id,
       firstName: data.first_name,
       lastName: data.last_name,
-      // Include any other fields you're returning from backend
     };
   } catch (error) {
     console.error('Login error:', error);
@@ -40,4 +49,38 @@ export const login = async (email: string, password: string) => {
       error instanceof Error ? error.message : 'Authentication failed'
     );
   }
+};
+
+// Add this helper function to get the token
+export const getAuthToken = () => {
+  return localStorage.getItem('authToken');
+};
+
+// Add this function to clear auth data
+export const logout = () => {
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('userData');
+};
+
+// Example of how to use the token in API calls
+export const updateEvent = async (eventId: number, eventData: any) => {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error('No authentication token found');
+  }
+
+  const response = await fetch(`${BASE_URL}/events/${eventId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(eventData),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to update event: ${response.status}`);
+  }
+
+  return await response.json();
 };

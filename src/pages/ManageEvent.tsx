@@ -115,6 +115,26 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
     }
   };
 
+  // Add this to your API service file
+  const assignSSGMembersToEvent = async (
+    eventId: number,
+    memberIds: number[]
+  ) => {
+    try {
+      const response = await fetchWithAuth(
+        `${BASE_URL}/events/${eventId}/ssg-members`,
+        {
+          method: "POST",
+          body: JSON.stringify({ ssg_member_ids: memberIds }),
+        }
+      );
+      return await response.json();
+    } catch (error) {
+      console.error("Error assigning SSG members:", error);
+      throw error;
+    }
+  };
+
   // Fetch all required data
   useEffect(() => {
     const fetchAllData = async () => {
@@ -265,6 +285,14 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
           body: JSON.stringify(updatePayload),
         }
       );
+
+      // Then handle SSG member assignments separately if needed
+      if (editingEvent.ssg_member_ids) {
+        await assignSSGMembersToEvent(
+          editingEvent.id,
+          editingEvent.ssg_member_ids
+        );
+      }
 
       const updatedEvent = await response.json();
 
@@ -696,7 +724,7 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
           </div>
 
           <div className="form-group">
-            <label>SSG Members</label>
+            <label>Assign SSG Members</label>
             <select
               multiple
               className="select-multiple"
@@ -710,17 +738,14 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
                 );
               }}
             >
-              {ssgMembers
-                .filter((member) => member && member.user)
-                .map((member) => (
-                  <option key={member.user_id} value={String(member.user_id)}>
-                    {member.user?.first_name || "Unknown"}{" "}
-                    {member.user?.last_name || ""} (
-                    {member.position || "Unknown"})
-                  </option>
-                ))}
+              {ssgMembers.map((member) => (
+                <option key={member.user_id} value={member.user_id}>
+                  {member.user.first_name} {member.user.last_name}
+                  {member.position && ` (${member.position})`}
+                </option>
+              ))}
             </select>
-            <small>Hold Ctrl/Cmd to select multiple</small>
+            <small>Hold Ctrl/Cmd to select multiple members</small>
           </div>
         </div>
 
