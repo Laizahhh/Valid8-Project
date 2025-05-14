@@ -33,14 +33,6 @@ interface SSGMember {
   user: User;
 }
 
-// Match the enum from FastAPI
-enum EventStatus {
-  UPCOMING = "UPCOMING",
-  ONGOING = "ONGOING",
-  COMPLETED = "COMPLETED",
-  CANCELLED = "CANCELLED",
-}
-
 // Updated to match the API structure
 interface Event {
   id: number;
@@ -102,7 +94,16 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
       }
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
+        const errorText = await response.text();
+        let errorData;
+
+        try {
+          errorData = JSON.parse(errorText);
+          console.error("API Error Response:", errorData);
+        } catch (e) {
+          console.error("API Error (non-JSON):", errorText);
+        }
+
         throw new Error(
           errorData?.detail || `HTTP error! status: ${response.status}`
         );
@@ -112,26 +113,6 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
     } catch (err) {
       console.error(`Error fetching ${url}:`, err);
       throw err;
-    }
-  };
-
-  // Add this to your API service file
-  const assignSSGMembersToEvent = async (
-    eventId: number,
-    memberIds: number[]
-  ) => {
-    try {
-      const response = await fetchWithAuth(
-        `${BASE_URL}/events/${eventId}/ssg-members`,
-        {
-          method: "POST",
-          body: JSON.stringify({ ssg_member_ids: memberIds }),
-        }
-      );
-      return await response.json();
-    } catch (error) {
-      console.error("Error assigning SSG members:", error);
-      throw error;
     }
   };
 
@@ -191,12 +172,10 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
 
         // Fetch SSG members with comprehensive error handling
         try {
-          const ssgResponse = await fetchWithAuth(
-            `${BASE_URL}/users/ssg-members`
-          );
+          const response = await fetchWithAuth(`${BASE_URL}/users/by-role/ssg`);
 
           // Check if response is empty or null before parsing
-          const text = await ssgResponse.text();
+          const text = await response.text();
           let ssgData = [];
 
           try {
@@ -208,16 +187,24 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
           }
 
           // Ensure we have the expected data structure and validate each member has a user property
-          const validMembers = Array.isArray(ssgData)
-            ? ssgData.filter(
-                (member) => member && typeof member === "object" && member.user
-              )
+          const transformedMembers = Array.isArray(ssgData)
+            ? ssgData
+                .filter((member) => member && typeof member === "object")
+                .map((user) => ({
+                  user_id: user.id,
+                  position: user.ssg_profile?.position || "Member",
+                  user: {
+                    id: user.id,
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    email: user.email,
+                  },
+                }))
             : [];
 
-          setSSGMembers(validMembers);
+          setSSGMembers(transformedMembers);
         } catch (ssgErr) {
           console.error("Error fetching SSG members:", ssgErr);
-          // Don't fail the entire component, just set empty array
           setSSGMembers([]);
         }
       } catch (err) {
@@ -262,21 +249,35 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
       setEditingEvent({ ...editingEvent, [e.target.name]: e.target.value });
     }
   };
-
+  // Fixed saveEditedEvent function - removed duplicate property
   const saveEditedEvent = async () => {
     if (!editingEvent) return;
 
+    // Clean up the ssg_member_ids to remove any null values
+    const cleanSsgMemberIds = Array.isArray(editingEvent.ssg_member_ids)
+      ? editingEvent.ssg_member_ids.filter(
+          (id) => id !== null && id !== undefined
+        )
+      : [];
+
     try {
-      // Format data to match FastAPI expectations
+      // Format data to match FastAPI expectations and validate arrays
       const updatePayload = {
         name: editingEvent.name,
         location: editingEvent.location,
         start_datetime: editingEvent.start_datetime,
         end_datetime: editingEvent.end_datetime,
-        department_ids: editingEvent.department_ids,
-        program_ids: editingEvent.program_ids,
-        ssg_member_ids: editingEvent.ssg_member_ids,
+        department_ids: Array.isArray(editingEvent.department_ids)
+          ? editingEvent.department_ids
+          : [],
+        program_ids: Array.isArray(editingEvent.program_ids)
+          ? editingEvent.program_ids
+          : [],
+        // Only define ssg_member_ids once with the cleaned array
+        ssg_member_ids: cleanSsgMemberIds,
       };
+
+      console.log("Sending update payload:", JSON.stringify(updatePayload));
 
       const response = await fetchWithAuth(
         `${BASE_URL}/events/${editingEvent.id}`,
@@ -285,14 +286,6 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
           body: JSON.stringify(updatePayload),
         }
       );
-
-      // Then handle SSG member assignments separately if needed
-      if (editingEvent.ssg_member_ids) {
-        await assignSSGMembersToEvent(
-          editingEvent.id,
-          editingEvent.ssg_member_ids
-        );
-      }
 
       const updatedEvent = await response.json();
 
@@ -737,13 +730,28 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
                   prev ? { ...prev, ssg_member_ids: options } : null
                 );
               }}
+              style={{
+                maxHeight: "200px",
+                overflow: "auto",
+              }}
             >
-              {ssgMembers.map((member) => (
-                <option key={member.user_id} value={member.user_id}>
-                  {member.user.first_name} {member.user.last_name}
-                  {member.position && ` (${member.position})`}
-                </option>
-              ))}
+              {ssgMembers.map((member) => {
+                // Check if this member is selected
+                const isSelected = editingEvent?.ssg_member_ids?.includes(
+                  member.user_id
+                );
+
+                return (
+                  <option
+                    key={member.user_id}
+                    value={member.user_id}
+                    className={isSelected ? "selected-option" : ""}
+                  >
+                    {member.user.first_name} {member.user.last_name}
+                    {member.position && ` (${member.position})`}
+                  </option>
+                );
+              })}
             </select>
             <small>Hold Ctrl/Cmd to select multiple members</small>
           </div>
