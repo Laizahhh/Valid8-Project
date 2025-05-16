@@ -11,12 +11,17 @@ interface EventsProps {
   role: string;
 }
 
-interface SSGProfile {
+interface User {
   id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
+interface SSGMember {
+  user_id: number;
   position: string;
-  first_name?: string;
-  last_name?: string;
-  email?: string;
+  user: User;
 }
 
 interface Department {
@@ -38,7 +43,7 @@ interface Event {
   status: "upcoming" | "ongoing" | "completed" | "cancelled";
   departments?: Department[];
   programs?: Program[];
-  ssg_members?: SSGProfile[]; // Changed from SSGMember[] to SSGProfile[]
+  ssg_members?: SSGMember[]; // Use SSGMember instead of SSGProfile
 }
 
 export const Events: React.FC<EventsProps> = ({ role }) => {
@@ -103,13 +108,15 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
     return programs.map((p) => p.name).join(", ") || "N/A";
   };
 
-  const formatSSGMembers = (members: SSGProfile[] = []) => {
+  // Then update formatSSGMembers:
+  const formatSSGMembers = (members: SSGMember[] = []) => {
     if (!members || members.length === 0) return "N/A";
+
     return members.map((m) => (
-      <div key={m.id} className="ssg-member-item">
+      <div key={m.user_id} className="ssg-member-item">
         <FaUsers className="member-icon" />
         <span>
-          {m.first_name || "Unknown"} {m.last_name || "User"}
+          {m.user.first_name} {m.user.last_name}
           {m.position && ` (${m.position})`}
         </span>
       </div>
