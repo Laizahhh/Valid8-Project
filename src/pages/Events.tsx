@@ -3,12 +3,20 @@ import { NavbarAdmin } from "../components/NavbarAdmin";
 import { NavbarStudentSSG } from "../components/NavbarStudentSSG";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
 import { NavbarSSG } from "../components/NavbarSSG";
-import { FaFilter, FaSearch } from "react-icons/fa";
+import { FaFilter, FaSearch, FaUsers } from "react-icons/fa";
 import { fetchEventsByStatus } from "../api/eventsApi";
 import "../css/Events.css";
 
 interface EventsProps {
   role: string;
+}
+
+interface SSGProfile {
+  id: number;
+  position: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
 }
 
 interface Department {
@@ -21,11 +29,6 @@ interface Program {
   name: string;
 }
 
-interface SSGProfile {
-  id: number;
-  position: string;
-}
-
 interface Event {
   id: number;
   name: string;
@@ -35,7 +38,7 @@ interface Event {
   status: "upcoming" | "ongoing" | "completed" | "cancelled";
   departments?: Department[];
   programs?: Program[];
-  ssg_members?: SSGProfile[];
+  ssg_members?: SSGProfile[]; // Changed from SSGMember[] to SSGProfile[]
 }
 
 export const Events: React.FC<EventsProps> = ({ role }) => {
@@ -98,6 +101,19 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
 
   const formatPrograms = (programs: Program[] = []) => {
     return programs.map((p) => p.name).join(", ") || "N/A";
+  };
+
+  const formatSSGMembers = (members: SSGProfile[] = []) => {
+    if (!members || members.length === 0) return "N/A";
+    return members.map((m) => (
+      <div key={m.id} className="ssg-member-item">
+        <FaUsers className="member-icon" />
+        <span>
+          {m.first_name || "Unknown"} {m.last_name || "User"}
+          {m.position && ` (${m.position})`}
+        </span>
+      </div>
+    ));
   };
 
   const filteredEvents = events
@@ -219,6 +235,7 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
                   <th>Event Name</th>
                   <th>Department(s)</th>
                   <th>Program(s)</th>
+                  <th>SSG Members</th>
                   <th>Date & Time</th>
                   <th>Location</th>
                   <th>Status</th>
@@ -235,6 +252,11 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
                       <td data-label="Program(s)">
                         {formatPrograms(event.programs)}
                       </td>
+                      <td data-label="SSG Members" className="ssg-members-cell">
+                        <div className="ssg-members-list">
+                          {formatSSGMembers(event.ssg_members)}
+                        </div>
+                      </td>
                       <td data-label="Date & Time">
                         {formatDateTime(event.start_datetime)} -{" "}
                         {formatDateTime(event.end_datetime)}
@@ -250,7 +272,7 @@ export const Events: React.FC<EventsProps> = ({ role }) => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={6} className="no-results">
+                    <td colSpan={7} className="no-results">
                       No matching events found
                     </td>
                   </tr>
