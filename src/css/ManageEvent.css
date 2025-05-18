@@ -446,3 +446,16 @@ body {
   padding: 3rem 1rem;
   color: var(--gray-color);
 }
+
+.select-multiple option:checked,
+.select-multiple option.selected-option {
+  background-color: #007bff !important;
+  color: white !important;
+}
+
+/* Firefox specific styling */
+@-moz-document url-prefix() {
+  .select-multiple option:checked {
+    box-shadow: 0 0 10px 100px #007bff inset !important;
+  }
+}

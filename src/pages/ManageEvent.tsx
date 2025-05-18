@@ -78,10 +78,12 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
       throw new Error("No authentication token found");
     }
 
+    // Don't set Content-Type for FormData
+    const isFormData = options.body instanceof FormData;
     const headers = {
       ...options.headers,
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+      ...(!isFormData && { "Content-Type": "application/json" }),
     };
 
     try {

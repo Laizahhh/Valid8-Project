@@ -12,6 +12,7 @@ import {
   FaCheck,
   FaSpinner,
   FaInfoCircle,
+  FaSearch,
 } from "react-icons/fa";
 import "../css/CreateEvent.css";
 
@@ -19,7 +20,6 @@ interface CreateEventProps {
   role: string;
 }
 
-// Updated SSG interfaces to match ManageEvent
 interface User {
   id: number;
   first_name: string;
@@ -48,7 +48,7 @@ interface EventFormData {
   location: string;
   start_datetime: string;
   end_datetime: string;
-  status: "upcoming" | "ongoing" | "completed" | "cancelled"; // Changed to lowercase to match API
+  status: "upcoming" | "ongoing" | "completed" | "cancelled";
   ssg_member_ids: number[];
   program_ids: number[];
   department_ids: number[];
@@ -61,13 +61,15 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
     location: "",
     start_datetime: "",
     end_datetime: "",
-    status: "upcoming", // Matching backend enum format (uppercase)
+    status: "upcoming",
     ssg_member_ids: [],
     program_ids: [],
     department_ids: [],
   });
 
-  // Updated to use SSGMember interface matching ManageEvent
+  const [ssgSearch, setSsgSearch] = useState("");
+  const [programSearch, setProgramSearch] = useState("");
+  const [departmentSearch, setDepartmentSearch] = useState("");
   const [ssgMembers, setSSGMembers] = useState<SSGMember[]>([]);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -79,14 +81,27 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
     Record<string, string>
   >({});
 
-  // Dropdown states
+  const filteredSSGMembers = ssgMembers.filter((member) => {
+    const fullName = `${member.user?.first_name || ""} ${
+      member.user?.last_name || ""
+    }`.toLowerCase();
+    return fullName.includes(ssgSearch.toLowerCase());
+  });
+
+  const filteredPrograms = programs.filter((program) =>
+    program.name.toLowerCase().includes(programSearch.toLowerCase())
+  );
+
+  const filteredDepartments = departments.filter((dept) =>
+    dept.name.toLowerCase().includes(departmentSearch.toLowerCase())
+  );
+
   const [ssgDropdownOpen, setSsgDropdownOpen] = useState(false);
   const [programsDropdownOpen, setProgramsDropdownOpen] = useState(false);
   const [departmentsDropdownOpen, setDepartmentsDropdownOpen] = useState(false);
 
   const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-  // Improved fetchWithAuth function with better error handling
   const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     const token = localStorage.getItem("authToken");
     if (!token) {
@@ -109,18 +124,15 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
         throw new Error("Session expired. Please login again.");
       }
 
-      // If response is not OK, try to parse error details
       if (!response.ok) {
         const errorText = await response.text();
         let errorData;
         let errorMessage = `HTTP error! status: ${response.status}`;
 
         try {
-          // Try to parse error as JSON
           errorData = JSON.parse(errorText);
           console.error("API Error Response:", errorData);
 
-          // Extract error message from common API error formats
           if (errorData.detail) {
             errorMessage =
               typeof errorData.detail === "string"
@@ -129,11 +141,9 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
           } else if (errorData.message) {
             errorMessage = errorData.message;
           } else if (typeof errorData === "object") {
-            // Handle validation errors that might be nested
             errorMessage = JSON.stringify(errorData);
           }
         } catch (e) {
-          // If not JSON, use raw error text
           console.error("API Error (non-JSON):", errorText);
           errorMessage = errorText || errorMessage;
         }
@@ -148,14 +158,11 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
     }
   };
 
-  // Function to format dates for API submission
   const formatDateForAPI = (dateString: string) => {
     if (!dateString) return "";
-    // Ensure date is in ISO format (which API expects)
     return new Date(dateString).toISOString();
   };
 
-  // Check if user is logged in before fetching data
   const checkAuthentication = (): boolean => {
     const token = localStorage.getItem("authToken");
     if (!token) {
@@ -173,7 +180,6 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
       if (!checkAuthentication()) return;
 
       try {
-        // Use fetchWithAuth for all API calls
         const [ssgResponse, programsResponse, deptsResponse] =
           await Promise.all([
             fetchWithAuth(`${BASE_URL}/users/by-role/ssg`),
@@ -181,14 +187,12 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
             fetchWithAuth(`${BASE_URL}/departments/`),
           ]);
 
-        // Parse responses
         const [ssgData, programsData, deptsData] = await Promise.all([
           ssgResponse.json(),
           programsResponse.json(),
           deptsResponse.json(),
         ]);
 
-        // Transform SSG members to match the structure in ManageEvent
         const transformedMembers = Array.isArray(ssgData)
           ? ssgData
               .filter((member) => member && typeof member === "object")
@@ -227,7 +231,6 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear validation error when field is edited
     if (validationErrors[name]) {
       setValidationErrors((prev) => {
         const newErrors = { ...prev };
@@ -242,7 +245,6 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
     value: string
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear validation errors related to dates
     if (validationErrors[field]) {
       setValidationErrors((prev) => {
         const newErrors = { ...prev };
@@ -263,7 +265,6 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
         : [...currentIds, id];
       return { ...prev, [type]: newIds };
     });
-    // Clear related validation error if any
     if (validationErrors[type]) {
       setValidationErrors((prev) => {
         const newErrors = { ...prev };
@@ -276,7 +277,6 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
   const validateForm = () => {
     const errors: Record<string, string> = {};
 
-    // Basic validations
     if (!formData.name.trim()) errors.name = "Event name is required";
     if (!formData.location.trim()) errors.location = "Location is required";
     if (!formData.start_datetime)
@@ -284,7 +284,6 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
     if (!formData.end_datetime)
       errors.end_datetime = "End date & time is required";
 
-    // Validate start date is before end date
     if (formData.start_datetime && formData.end_datetime) {
       const start = new Date(formData.start_datetime);
       const end = new Date(formData.end_datetime);
@@ -294,7 +293,6 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
       }
     }
 
-    // Check if start date is in the past
     const now = new Date();
     const start = formData.start_datetime
       ? new Date(formData.start_datetime)
@@ -307,14 +305,11 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
     return Object.keys(errors).length === 0;
   };
 
-  // Improved handleSubmit with better error handling
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check authentication before submitting
     if (!checkAuthentication()) return;
 
-    // First validate the form
     if (!validateForm()) {
       setError("Please fix the validation errors before submitting");
       return;
@@ -324,7 +319,6 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
     setError(null);
 
     try {
-      // Format dates correctly for API
       const apiFormData = {
         ...formData,
         start_datetime: formatDateForAPI(formData.start_datetime),
@@ -333,7 +327,6 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
 
       console.log("Submitting event data:", apiFormData);
 
-      // Use fetchWithAuth for POST request
       const response = await fetchWithAuth(`${BASE_URL}/events/`, {
         method: "POST",
         body: JSON.stringify(apiFormData),
@@ -342,7 +335,6 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
       const result = await response.json();
       setSuccessMessage(`Event "${result.name}" created successfully!`);
 
-      // Reset form
       setFormData({
         name: "",
         location: "",
@@ -354,12 +346,10 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
         department_ids: [],
       });
 
-      // Auto-dismiss success message after 5 seconds
       setTimeout(() => setSuccessMessage(""), 5000);
     } catch (err) {
       console.error("Error creating event:", err);
 
-      // Improved error handling with proper extraction of error message
       if (err instanceof Error) {
         setError(err.message);
       } else if (typeof err === "object" && err !== null) {
@@ -400,13 +390,11 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
     return items.map((item) => item.name).join(", ");
   };
 
-  // Handle outside clicks to close dropdowns
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
 
-      // Check if click is outside dropdown areas
-      if (!target.closest(".custom-dropdown")) {
+      if (!target.closest(".ce-custom-dropdown")) {
         setSsgDropdownOpen(false);
         setProgramsDropdownOpen(false);
         setDepartmentsDropdownOpen(false);
@@ -419,24 +407,26 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
     };
   }, []);
 
-  // Helper function to render a login prompt if not authenticated
   const renderLoginPrompt = () => (
-    <div className="page-container">
-      <div className="navbar-container">
+    <div className="ce-page-container">
+      <div className="ce-navbar-container">
         {role === "student-ssg-eventorganizer" ? (
           <NavbarStudentSSGEventOrganizer />
         ) : (
           <NavbarEventOrganizer />
         )}
       </div>
-      <div className="content-container">
-        <div className="error-message">
-          <FaTimes className="error-icon" />
+      <div className="ce-content-container">
+        <div className="ce-error-message">
+          <FaTimes className="ce-error-icon" />
           {error}
         </div>
-        <div className="login-prompt">
+        <div className="ce-login-prompt">
           <p>Please log in to access the event creation form.</p>
-          <button onClick={() => navigate("/login")} className="primary-button">
+          <button
+            onClick={() => navigate("/login")}
+            className="ce-primary-button"
+          >
             Go to Login
           </button>
         </div>
@@ -444,23 +434,22 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
     </div>
   );
 
-  // Return login prompt if authentication error occurs
   if (!loading && error?.includes("log in")) {
     return renderLoginPrompt();
   }
 
   if (loading) {
     return (
-      <div className="page-container">
-        <div className="navbar-container">
+      <div className="ce-page-container">
+        <div className="ce-navbar-container">
           {role === "student-ssg-eventorganizer" ? (
             <NavbarStudentSSGEventOrganizer />
           ) : (
             <NavbarEventOrganizer />
           )}
         </div>
-        <div className="loading-container">
-          <FaSpinner className="spinner-icon" />
+        <div className="ce-loading-container">
+          <FaSpinner className="ce-spinner-icon" />
           Loading event data...
         </div>
       </div>
@@ -468,8 +457,8 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
   }
 
   return (
-    <div className="page-container">
-      <div className="navbar-container">
+    <div className="ce-page-container">
+      <div className="ce-navbar-container">
         {role === "student-ssg-eventorganizer" ? (
           <NavbarStudentSSGEventOrganizer />
         ) : (
@@ -477,39 +466,48 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
         )}
       </div>
 
-      <div className="content-container">
+      <div className="ce-content-container">
         {error && (
-          <div className="error-message">
-            <FaTimes className="error-icon" />
+          <div className="ce-error-message">
+            <FaTimes className="ce-error-icon" />
             {error}
-            <button onClick={() => setError(null)} className="dismiss-button">
-              Dismiss
-            </button>
-          </div>
-        )}
-
-        {successMessage && (
-          <div className="success-message">
-            <FaCheck className="success-icon" />
-            {successMessage}
             <button
-              onClick={() => setSuccessMessage("")}
-              className="dismiss-button"
+              onClick={() => setError(null)}
+              className="ce-dismiss-button"
             >
               Dismiss
             </button>
           </div>
         )}
 
-        <h2>Create New Event</h2>
-        <p className="subtitle">
-          Fill in the details below to create a new event
-        </p>
+        {successMessage && (
+          <div className="ce-success-message">
+            <FaCheck className="ce-success-icon" />
+            {successMessage}
+            <button
+              onClick={() => setSuccessMessage("")}
+              className="ce-dismiss-button"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="event-form">
-          <div className={`form-group ${validationErrors.name ? "error" : ""}`}>
-            <label>
-              <FaCalendarAlt className="icon" />
+        <div className="ce-header-section">
+          <h2 className="ce-main-title">Create New Event</h2>
+          <p className="ce-subtitle">
+            Fill in the details below to create a new event
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="ce-event-form">
+          <div
+            className={`ce-form-group ${
+              validationErrors.name ? "ce-error" : ""
+            }`}
+          >
+            <label className="ce-form-label">
+              <FaCalendarAlt className="ce-icon" />
               Event Name*
             </label>
             <input
@@ -519,18 +517,22 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
               onChange={handleInputChange}
               required
               placeholder="Enter Event Name"
-              className={validationErrors.name ? "input-error" : ""}
+              className={`ce-form-input ${
+                validationErrors.name ? "ce-input-error" : ""
+              }`}
             />
             {validationErrors.name && (
-              <div className="error-text">{validationErrors.name}</div>
+              <div className="ce-error-text">{validationErrors.name}</div>
             )}
           </div>
 
           <div
-            className={`form-group ${validationErrors.location ? "error" : ""}`}
+            className={`ce-form-group ${
+              validationErrors.location ? "ce-error" : ""
+            }`}
           >
-            <label>
-              <FaMapMarkerAlt className="icon" />
+            <label className="ce-form-label">
+              <FaMapMarkerAlt className="ce-icon" />
               Location*
             </label>
             <input
@@ -540,21 +542,23 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
               onChange={handleInputChange}
               required
               placeholder="Enter Location"
-              className={validationErrors.location ? "input-error" : ""}
+              className={`ce-form-input ${
+                validationErrors.location ? "ce-input-error" : ""
+              }`}
             />
             {validationErrors.location && (
-              <div className="error-text">{validationErrors.location}</div>
+              <div className="ce-error-text">{validationErrors.location}</div>
             )}
           </div>
 
-          <div className="form-row">
+          <div className="ce-form-row">
             <div
-              className={`form-group ${
-                validationErrors.start_datetime ? "error" : ""
+              className={`ce-form-group ${
+                validationErrors.start_datetime ? "ce-error" : ""
               }`}
             >
-              <label>
-                <FaCalendarAlt className="icon" />
+              <label className="ce-form-label">
+                <FaCalendarAlt className="ce-icon" />
                 Start Date & Time*
               </label>
               <input
@@ -564,22 +568,24 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
                   handleDateTimeChange("start_datetime", e.target.value)
                 }
                 required
-                className={validationErrors.start_datetime ? "input-error" : ""}
+                className={`ce-form-input ${
+                  validationErrors.start_datetime ? "ce-input-error" : ""
+                }`}
               />
               {validationErrors.start_datetime && (
-                <div className="error-text">
+                <div className="ce-error-text">
                   {validationErrors.start_datetime}
                 </div>
               )}
             </div>
 
             <div
-              className={`form-group ${
-                validationErrors.end_datetime ? "error" : ""
+              className={`ce-form-group ${
+                validationErrors.end_datetime ? "ce-error" : ""
               }`}
             >
-              <label>
-                <FaCalendarAlt className="icon" />
+              <label className="ce-form-label">
+                <FaCalendarAlt className="ce-icon" />
                 End Date & Time*
               </label>
               <input
@@ -589,94 +595,130 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
                   handleDateTimeChange("end_datetime", e.target.value)
                 }
                 required
-                className={validationErrors.end_datetime ? "input-error" : ""}
+                className={`ce-form-input ${
+                  validationErrors.end_datetime ? "ce-input-error" : ""
+                }`}
               />
               {validationErrors.end_datetime && (
-                <div className="error-text">
+                <div className="ce-error-text">
                   {validationErrors.end_datetime}
                 </div>
               )}
             </div>
           </div>
 
-          <div className="form-info-box">
-            <FaInfoCircle className="info-icon" />
+          <div className="ce-info-box">
+            <FaInfoCircle className="ce-info-icon" />
             <span>
               Select SSG members, programs, and departments for this event. At
               least one selection is recommended.
             </span>
           </div>
 
-          {/* SSG Members Dropdown - Updated to match ManageEvent logic */}
+          {/* SSG Members Dropdown */}
           <div
-            className={`form-group ${
-              validationErrors.ssg_member_ids ? "error" : ""
+            className={`ce-form-group ${
+              validationErrors.ssg_member_ids ? "ce-error" : ""
             }`}
           >
-            <label>
-              <FaUsers className="icon" />
+            <label className="ce-form-label">
+              <FaUsers className="ce-icon" />
               Assign SSG Members
             </label>
             <div
-              className={`custom-dropdown ${ssgDropdownOpen ? "active" : ""}`}
+              className={`ce-custom-dropdown ${
+                ssgDropdownOpen ? "ce-active" : ""
+              }`}
             >
               <div
-                className="dropdown-header"
+                className={`ce-dropdown-header ${
+                  formData.ssg_member_ids.length > 0 ? "ce-has-selection" : ""
+                }`}
                 onClick={() => {
                   setSsgDropdownOpen(!ssgDropdownOpen);
                   setProgramsDropdownOpen(false);
                   setDepartmentsDropdownOpen(false);
+                  setSsgSearch("");
                 }}
               >
-                <span>{getSelectedItemsLabel("ssg_member_ids")}</span>
+                <span className="ce-dropdown-header-text">
+                  {getSelectedItemsLabel("ssg_member_ids")}
+                </span>
                 <FaChevronDown
-                  className={`dropdown-icon ${ssgDropdownOpen ? "open" : ""}`}
+                  className={`ce-dropdown-icon ${
+                    ssgDropdownOpen ? "ce-open" : ""
+                  }`}
                 />
               </div>
               {ssgDropdownOpen && (
-                <div className="dropdown-options">
-                  {loading ? (
-                    <div className="dropdown-loading">
-                      <FaSpinner className="spinner-icon" /> Loading...
-                    </div>
-                  ) : ssgMembers.length === 0 ? (
-                    <div className="dropdown-empty">
-                      {error
-                        ? "Failed to load SSG members"
-                        : "No SSG members available"}
-                    </div>
-                  ) : (
-                    ssgMembers.map((member) => (
-                      <div
-                        key={member.user_id}
-                        className="dropdown-option"
-                        onClick={() =>
-                          toggleSelection("ssg_member_ids", member.user_id)
-                        }
-                      >
+                <div className="ce-dropdown-options-container">
+                  <div className="ce-dropdown-search">
+                    <FaSearch className="ce-search-icon" />
+                    <input
+                      type="text"
+                      placeholder="Search SSG members..."
+                      value={ssgSearch}
+                      onChange={(e) => setSsgSearch(e.target.value)}
+                      className="ce-search-input"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="ce-dropdown-options-list">
+                    {filteredSSGMembers.length === 0 ? (
+                      <div className="ce-dropdown-empty">
+                        {ssgSearch
+                          ? "No members match your search"
+                          : "No SSG members available"}
+                      </div>
+                    ) : (
+                      filteredSSGMembers.map((member) => (
                         <div
-                          className={`checkbox ${
+                          key={member.user_id}
+                          className={`ce-dropdown-option ${
                             formData.ssg_member_ids.includes(member.user_id)
-                              ? "checked"
+                              ? "ce-selected"
                               : ""
                           }`}
+                          onClick={() =>
+                            toggleSelection("ssg_member_ids", member.user_id)
+                          }
                         >
-                          {formData.ssg_member_ids.includes(member.user_id) && (
-                            <FaCheck className="check-icon" />
-                          )}
+                          <div className="ce-option-content">
+                            <div className="ce-member-name">
+                              {member.user?.first_name || "Unknown"}{" "}
+                              {member.user?.last_name || "User"}
+                            </div>
+                            <div className="ce-member-position">
+                              {member.position}
+                            </div>
+                          </div>
+                          <div
+                            className={`ce-checkbox ${
+                              formData.ssg_member_ids.includes(member.user_id)
+                                ? "ce-checked"
+                                : ""
+                            }`}
+                          >
+                            {formData.ssg_member_ids.includes(
+                              member.user_id
+                            ) && <FaCheck className="ce-check-icon" />}
+                          </div>
                         </div>
-                        <span>
-                          {member.user?.first_name || "Unknown"}{" "}
-                          {member.user?.last_name || "User"} ({member.position})
-                        </span>
+                      ))
+                    )}
+                  </div>
+                  {formData.ssg_member_ids.length > 0 && (
+                    <div className="ce-dropdown-footer">
+                      <div className="ce-selected-count">
+                        {formData.ssg_member_ids.length} selected
                       </div>
-                    ))
+                    </div>
                   )}
                 </div>
               )}
             </div>
             {validationErrors.ssg_member_ids && (
-              <div className="error-text">
+              <div className="ce-error-text">
                 {validationErrors.ssg_member_ids}
               </div>
             )}
@@ -684,144 +726,214 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
 
           {/* Programs Dropdown */}
           <div
-            className={`form-group ${
-              validationErrors.program_ids ? "error" : ""
+            className={`ce-form-group ${
+              validationErrors.program_ids ? "ce-error" : ""
             }`}
           >
-            <label>
-              <FaGraduationCap className="icon" />
+            <label className="ce-form-label">
+              <FaGraduationCap className="ce-icon" />
               Select Programs
             </label>
             <div
-              className={`custom-dropdown ${
-                programsDropdownOpen ? "active" : ""
+              className={`ce-custom-dropdown ${
+                programsDropdownOpen ? "ce-active" : ""
               }`}
             >
               <div
-                className="dropdown-header"
+                className={`ce-dropdown-header ${
+                  formData.program_ids.length > 0 ? "ce-has-selection" : ""
+                }`}
                 onClick={() => {
                   setProgramsDropdownOpen(!programsDropdownOpen);
                   setSsgDropdownOpen(false);
                   setDepartmentsDropdownOpen(false);
+                  setProgramSearch("");
                 }}
               >
-                <span>{getSelectedItemsLabel("program_ids")}</span>
+                <span className="ce-dropdown-header-text">
+                  {getSelectedItemsLabel("program_ids")}
+                </span>
                 <FaChevronDown
-                  className={`dropdown-icon ${
-                    programsDropdownOpen ? "open" : ""
+                  className={`ce-dropdown-icon ${
+                    programsDropdownOpen ? "ce-open" : ""
                   }`}
                 />
               </div>
               {programsDropdownOpen && (
-                <div className="dropdown-options">
-                  {programs.length === 0 ? (
-                    <div className="dropdown-empty">No programs available</div>
-                  ) : (
-                    programs.map((program) => (
-                      <div
-                        key={program.id}
-                        className="dropdown-option"
-                        onClick={() =>
-                          toggleSelection("program_ids", program.id)
-                        }
-                      >
+                <div className="ce-dropdown-options-container">
+                  <div className="ce-dropdown-search">
+                    <FaSearch className="ce-search-icon" />
+                    <input
+                      type="text"
+                      placeholder="Search programs..."
+                      value={programSearch}
+                      onChange={(e) => setProgramSearch(e.target.value)}
+                      className="ce-search-input"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="ce-dropdown-options-list">
+                    {filteredPrograms.length === 0 ? (
+                      <div className="ce-dropdown-empty">
+                        {programSearch
+                          ? "No programs match your search"
+                          : "No programs available"}
+                      </div>
+                    ) : (
+                      filteredPrograms.map((program) => (
                         <div
-                          className={`checkbox ${
+                          key={program.id}
+                          className={`ce-dropdown-option ${
                             formData.program_ids.includes(program.id)
-                              ? "checked"
+                              ? "ce-selected"
                               : ""
                           }`}
+                          onClick={() =>
+                            toggleSelection("program_ids", program.id)
+                          }
                         >
-                          {formData.program_ids.includes(program.id) && (
-                            <FaCheck className="check-icon" />
-                          )}
+                          <div className="ce-option-content">
+                            <div className="ce-item-name">{program.name}</div>
+                          </div>
+                          <div
+                            className={`ce-checkbox ${
+                              formData.program_ids.includes(program.id)
+                                ? "ce-checked"
+                                : ""
+                            }`}
+                          >
+                            {formData.program_ids.includes(program.id) && (
+                              <FaCheck className="ce-check-icon" />
+                            )}
+                          </div>
                         </div>
-                        <span>{program.name}</span>
+                      ))
+                    )}
+                  </div>
+                  {formData.program_ids.length > 0 && (
+                    <div className="ce-dropdown-footer">
+                      <div className="ce-selected-count">
+                        {formData.program_ids.length} selected
                       </div>
-                    ))
+                    </div>
                   )}
                 </div>
               )}
             </div>
             {validationErrors.program_ids && (
-              <div className="error-text">{validationErrors.program_ids}</div>
+              <div className="ce-error-text">
+                {validationErrors.program_ids}
+              </div>
             )}
           </div>
 
           {/* Departments Dropdown */}
           <div
-            className={`form-group ${
-              validationErrors.department_ids ? "error" : ""
+            className={`ce-form-group ${
+              validationErrors.department_ids ? "ce-error" : ""
             }`}
           >
-            <label>
-              <FaGraduationCap className="icon" />
+            <label className="ce-form-label">
+              <FaGraduationCap className="ce-icon" />
               Select Departments
             </label>
             <div
-              className={`custom-dropdown ${
-                departmentsDropdownOpen ? "active" : ""
+              className={`ce-custom-dropdown ${
+                departmentsDropdownOpen ? "ce-active" : ""
               }`}
             >
               <div
-                className="dropdown-header"
+                className={`ce-dropdown-header ${
+                  formData.department_ids.length > 0 ? "ce-has-selection" : ""
+                }`}
                 onClick={() => {
                   setDepartmentsDropdownOpen(!departmentsDropdownOpen);
                   setSsgDropdownOpen(false);
                   setProgramsDropdownOpen(false);
+                  setDepartmentSearch("");
                 }}
               >
-                <span>{getSelectedItemsLabel("department_ids")}</span>
+                <span className="ce-dropdown-header-text">
+                  {getSelectedItemsLabel("department_ids")}
+                </span>
                 <FaChevronDown
-                  className={`dropdown-icon ${
-                    departmentsDropdownOpen ? "open" : ""
+                  className={`ce-dropdown-icon ${
+                    departmentsDropdownOpen ? "ce-open" : ""
                   }`}
                 />
               </div>
               {departmentsDropdownOpen && (
-                <div className="dropdown-options">
-                  {departments.length === 0 ? (
-                    <div className="dropdown-empty">
-                      No departments available
-                    </div>
-                  ) : (
-                    departments.map((dept) => (
-                      <div
-                        key={dept.id}
-                        className="dropdown-option"
-                        onClick={() =>
-                          toggleSelection("department_ids", dept.id)
-                        }
-                      >
+                <div className="ce-dropdown-options-container">
+                  <div className="ce-dropdown-search">
+                    <FaSearch className="ce-search-icon" />
+                    <input
+                      type="text"
+                      placeholder="Search departments..."
+                      value={departmentSearch}
+                      onChange={(e) => setDepartmentSearch(e.target.value)}
+                      className="ce-search-input"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="ce-dropdown-options-list">
+                    {filteredDepartments.length === 0 ? (
+                      <div className="ce-dropdown-empty">
+                        {departmentSearch
+                          ? "No departments match your search"
+                          : "No departments available"}
+                      </div>
+                    ) : (
+                      filteredDepartments.map((dept) => (
                         <div
-                          className={`checkbox ${
+                          key={dept.id}
+                          className={`ce-dropdown-option ${
                             formData.department_ids.includes(dept.id)
-                              ? "checked"
+                              ? "ce-selected"
                               : ""
                           }`}
+                          onClick={() =>
+                            toggleSelection("department_ids", dept.id)
+                          }
                         >
-                          {formData.department_ids.includes(dept.id) && (
-                            <FaCheck className="check-icon" />
-                          )}
+                          <div className="ce-option-content">
+                            <div className="ce-item-name">{dept.name}</div>
+                          </div>
+                          <div
+                            className={`ce-checkbox ${
+                              formData.department_ids.includes(dept.id)
+                                ? "ce-checked"
+                                : ""
+                            }`}
+                          >
+                            {formData.department_ids.includes(dept.id) && (
+                              <FaCheck className="ce-check-icon" />
+                            )}
+                          </div>
                         </div>
-                        <span>{dept.name}</span>
+                      ))
+                    )}
+                  </div>
+                  {formData.department_ids.length > 0 && (
+                    <div className="ce-dropdown-footer">
+                      <div className="ce-selected-count">
+                        {formData.department_ids.length} selected
                       </div>
-                    ))
+                    </div>
                   )}
                 </div>
               )}
             </div>
             {validationErrors.department_ids && (
-              <div className="error-text">
+              <div className="ce-error-text">
                 {validationErrors.department_ids}
               </div>
             )}
           </div>
 
-          <div className="form-actions">
+          <div className="ce-form-actions">
             <button
               type="button"
-              className="secondary-button"
+              className="ce-secondary-button"
               onClick={() => {
                 setFormData({
                   name: "",
@@ -842,12 +954,12 @@ export const CreateEvent: React.FC<CreateEventProps> = ({ role }) => {
             </button>
             <button
               type="submit"
-              className="primary-button"
+              className="ce-primary-button"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
-                  <FaSpinner className="spinner-icon" /> Creating...
+                  <FaSpinner className="ce-spinner-icon" /> Creating...
                 </>
               ) : (
                 "Create Event"
