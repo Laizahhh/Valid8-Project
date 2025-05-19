@@ -6,7 +6,6 @@ import {
   FaCalendarAlt,
   FaCheckCircle,
   FaClipboardList,
-  FaUsers,
   FaChartBar,
 } from "react-icons/fa";
 
@@ -30,12 +29,6 @@ export const StudentSsgDashboard = () => {
       description: "View and manage currently ongoing events.",
       icon: <FaClipboardList style={{ color: "#ffc107" }} />,
       link: "/studentssg_events",
-    },
-    {
-      title: "Attendance",
-      description: "Track and verify attendance records.",
-      icon: <FaUsers style={{ color: "#17a2b8" }} />,
-      link: "/studentssg_attendance",
     },
     {
       title: "Records",
