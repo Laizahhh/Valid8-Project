@@ -34,10 +34,10 @@ const StudentSsgEventDashboard = () => {
       link: "/student_ssg_eventorganizer_events",
     },
     {
-      title: "Attendance",
-      description: "Track and verify attendance records.",
+      title: "Manual Attendance",
+      description: "Record Attendance",
       icon: <FaUsers style={{ color: "#17a2b8" }} />,
-      link: "/student_ssg_eventorganizer_attendance",
+      link: "/student_ssg_eventorganizer_manual_attendance",
     },
     {
       title: "Records",

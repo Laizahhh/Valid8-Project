@@ -688,3 +688,15 @@ select:focus {
       width: 100%;
     }
   }
+
+  .required {
+    color: red;
+  }
+  
+  .image-not-required {
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    color: #666;
+    font-style: italic;
+  }

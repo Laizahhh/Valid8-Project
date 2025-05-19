@@ -13,70 +13,184 @@ interface AttendanceProps {
   role: string;
 }
 
-const dummyEvents = [
-  {
-    name: "Sports Day",
-    date: "January 15, 2025",
-    location: "Sports Complex",
-    description: "Annual sports competition between departments",
-    image: "https://source.unsplash.com/random/600x400/?sports",
-  },
-  {
-    name: "Cultural Night",
-    date: "March 22, 2025",
-    location: "Main Hall",
-    description: "Showcase of diverse cultural performances",
-    image: "https://source.unsplash.com/random/600x400/?culture",
-  },
-  {
-    name: "Science Fair",
-    date: "April 10, 2025",
-    location: "Gymnasium",
-    description: "Exhibition of student research projects",
-    image: "https://source.unsplash.com/random/600x400/?science",
-  },
-];
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3003";
 
-interface AttendanceRecord {
+interface Event {
+  id: string;
   name: string;
   date: string;
   location: string;
   description: string;
+  image?: string;
+  status: "active" | "upcoming" | "past";
+}
+
+interface Student {
+  id: string;
+  studentId: string;
+  fullName: string;
   yearLevel: string;
   program: string;
+  photoUrl?: string;
+}
+
+interface AttendanceRecord {
+  eventId: string;
+  name: string;
+  date: string;
+  location: string;
+  description: string;
   timeIn: string;
-  checkpoint: string;
   timeOut: string;
   studentId: string;
+  studentDetails: Student | null;
   image?: string;
-  status: "pending" | "time-in" | "checkpoint" | "time-out" | "completed";
+  status: "pending" | "time-in" | "time-out" | "completed";
 }
 
 export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [attendanceRecords, setAttendanceRecords] = useState<
     AttendanceRecord[]
-  >(
-    dummyEvents.map((event) => ({
-      ...event,
-      yearLevel: "1",
-      program: "BS Computer Engineering",
-      timeIn: "",
-      checkpoint: "",
-      timeOut: "",
-      studentId: "",
-      status: "pending",
-    }))
-  );
+  >([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [scanning, setScanning] = useState<number | null>(null);
-  const [scanType, setScanType] = useState<
-    "timeIn" | "checkpoint" | "timeOut" | null
-  >(null);
+  const [scanType, setScanType] = useState<"timeIn" | "timeOut" | null>(null);
   const [showCamera, setShowCamera] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [resetAfterSubmit, setResetAfterSubmit] = useState(true);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Fetch active events from API
+  const fetchActiveEvents = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${BASE_URL}/activeEvents`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setEvents(data);
+
+      // Initialize attendance records for each event
+      setAttendanceRecords(
+        data.map((event: Event) => ({
+          eventId: event.id,
+          name: event.name,
+          date: event.date,
+          location: event.location,
+          description: event.description,
+          timeIn: "",
+          timeOut: "",
+          studentId: "",
+          studentDetails: null,
+          image: event.image,
+          status: "pending",
+        }))
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch events");
+      console.error("Fetch error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Submit attendance record to API
+  const submitAttendance = async (record: AttendanceRecord) => {
+    try {
+      const response = await fetch(`${BASE_URL}/attendance`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          eventId: record.eventId,
+          studentId: record.studentId,
+          timeIn: record.timeIn,
+          timeOut: record.timeOut,
+          status: record.status,
+          studentDetails: record.studentDetails,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (err) {
+      console.error("Error submitting attendance:", err);
+      throw err;
+    }
+  };
+
+  // Verify student ID with API and fetch details
+  const verifyStudent = async (studentId: string) => {
+    try {
+      const response = await fetch(`${BASE_URL}/students/${studentId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error("Error verifying student:", err);
+      throw err;
+    }
+  };
+
+  // Handle student ID change and fetch details
+  const handleStudentIdChange = async (index: number, studentId: string) => {
+    setAttendanceRecords((prev) =>
+      prev.map((record, i) =>
+        i === index ? { ...record, studentId, studentDetails: null } : record
+      )
+    );
+
+    if (studentId.length > 0) {
+      try {
+        const student = await verifyStudent(studentId);
+        if (student) {
+          setAttendanceRecords((prev) =>
+            prev.map((record, i) =>
+              i === index ? { ...record, studentDetails: student } : record
+            )
+          );
+        }
+      } catch (err) {
+        console.error("Error fetching student details:", err);
+      }
+    }
+  };
+
+  // Reset function for preparing the form for the next student
+  const resetForNextStudent = (index: number) => {
+    setAttendanceRecords((prev) =>
+      prev.map((record, i) => {
+        if (i === index) {
+          return {
+            ...record,
+            studentId: "",
+            studentDetails: null,
+            timeIn: "",
+            timeOut: "",
+            status: "pending",
+          };
+        }
+        return record;
+      })
+    );
+  };
+
+  useEffect(() => {
+    fetchActiveEvents();
+  }, []);
 
   // Initialize camera when showCamera is true
   useEffect(() => {
@@ -124,42 +238,92 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
 
     // Process the scan after capture
     if (scanning !== null && scanType) {
-      processFaceScan(scanning, scanType, imageData);
+      processFaceScan(scanning, scanType, imageData, resetAfterSubmit);
     }
   };
 
-  const processFaceScan = (
+  const processFaceScan = async (
     index: number,
-    type: "timeIn" | "checkpoint" | "timeOut",
-    faceImage: string
+    type: "timeIn" | "timeOut",
+    faceImage: string,
+    resetAfter = false
   ) => {
     const now = new Date();
     const timeString = now.toTimeString().substring(0, 5);
 
-    setAttendanceRecords((prev) =>
-      prev.map((record, i) => {
-        if (i === index) {
-          const updatedRecord = {
-            ...record,
-            [type]: timeString,
-            status: getNextStatus(record.status, type),
-          };
+    // Here you would typically send the faceImage to your face recognition API
+    // For this example, we'll assume it returns the student ID
+    try {
+      // Simulate face recognition API call
+      const recognitionResponse = await fetch(`${BASE_URL}/face-recognition`, {
+        method: "POST",
+        body: JSON.stringify({ image: faceImage }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-          if (type === "timeOut") {
-            updatedRecord.status = "completed";
+      const recognitionData = await recognitionResponse.json();
+      const studentId = recognitionData.studentId;
+
+      // Fetch student details
+      const student = await verifyStudent(studentId);
+
+      setAttendanceRecords((prev) =>
+        prev.map((record, i) => {
+          if (i === index) {
+            const updatedRecord = {
+              ...record,
+              studentId,
+              studentDetails: student,
+              [type]: timeString,
+              status: getNextStatus(record.status, type),
+            };
+
+            if (type === "timeOut") {
+              updatedRecord.status = "completed";
+            }
+
+            return updatedRecord;
           }
+          return record;
+        })
+      );
 
-          return updatedRecord;
-        }
-        return record;
-      })
-    );
+      // Submit the updated record
+      const updatedRecord = attendanceRecords[index];
+      await submitAttendance({
+        ...updatedRecord,
+        studentId,
+        studentDetails: student,
+        [type]: timeString,
+        status:
+          type === "timeOut"
+            ? "completed"
+            : getNextStatus(updatedRecord.status, type),
+      });
 
-    // Close camera after processing
-    setShowCamera(false);
-    setScanning(null);
-    setScanType(null);
-    setCapturedImage(null);
+      // Show success message
+      alert(
+        `Attendance ${
+          type === "timeIn" ? "time-in" : "time-out"
+        } recorded successfully for ${student.fullName}!`
+      );
+
+      // Reset for next student if requested
+      if (resetAfter && type === "timeIn") {
+        resetForNextStudent(index);
+      }
+    } catch (err) {
+      console.error("Face recognition error:", err);
+      alert("Could not recognize student. Please try manual entry.");
+    } finally {
+      // Close camera after processing
+      setShowCamera(false);
+      setScanning(null);
+      setScanType(null);
+      setCapturedImage(null);
+    }
   };
 
   const filteredEvents = attendanceRecords.filter(
@@ -168,22 +332,7 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
       event.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleChange = <K extends keyof AttendanceRecord>(
-    index: number,
-    field: K,
-    value: AttendanceRecord[K]
-  ) => {
-    setAttendanceRecords((prevRecords) =>
-      prevRecords.map((record, i) =>
-        i === index ? { ...record, [field]: value } : record
-      )
-    );
-  };
-
-  const startFaceScan = (
-    index: number,
-    type: "timeIn" | "checkpoint" | "timeOut"
-  ) => {
+  const startFaceScan = (index: number, type: "timeIn" | "timeOut") => {
     setScanning(index);
     setScanType(type);
     setShowCamera(true);
@@ -191,15 +340,14 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
 
   const getNextStatus = (
     currentStatus: AttendanceRecord["status"],
-    type: "timeIn" | "checkpoint" | "timeOut"
+    type: "timeIn" | "timeOut"
   ) => {
     if (type === "timeIn") return "time-in";
-    if (type === "checkpoint") return "checkpoint";
     if (type === "timeOut") return "time-out";
     return currentStatus;
   };
 
-  const handleManualSubmit = (index: number) => {
+  const handleManualSubmit = async (index: number, resetAfter = false) => {
     const record = attendanceRecords[index];
 
     if (!record.studentId) {
@@ -207,15 +355,19 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
       return;
     }
 
-    let type: "timeIn" | "checkpoint" | "timeOut" = "timeIn";
-    if (record.status === "time-in") type = "checkpoint";
-    if (record.status === "checkpoint") type = "timeOut";
+    if (!record.studentDetails) {
+      alert("Student not found. Please verify the Student ID");
+      return;
+    }
 
-    const now = new Date();
-    const timeString = now.toTimeString().substring(0, 5);
+    try {
+      let type: "timeIn" | "timeOut" = "timeIn";
+      if (record.status === "time-in") type = "timeOut";
 
-    setAttendanceRecords((prev) =>
-      prev.map((r, i) => {
+      const now = new Date();
+      const timeString = now.toTimeString().substring(0, 5);
+
+      const updatedRecords = attendanceRecords.map((r, i) => {
         if (i === index) {
           const updatedRecord = {
             ...r,
@@ -230,8 +382,28 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
           return updatedRecord;
         }
         return r;
-      })
-    );
+      });
+
+      setAttendanceRecords(updatedRecords);
+
+      // Submit to API
+      await submitAttendance(updatedRecords[index]);
+
+      // Show success message
+      alert(
+        `Attendance ${
+          type === "timeIn" ? "time-in" : "time-out"
+        } recorded successfully for ${record.studentDetails.fullName}!`
+      );
+
+      // Reset for next student if requested
+      if (resetAfter && type === "timeIn") {
+        resetForNextStudent(index);
+      }
+    } catch (err) {
+      console.error("Error submitting attendance:", err);
+      alert("Failed to submit attendance. Please try again.");
+    }
   };
 
   const getStatusBadge = (status: AttendanceRecord["status"]) => {
@@ -243,12 +415,6 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
       case "time-in":
         return (
           <span className="ams-status-badge ams-time-in">Time In Recorded</span>
-        );
-      case "checkpoint":
-        return (
-          <span className="ams-status-badge ams-checkpoint">
-            Checkpoint Recorded
-          </span>
         );
       case "time-out":
         return (
@@ -335,8 +501,22 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
           </div>
         </div>
 
+        {isLoading && (
+          <div className="ams-loading">
+            <div className="spinner"></div>
+            <p>Loading events...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="ams-error">
+            <p>{error}</p>
+            <button onClick={fetchActiveEvents}>Retry</button>
+          </div>
+        )}
+
         <div className="ams-content">
-          {filteredEvents.length === 0 ? (
+          {!isLoading && !error && filteredEvents.length === 0 ? (
             <div className="ams-no-results">
               <div className="ams-no-results-content">
                 <p>No matching events found</p>
@@ -349,7 +529,12 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
                 <div key={index} className="ams-card">
                   <div
                     className="ams-card-header-image"
-                    style={{ backgroundImage: `url(${event.image})` }}
+                    style={{
+                      backgroundImage: `url(${
+                        event.image ||
+                        "https://source.unsplash.com/random/600x400/?event"
+                      })`,
+                    }}
                   >
                     <div className="ams-header-overlay">
                       <div className="ams-event-badge">
@@ -380,53 +565,43 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
                         <h4>Student Information</h4>
                         <div className="ams-form-section">
                           <div className="ams-form-group">
-                            <label>Year Level</label>
-                            <select
-                              value={event.yearLevel}
-                              onChange={(e) =>
-                                handleChange(index, "yearLevel", e.target.value)
-                              }
-                            >
-                              {[1, 2, 3, 4, 5].map((level) => (
-                                <option key={level} value={level}>
-                                  Year {level}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-
-                          <div className="ams-form-group">
-                            <label>Program</label>
-                            <select
-                              value={event.program}
-                              onChange={(e) =>
-                                handleChange(index, "program", e.target.value)
-                              }
-                            >
-                              {[
-                                "BS Computer Engineering",
-                                "BS Electrical Engineering",
-                                "BS Electronics Engineering",
-                                "BS Civil Engineering",
-                              ].map((program) => (
-                                <option key={program} value={program}>
-                                  {program}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-
-                          <div className="ams-form-group">
                             <label>Student ID</label>
                             <input
                               type="text"
                               placeholder="Enter student ID"
                               value={event.studentId}
                               onChange={(e) =>
-                                handleChange(index, "studentId", e.target.value)
+                                handleStudentIdChange(index, e.target.value)
                               }
+                              disabled={event.status !== "pending"}
                             />
                           </div>
+
+                          {event.studentDetails && (
+                            <div className="ams-student-details">
+                              <div className="ams-student-photo">
+                                {event.studentDetails.photoUrl ? (
+                                  <img
+                                    src={event.studentDetails.photoUrl}
+                                    alt={event.studentDetails.fullName}
+                                  />
+                                ) : (
+                                  <FaUserAlt size={48} />
+                                )}
+                              </div>
+                              <div className="ams-student-info">
+                                <h5>{event.studentDetails.fullName}</h5>
+                                <p>
+                                  <strong>Program:</strong>{" "}
+                                  {event.studentDetails.program}
+                                </p>
+                                <p>
+                                  <strong>Year Level:</strong>{" "}
+                                  {event.studentDetails.yearLevel}
+                                </p>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -442,7 +617,11 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
                                 : ""
                             } ${event.timeIn ? "ams-success" : ""}`}
                             onClick={() => startFaceScan(index, "timeIn")}
-                            disabled={!!event.timeIn || scanning !== null}
+                            disabled={
+                              !!event.timeIn ||
+                              scanning !== null ||
+                              !event.studentId
+                            }
                           >
                             <FaRegSmileBeam className="ams-face-scan-icon" />
                             {event.timeIn
@@ -457,45 +636,10 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
                                 <FiClock /> {event.timeIn}
                               </span>
                             ) : (
-                              <span className="ams-pending">Not recorded</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="ams-time-record">
-                        <h4>Checkpoint</h4>
-                        <div className="ams-time-input-group">
-                          <button
-                            className={`ams-btn ams-face-scan-btn ${
-                              scanning === index && scanType === "checkpoint"
-                                ? "ams-scanning"
-                                : ""
-                            } ${event.checkpoint ? "ams-success" : ""}`}
-                            onClick={() => startFaceScan(index, "checkpoint")}
-                            disabled={
-                              !event.timeIn ||
-                              !!event.checkpoint ||
-                              scanning !== null
-                            }
-                          >
-                            <FaRegSmileBeam className="ams-face-scan-icon" />
-                            {event.checkpoint
-                              ? "Recorded"
-                              : scanning === index && scanType === "checkpoint"
-                              ? "Scanning..."
-                              : "Face Scan"}
-                          </button>
-                          <div className="ams-time-display">
-                            {event.checkpoint ? (
-                              <span className="ams-recorded">
-                                <FiClock /> {event.checkpoint}
-                              </span>
-                            ) : (
                               <span className="ams-pending">
-                                {event.timeIn
+                                {event.studentId
                                   ? "Not recorded"
-                                  : "Complete Time In first"}
+                                  : "Enter Student ID first"}
                               </span>
                             )}
                           </div>
@@ -513,7 +657,7 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
                             } ${event.timeOut ? "ams-success" : ""}`}
                             onClick={() => startFaceScan(index, "timeOut")}
                             disabled={
-                              !event.checkpoint ||
+                              !event.timeIn ||
                               !!event.timeOut ||
                               scanning !== null
                             }
@@ -532,9 +676,9 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
                               </span>
                             ) : (
                               <span className="ams-pending">
-                                {event.checkpoint
+                                {event.timeIn
                                   ? "Not recorded"
-                                  : "Complete Checkpoint first"}
+                                  : "Complete Time In first"}
                               </span>
                             )}
                           </div>
@@ -542,17 +686,31 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
                       </div>
                     </div>
 
+                    {/* Reset after submission option */}
+                    <div className="ams-submit-options">
+                      <label className="ams-reset-option">
+                        <input
+                          type="checkbox"
+                          checked={resetAfterSubmit}
+                          onChange={(e) =>
+                            setResetAfterSubmit(e.target.checked)
+                          }
+                        />
+                        Reset for next student after time-in
+                      </label>
+                    </div>
+
                     <div className="ams-submit-section">
                       <button
                         className="ams-submit-btn"
-                        onClick={() => handleManualSubmit(index)}
+                        onClick={() =>
+                          handleManualSubmit(index, resetAfterSubmit)
+                        }
                         disabled={
                           event.status === "completed" ||
                           scanning !== null ||
-                          (!event.studentId &&
-                            !event.timeIn &&
-                            !event.checkpoint &&
-                            !event.timeOut)
+                          !event.studentId ||
+                          !event.studentDetails
                         }
                       >
                         {event.status === "completed" ? (
@@ -568,6 +726,19 @@ export const Attendance: React.FC<AttendanceProps> = ({ role }) => {
                           "If face scan fails, enter Student ID and click Submit"}
                       </p>
                     </div>
+
+                    {/* Next Student button only shows after time-in is complete */}
+                    {event.status === "time-in" && (
+                      <div className="ams-next-student-section">
+                        <button
+                          className="ams-next-student-btn"
+                          onClick={() => resetForNextStudent(index)}
+                        >
+                          <FiUser className="ams-next-icon" /> Process Next
+                          Student
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

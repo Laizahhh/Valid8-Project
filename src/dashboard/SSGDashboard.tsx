@@ -15,16 +15,16 @@ export const SSGDashboard: React.FC = () => {
       link: "/ssg_events",
     },
     {
-      title: "Attendance",
-      description: "Track and verify attendance records.",
-      icon: <FaUsers style={{ color: "#17a2b8" }} />, // Teal color
-      link: "/ssg_attendance",
-    },
-    {
       title: "Records",
       description: "Access records and event history.",
       icon: <FaChartBar style={{ color: "#6c757d" }} />, // Gray color
       link: "/ssg_records",
+    },
+    {
+      title: "Manual Attendance",
+      description: "Records Attendance.",
+      icon: <FaUsers style={{ color: "#6c757d" }} />, // Gray color
+      link: "/ssg_manual_attendance",
     },
   ];
 

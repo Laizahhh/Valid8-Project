@@ -6,7 +6,7 @@
   --transition-speed: 0.3s;
   --sidebar-width-expanded: 250px;
   --sidebar-width-collapsed: 70px;
-  --table-offset: 80px;
+  --table-offset: 0px; /* Changed from 80px to 0px to move table left */
 }
 
 .upcoming-page {
@@ -24,7 +24,7 @@
 .upcoming-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 30px 30px 30px 110px;
+  padding: 30px 30px 30px 30px; /* Changed from 110px to 30px for left padding */
   transition: padding-left var(--transition-speed) ease;
 }
 

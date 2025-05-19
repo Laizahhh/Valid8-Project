@@ -10,6 +10,7 @@ import {
   FaBars,
   FaTimes,
   FaThList,
+  FaUserCheck,
 } from "react-icons/fa";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
 import userprofile from "../assets/images/userprofile.png";
@@ -133,19 +134,6 @@ export const NavbarStudentSSG = () => {
             </li>
             <li>
               <NavLink
-                to="/studentssg_attendance"
-                className={({ isActive }) =>
-                  isActive ? "ssg-nav-link active" : "ssg-nav-link"
-                }
-                onClick={() => setSidebarOpen(false)}
-                title="Attendance"
-              >
-                <FaCheckCircle className="nav-icon" />
-                <span className="nav-text">Attendance</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
                 to="/studentssg_records"
                 className={({ isActive }) =>
                   isActive ? "ssg-nav-link active" : "ssg-nav-link"
@@ -155,6 +143,32 @@ export const NavbarStudentSSG = () => {
               >
                 <FaClipboard className="nav-icon" />
                 <span className="nav-text">Records</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/studentssg_face_scan"
+                className={({ isActive }) =>
+                  isActive ? "ssg-nav-link active" : "ssg-nav-link"
+                }
+                onClick={() => setSidebarOpen(false)}
+                title="Face Scan"
+              >
+                <FaCheckCircle className="nav-icon" />
+                <span className="nav-text">Face Scan</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/studentssg_manual_attendance"
+                className={({ isActive }) =>
+                  isActive ? "ssg-nav-link active" : "ssg-nav-link"
+                }
+                onClick={() => setSidebarOpen(false)}
+                title="Manual Attendance"
+              >
+                <FaUserCheck className="nav-icon" />
+                <span className="nav-text">Manual Attendance</span>
               </NavLink>
             </li>
           </ul>

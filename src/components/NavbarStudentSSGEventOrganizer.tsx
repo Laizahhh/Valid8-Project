@@ -51,9 +51,9 @@ export const NavbarStudentSSGEventOrganizer = () => {
       text: "Events",
     },
     {
-      path: "/student_ssg_eventorganizer_attendance",
+      path: "/student_ssg_eventorganizer_manual_attendance",
       icon: <FaCheckCircle />,
-      text: "Attendance",
+      text: "Manual Attendance",
     },
     {
       path: "/student_ssg_eventorganizer_records",

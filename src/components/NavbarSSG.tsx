@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import {
   FaHome,
   FaRegListAlt,
-  FaCheckCircle,
+  FaUserCheck,
   FaClipboard,
   FaBars,
   FaTimes,
@@ -28,8 +28,12 @@ export const NavbarSSG = () => {
   const navLinks = [
     { path: "/ssg_home", icon: <FaHome />, text: "Home" },
     { path: "/ssg_events", icon: <FaRegListAlt />, text: "Events" },
-    { path: "/ssg_attendance", icon: <FaCheckCircle />, text: "Attendance" },
     { path: "/ssg_records", icon: <FaClipboard />, text: "Records" },
+    {
+      path: "/ssg_manual_attendance",
+      icon: <FaUserCheck />,
+      text: "Manual Attendance",
+    },
   ];
 
   return (

@@ -20,6 +20,9 @@ import { CreateEvent } from "./pages/CreateEvent";
 import { ManageEvent } from "./pages/ManageEvent";
 import Unauthorized from "./components/Unauthorized"; // Import Unauthorized Page
 import ErrorBoundary from "../src/components/ErrorBoundary";
+import { CreateUsers } from "./pages/CreateUsers";
+import FaceScan from "../src/pages/FaceScan";
+import ManualAttendance from "../src/pages/ManualAttendance";
 
 const App = () => {
   return (
@@ -39,6 +42,14 @@ const App = () => {
             element={
               <ErrorBoundary>
                 <ManageUsers />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/admin_create_users"
+            element={
+              <ErrorBoundary>
+                <CreateUsers />
               </ErrorBoundary>
             }
           />
@@ -65,8 +76,11 @@ const App = () => {
           <Route path="/ssg_dashboard" element={<SSGDashboard />} />
           <Route path="/ssg_home" element={<HomeUser role="ssg" />} />
           <Route path="/ssg_events" element={<Events role="ssg" />} />
-          <Route path="/ssg_attendance" element={<Attendance role="ssg" />} />
           <Route path="/ssg_records" element={<Records role="ssg" />} />
+          <Route
+            path="/ssg_manual_attendance"
+            element={<ManualAttendance role="ssg" />}
+          />
           <Route path="/ssg_profile" element={<Profile role="ssg" />} />
         </Route>
 
@@ -125,6 +139,14 @@ const App = () => {
             element={<Records role="student-ssg" />}
           />
           <Route
+            path="/studentssg_face_scan"
+            element={<FaceScan role="student-ssg" />}
+          />
+          <Route
+            path="/studentssg_manual_attendance"
+            element={<ManualAttendance role="student-ssg" />}
+          />
+          <Route
             path="/studentssg_profile"
             element={<Profile role="student-ssg" />}
           />
@@ -160,8 +182,8 @@ const App = () => {
             element={<Events role="student-ssg-eventorganizer" />}
           />
           <Route
-            path="/student_ssg_eventorganizer_attendance"
-            element={<Attendance role="student-ssg-eventorganizer" />}
+            path="/student_ssg_eventorganizer_manual_attendance"
+            element={<ManualAttendance role="student-ssg-eventorganizer" />}
           />
           <Route
             path="/student_ssg_eventorganizer_records"

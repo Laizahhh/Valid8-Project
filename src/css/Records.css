@@ -239,3 +239,44 @@
     padding: 10px 8px;
   }
 }
+
+/* Add to your Records.css */
+.status-badge-present {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.status-badge-absent {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.btn-refresh {
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-refresh:disabled {
+  opacity: 0.65;
+}
+
+.loading-row {
+  text-align: center;
+  padding: 20px;
+}
+
+.alert-danger {
+  color: #721c24;
+  background-color: #f8d7da;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}

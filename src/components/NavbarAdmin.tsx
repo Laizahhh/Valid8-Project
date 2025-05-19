@@ -4,10 +4,11 @@ import {
   FaHome,
   FaRegListAlt,
   FaClipboard,
-  FaCheckCircle,
+  FaPlusCircle,
   FaBars,
   FaTimes,
   FaThList,
+  FaEdit,
 } from "react-icons/fa";
 import { useUser } from "../context/UserContext";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
@@ -123,8 +124,21 @@ export const NavbarAdmin = () => {
                 onClick={() => setSidebarOpen(false)}
                 title="Manage Users"
               >
-                <FaCheckCircle className="nav-icon" />
+                <FaEdit className="nav-icon" />
                 <span className="nav-text">Manage Users</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/admin_create_users"
+                className={({ isActive }) =>
+                  isActive ? "admin-nav-link active" : "admin-nav-link"
+                }
+                onClick={() => setSidebarOpen(false)}
+                title="Create Users"
+              >
+                <FaPlusCircle className="nav-icon" />
+                <span className="nav-text">Create Users</span>
               </NavLink>
             </li>
           </ul>

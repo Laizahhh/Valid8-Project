@@ -54,16 +54,16 @@ export const HomeUser: React.FC<HomeUserProps> = ({ role }) => {
         link: "/ssg_events",
       },
       {
-        title: "Attendance",
-        description: "Track and verify attendance records.",
-        icon: <FaUsers style={{ color: "#17a2b8" }} />, // Teal color
-        link: "/ssg_attendance",
-      },
-      {
         title: "Records",
         description: "Access records and event history.",
         icon: <FaChartBar style={{ color: "#6c757d" }} />, // Gray color
         link: "/ssg_records",
+      },
+      {
+        title: "Manual Attendance",
+        description: "Records Attendance.",
+        icon: <FaUsers style={{ color: "#6c757d" }} />, // Gray color
+        link: "/ssg_manual_attendance",
       },
     ],
     "event-organizer": [
@@ -99,6 +99,12 @@ export const HomeUser: React.FC<HomeUserProps> = ({ role }) => {
         icon: <FaUserShield style={{ color: "#dc3545" }} />, // Red color
         link: "/admin_manage_users",
       },
+      {
+        title: "Create Users",
+        description: "Create, update, and manage user accounts and roles.",
+        icon: <FaCheckCircle style={{ color: "#dc3545" }} />, // Red color
+        link: "/admin_create_users",
+      },
     ],
     "student-ssg": [
       {
@@ -120,10 +126,10 @@ export const HomeUser: React.FC<HomeUserProps> = ({ role }) => {
         link: "/studentssg_events",
       },
       {
-        title: "Attendance",
-        description: "Track and verify attendance records.",
+        title: "Manual Attendance",
+        description: "Record Attendance",
         icon: <FaUsers style={{ color: "#17a2b8" }} />, // Teal color
-        link: "/studentssg_attendance",
+        link: "/studentssg_manual_attendance",
       },
       {
         title: "Records",
@@ -152,10 +158,10 @@ export const HomeUser: React.FC<HomeUserProps> = ({ role }) => {
         link: "/student_ssg_eventorganizer_events",
       },
       {
-        title: "Attendance",
-        description: "Track and verify attendance records.",
+        title: "Manual Attendance",
+        description: "Record Attendance.",
         icon: <FaUsers style={{ color: "#17a2b8" }} />, // Teal color
-        link: "/student_ssg_eventorganizer_attendance",
+        link: "/student_ssg_eventorganizer_manua_attendance",
       },
       {
         title: "Records",
