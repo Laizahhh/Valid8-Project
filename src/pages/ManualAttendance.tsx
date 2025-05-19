@@ -179,14 +179,12 @@ export const ManualAttendance: React.FC<ManualAttendanceProps> = ({ role }) => {
 
     setLoading(true);
     try {
-      const currentTime = new Date().toISOString(); // Add this line
       const response = await fetchWithAuth(`${BASE_URL}/attendance/manual`, {
         method: "POST",
         body: JSON.stringify({
           event_id: selectedEventId,
           student_id: studentId.trim(),
           notes: notes.trim() || null,
-          time_in: currentTime, // Add this line
         }),
       });
 
@@ -194,7 +192,7 @@ export const ManualAttendance: React.FC<ManualAttendanceProps> = ({ role }) => {
       showMessage(`Time in recorded successfully for ${studentId}`, "success");
       setStudentId("");
       setNotes("");
-      fetchActiveAttendances();
+      fetchActiveAttendances(); // Refresh active attendances
     } catch (error) {
       showMessage(
         error instanceof Error ? error.message : "Failed to record time in",
@@ -211,15 +209,10 @@ export const ManualAttendance: React.FC<ManualAttendanceProps> = ({ role }) => {
   ) => {
     setLoading(true);
     try {
-      const currentTime = new Date().toISOString(); // Add this line
       const response = await fetchWithAuth(
         `${BASE_URL}/attendance/${attendanceId}/time-out`,
         {
           method: "POST",
-          body: JSON.stringify({
-            // Add this body
-            time_out: currentTime,
-          }),
         }
       );
 
@@ -228,7 +221,7 @@ export const ManualAttendance: React.FC<ManualAttendanceProps> = ({ role }) => {
         `Time out recorded successfully for ${studentDisplayId}`,
         "success"
       );
-      fetchActiveAttendances();
+      fetchActiveAttendances(); // Refresh active attendances
     } catch (error) {
       showMessage(
         error instanceof Error ? error.message : "Failed to record time out",
@@ -594,5 +587,3 @@ export const ManualAttendance: React.FC<ManualAttendanceProps> = ({ role }) => {
     </div>
   );
 };
-
-export default ManualAttendance;
