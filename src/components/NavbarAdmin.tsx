@@ -3,7 +3,6 @@ import { NavLink } from "react-router-dom";
 import {
   FaHome,
   FaRegListAlt,
-  FaClipboard,
   FaPlusCircle,
   FaBars,
   FaTimes,
@@ -104,19 +103,6 @@ export const NavbarAdmin = () => {
             </li>
             <li>
               <NavLink
-                to="/admin_reports"
-                className={({ isActive }) =>
-                  isActive ? "admin-nav-link active" : "admin-nav-link"
-                }
-                onClick={() => setSidebarOpen(false)}
-                title="Reports"
-              >
-                <FaClipboard className="nav-icon" />
-                <span className="nav-text">Reports</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
                 to="/admin_manage_users"
                 className={({ isActive }) =>
                   isActive ? "admin-nav-link active" : "admin-nav-link"
@@ -139,6 +125,19 @@ export const NavbarAdmin = () => {
               >
                 <FaPlusCircle className="nav-icon" />
                 <span className="nav-text">Create Users</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/admin_create_department_program"
+                className={({ isActive }) =>
+                  isActive ? "admin-nav-link active" : "admin-nav-link"
+                }
+                onClick={() => setSidebarOpen(false)}
+                title="Create Users"
+              >
+                <FaPlusCircle className="nav-icon" />
+                <span className="nav-text">Create Department & Program</span>
               </NavLink>
             </li>
           </ul>

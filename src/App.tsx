@@ -23,6 +23,7 @@ import ErrorBoundary from "../src/components/ErrorBoundary";
 import { CreateUsers } from "./pages/CreateUsers";
 import FaceScan from "../src/pages/FaceScan";
 import ManualAttendance from "../src/pages/ManualAttendance";
+import AcademicManagement from "../src/pages/AcademicManagement";
 
 const App = () => {
   return (
@@ -50,6 +51,14 @@ const App = () => {
             element={
               <ErrorBoundary>
                 <CreateUsers />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/admin_create_department_program"
+            element={
+              <ErrorBoundary>
+                <AcademicManagement />
               </ErrorBoundary>
             }
           />
