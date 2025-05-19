@@ -5,7 +5,6 @@ import {
   FaCalendarAlt,
   FaClipboardCheck,
   FaRegListAlt,
-  FaCheckCircle,
   FaClipboard,
   FaBars,
   FaTimes,
@@ -143,19 +142,6 @@ export const NavbarStudentSSG = () => {
               >
                 <FaClipboard className="nav-icon" />
                 <span className="nav-text">Records</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to="/studentssg_face_scan"
-                className={({ isActive }) =>
-                  isActive ? "ssg-nav-link active" : "ssg-nav-link"
-                }
-                onClick={() => setSidebarOpen(false)}
-                title="Face Scan"
-              >
-                <FaCheckCircle className="nav-icon" />
-                <span className="nav-text">Face Scan</span>
               </NavLink>
             </li>
             <li>
