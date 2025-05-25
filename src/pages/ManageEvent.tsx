@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { NavbarEventOrganizer } from "../components/NavbarEventOrganizer";
 import { NavbarStudentSSGEventOrganizer } from "../components/NavbarStudentSSGEventOrganizer";
 import Modal from "react-modal";
-import "../css/ManageEvent.css";
 import { useNavigate } from "react-router-dom";
 
 interface ManageEventProps {
@@ -33,19 +32,16 @@ interface SSGMember {
   user: User;
 }
 
-// Updated to match the API structure
 interface Event {
   id: number;
   name: string;
   start_datetime: string;
   end_datetime: string;
   location: string;
-  status: string; // Will match EventStatus values
+  status: string;
   departments: Department[];
   programs: Program[];
   ssg_members: SSGMember[];
-
-  // For form handling - not in the API response
   department_ids?: number[];
   program_ids?: number[];
   ssg_member_ids?: number[];
@@ -78,7 +74,6 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
       throw new Error("No authentication token found");
     }
 
-    // Don't set Content-Type for FormData
     const isFormData = options.body instanceof FormData;
     const headers = {
       ...options.headers,
@@ -88,29 +83,23 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
 
     try {
       const response = await fetch(url, { ...options, headers });
-
       if (response.status === 401) {
         localStorage.removeItem("authToken");
         navigate("/login");
         throw new Error("Session expired. Please login again.");
       }
-
       if (!response.ok) {
         const errorText = await response.text();
         let errorData;
-
         try {
           errorData = JSON.parse(errorText);
-          console.error("API Error Response:", errorData);
         } catch (e) {
           console.error("API Error (non-JSON):", errorText);
         }
-
         throw new Error(
           errorData?.detail || `HTTP error! status: ${response.status}`
         );
       }
-
       return response;
     } catch (err) {
       console.error(`Error fetching ${url}:`, err);
@@ -118,97 +107,53 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
     }
   };
 
-  // Fetch all required data
   useEffect(() => {
     const fetchAllData = async () => {
       setIsLoading(true);
       try {
-        // Fetch events with relations - FastAPI returns complete objects
         const eventsResponse = await fetchWithAuth(`${BASE_URL}/events`);
         const eventsData = await eventsResponse.json();
-
-        // Add derived fields for form handling with error handling
         const transformedEvents = (
           Array.isArray(eventsData) ? eventsData : []
-        ).map((event: Event) => {
-          try {
-            return {
-              ...event,
-              department_ids: Array.isArray(event.departments)
-                ? event.departments
-                    .filter((d) => d)
-                    .map((d: Department) => d.id)
-                : [],
-              program_ids: Array.isArray(event.programs)
-                ? event.programs.filter((p) => p).map((p: Program) => p.id)
-                : [],
-              ssg_member_ids: Array.isArray(event.ssg_members)
-                ? event.ssg_members
-                    .filter((m) => m && m.user_id)
-                    .map((m: SSGMember) => m.user_id)
-                : [],
-            };
-          } catch (err) {
-            console.error("Error processing event data:", err, event);
-            // Return a minimal valid event object if there's an error
-            return {
-              ...event,
-              department_ids: [],
-              program_ids: [],
-              ssg_member_ids: [],
-            };
-          }
-        });
-
+        ).map((event: Event) => ({
+          ...event,
+          department_ids: Array.isArray(event.departments)
+            ? event.departments.map((d: Department) => d.id)
+            : [],
+          program_ids: Array.isArray(event.programs)
+            ? event.programs.map((p: Program) => p.id)
+            : [],
+          ssg_member_ids: Array.isArray(event.ssg_members)
+            ? event.ssg_members.map((m: SSGMember) => m.user_id)
+            : [],
+        }));
         setEvents(transformedEvents);
 
-        // Fetch departments
         const deptResponse = await fetchWithAuth(`${BASE_URL}/departments`);
         const deptData = await deptResponse.json();
         setDepartments(deptData);
 
-        // Fetch programs
         const programsResponse = await fetchWithAuth(`${BASE_URL}/programs`);
         const programsData = await programsResponse.json();
         setPrograms(programsData);
 
-        // Fetch SSG members with comprehensive error handling
-        try {
-          const response = await fetchWithAuth(`${BASE_URL}/users/by-role/ssg`);
-
-          // Check if response is empty or null before parsing
-          const text = await response.text();
-          let ssgData = [];
-
-          try {
-            if (text && text.trim() !== "" && text !== "null") {
-              ssgData = JSON.parse(text);
-            }
-          } catch (parseErr) {
-            console.error("Error parsing SSG members JSON:", parseErr);
-          }
-
-          // Ensure we have the expected data structure and validate each member has a user property
-          const transformedMembers = Array.isArray(ssgData)
-            ? ssgData
-                .filter((member) => member && typeof member === "object")
-                .map((user) => ({
-                  user_id: user.id,
-                  position: user.ssg_profile?.position || "Member",
-                  user: {
-                    id: user.id,
-                    first_name: user.first_name,
-                    last_name: user.last_name,
-                    email: user.email,
-                  },
-                }))
-            : [];
-
-          setSSGMembers(transformedMembers);
-        } catch (ssgErr) {
-          console.error("Error fetching SSG members:", ssgErr);
-          setSSGMembers([]);
-        }
+        const ssgResponse = await fetchWithAuth(
+          `${BASE_URL}/users/by-role/ssg`
+        );
+        const ssgData = await ssgResponse.json();
+        const transformedMembers = Array.isArray(ssgData)
+          ? ssgData.map((user: any) => ({
+              user_id: user.id,
+              position: user.ssg_profile?.position || "Member",
+              user: {
+                id: user.id,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                email: user.email,
+              },
+            }))
+          : [];
+        setSSGMembers(transformedMembers);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "An unknown error occurred"
@@ -217,18 +162,15 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
         setIsLoading(false);
       }
     };
-
     fetchAllData();
   }, [BASE_URL, navigate]);
 
-  // Filter events based on search term
   const filteredEvents = events.filter(
     (event) =>
       event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       event.location.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Event handlers
   const openEditModal = (item: Event) => {
     setEditingEvent({
       ...item,
@@ -251,35 +193,19 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
       setEditingEvent({ ...editingEvent, [e.target.name]: e.target.value });
     }
   };
-  // Fixed saveEditedEvent function - removed duplicate property
+
   const saveEditedEvent = async () => {
     if (!editingEvent) return;
-
-    // Clean up the ssg_member_ids to remove any null values
-    const cleanSsgMemberIds = Array.isArray(editingEvent.ssg_member_ids)
-      ? editingEvent.ssg_member_ids.filter(
-          (id) => id !== null && id !== undefined
-        )
-      : [];
-
     try {
-      // Format data to match FastAPI expectations and validate arrays
       const updatePayload = {
         name: editingEvent.name,
         location: editingEvent.location,
         start_datetime: editingEvent.start_datetime,
         end_datetime: editingEvent.end_datetime,
-        department_ids: Array.isArray(editingEvent.department_ids)
-          ? editingEvent.department_ids
-          : [],
-        program_ids: Array.isArray(editingEvent.program_ids)
-          ? editingEvent.program_ids
-          : [],
-        // Only define ssg_member_ids once with the cleaned array
-        ssg_member_ids: cleanSsgMemberIds,
+        department_ids: editingEvent.department_ids || [],
+        program_ids: editingEvent.program_ids || [],
+        ssg_member_ids: editingEvent.ssg_member_ids || [],
       };
-
-      console.log("Sending update payload:", JSON.stringify(updatePayload));
 
       const response = await fetchWithAuth(
         `${BASE_URL}/events/${editingEvent.id}`,
@@ -290,8 +216,6 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
       );
 
       const updatedEvent = await response.json();
-
-      // Transform the updated event to include IDs for form handling
       const transformedEvent = {
         ...updatedEvent,
         department_ids:
@@ -312,27 +236,13 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
     }
   };
 
-  // Alternative implementation to use the new endpoint
   const updateEventStatus = async () => {
     if (!eventToUpdate || !statusToUpdate) return;
-
     try {
-      // Convert statusToUpdate to lowercase to match API expectations
-      const lowercaseStatus = statusToUpdate.toLowerCase();
-
-      // Send as query parameter, exactly matching the Swagger example
       await fetchWithAuth(
-        `${BASE_URL}/events/${eventToUpdate}/status?status=${lowercaseStatus}`,
-        {
-          method: "PATCH",
-          headers: {
-            accept: "application/json",
-            // Authorization header is added by fetchWithAuth
-          },
-        }
+        `${BASE_URL}/events/${eventToUpdate}/status?status=${statusToUpdate.toLowerCase()}`,
+        { method: "PATCH" }
       );
-
-      // Update local state (keep using the original statusToUpdate for consistency in UI)
       setEvents(
         events.map((event) =>
           event.id === eventToUpdate
@@ -340,10 +250,7 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
             : event
         )
       );
-
-      console.log("Status update successful");
     } catch (err) {
-      console.error("Status update error:", err);
       setError(err instanceof Error ? err.message : "Failed to update status");
     } finally {
       setStatusModalOpen(false);
@@ -354,13 +261,10 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
 
   const handleDelete = async () => {
     if (!itemToDelete) return;
-
     try {
       await fetchWithAuth(`${BASE_URL}/events/${itemToDelete}`, {
         method: "DELETE",
       });
-
-      // Update local state
       setEvents(events.filter((event) => event.id !== itemToDelete));
       setDeleteModalOpen(false);
       setItemToDelete(null);
@@ -370,27 +274,30 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
   };
 
   const getStatusBadge = (status: string) => {
-    let badgeClass = "";
-    switch (status.toLowerCase()) {
-      case "upcoming":
-        badgeClass = "badge bg-primary";
-        break;
-      case "ongoing":
-        badgeClass = "badge bg-warning text-dark";
-        break;
-      case "completed":
-        badgeClass = "badge bg-success";
-        break;
-      case "cancelled":
-        badgeClass = "badge bg-danger";
-        break;
-      default:
-        badgeClass = "badge bg-secondary";
-    }
-    return <span className={badgeClass}>{status}</span>;
+    const badgeStyles: Record<string, React.CSSProperties> = {
+      upcoming: { backgroundColor: "#0d6efd", color: "white" },
+      ongoing: { backgroundColor: "#ffc107", color: "black" },
+      completed: { backgroundColor: "#198754", color: "white" },
+      cancelled: { backgroundColor: "#dc3545", color: "white" },
+      default: { backgroundColor: "#6c757d", color: "white" },
+    };
+
+    const style = badgeStyles[status.toLowerCase()] || badgeStyles.default;
+    return (
+      <span
+        style={{
+          padding: "0.25rem 0.5rem",
+          borderRadius: "0.25rem",
+          fontSize: "0.875rem",
+          fontWeight: "bold",
+          ...style,
+        }}
+      >
+        {status}
+      </span>
+    );
   };
 
-  // Helper function to format date for better display
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -399,53 +306,36 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
     });
   };
 
-  // Helper functions for displaying related entities
-  const getDepartmentNames = (deps?: Department[]) => {
-    if (!deps || deps.length === 0) return "None";
-    console.log("Available programs:", getProgramNames(programs));
-    return deps.map((dept) => dept.name).join(", ");
-  };
-
-  const getProgramNames = (progs?: Program[]) => {
-    if (!progs || progs.length === 0) return "None";
-    return progs.map((prog) => prog.name).join(", ");
-  };
-
-  const getSSGMemberNames = (members?: SSGMember[]) => {
-    if (!members || members.length === 0) return "None";
-    console.log("Available programs:", getSSGMemberNames(ssgMembers));
-    return members
-      .filter((member) => member && member.user)
-      .map(
-        (member) =>
-          `${member.user?.first_name || "Unknown"} ${
-            member.user?.last_name || ""
-          } (${member.position || "Unknown"})`
-      )
-      .join(", ");
-  };
-
-  // This makes the modal more accessible but can be commented out if causing issues
-  try {
-    Modal.setAppElement("#root");
-  } catch (error) {
-    console.warn(
-      "Could not set app element for Modal. This might affect accessibility:",
-      error
-    );
-  }
-
   if (isLoading) {
     return (
-      <div className="app-container">
+      <div
+        style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+      >
         {role === "student-ssg-eventorganizer" ? (
           <NavbarStudentSSGEventOrganizer />
         ) : (
           <NavbarEventOrganizer />
         )}
-        <div className="content-wrapper">
-          <div className="loading-spinner">
-            <div className="spinner"></div>
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div style={{ textAlign: "center" }}>
+            <div
+              style={{
+                border: "4px solid rgba(0, 0, 0, 0.1)",
+                borderLeftColor: "#0d6efd",
+                borderRadius: "50%",
+                width: "40px",
+                height: "40px",
+                animation: "spin 1s linear infinite",
+                margin: "0 auto 1rem",
+              }}
+            ></div>
             <p>Loading events...</p>
           </div>
         </div>
@@ -455,17 +345,43 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
 
   if (error) {
     return (
-      <div className="app-container">
+      <div
+        style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+      >
         {role === "student-ssg-eventorganizer" ? (
           <NavbarStudentSSGEventOrganizer />
         ) : (
           <NavbarEventOrganizer />
         )}
-        <div className="content-wrapper">
-          <div className="error-message">
-            <p>❌ Error: {error}</p>
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{ textAlign: "center", padding: "2rem", maxWidth: "600px" }}
+          >
+            <p
+              style={{
+                color: "#dc3545",
+                fontSize: "1.25rem",
+                marginBottom: "1rem",
+              }}
+            >
+              ❌ Error: {error}
+            </p>
             <button
-              className="btn btn-primary"
+              style={{
+                backgroundColor: "#0d6efd",
+                color: "white",
+                border: "none",
+                padding: "0.5rem 1rem",
+                borderRadius: "0.25rem",
+                cursor: "pointer",
+              }}
               onClick={() => window.location.reload()}
             >
               Try Again
@@ -477,64 +393,133 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
   }
 
   return (
-    <div className="app-container">
+    <div
+      style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+    >
       {role === "student-ssg-eventorganizer" ? (
         <NavbarStudentSSGEventOrganizer />
       ) : (
         <NavbarEventOrganizer />
       )}
 
-      <div className="content-wrapper">
-        <div className="page-header">
-          <h1>Manage Events</h1>
-          <div className="search-container">
+      <div
+        style={{
+          flex: 1,
+          padding: "1rem",
+          maxWidth: "1200px",
+          margin: "0 auto",
+          width: "100%",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "1.5rem",
+            flexWrap: "wrap",
+            gap: "1rem",
+          }}
+        >
+          <h1 style={{ fontSize: "1.75rem", margin: 0 }}>Manage Events</h1>
+          <div style={{ position: "relative" }}>
             <input
               type="search"
               placeholder="Search events or locations..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
+              style={{
+                padding: "0.5rem 1rem",
+                borderRadius: "0.25rem",
+                border: "1px solid #ced4da",
+                width: "100%",
+                minWidth: "250px",
+              }}
             />
           </div>
         </div>
 
         {filteredEvents.length === 0 ? (
-          <div className="no-results">
+          <div
+            style={{
+              textAlign: "center",
+              padding: "2rem",
+              border: "1px dashed #ced4da",
+              borderRadius: "0.25rem",
+            }}
+          >
             <p>No events found. Try a different search term.</p>
           </div>
         ) : (
-          <div className="event-cards">
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+              gap: "1rem",
+            }}
+          >
             {filteredEvents.map((event) => (
-              <div className="event-card" key={event.id}>
-                <div className="event-header">
-                  <h3>{event.name}</h3>
+              <div
+                key={event.id}
+                style={{
+                  border: "1px solid #dee2e6",
+                  borderRadius: "0.5rem",
+                  padding: "1rem",
+                  display: "flex",
+                  flexDirection: "column",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "0.75rem",
+                  }}
+                >
+                  <h3 style={{ margin: 0, fontSize: "1.25rem" }}>
+                    {event.name}
+                  </h3>
                   {getStatusBadge(event.status)}
                 </div>
 
-                <div className="event-details">
-                  <p>
+                <div style={{ flex: 1, marginBottom: "1rem" }}>
+                  <p style={{ margin: "0.5rem 0" }}>
                     <strong>Date:</strong> {formatDate(event.start_datetime)}
                   </p>
-                  <p>
+                  <p style={{ margin: "0.5rem 0" }}>
                     <strong>Location:</strong> {event.location}
                   </p>
-                  <p className="departments">
+                  <p style={{ margin: "0.5rem 0" }}>
                     <strong>Departments:</strong>{" "}
-                    {getDepartmentNames(event.departments)}
+                    {event.departments?.map((d) => d.name).join(", ") || "None"}
                   </p>
                 </div>
 
-                <div className="event-actions">
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "0.5rem",
+                    flexWrap: "wrap",
+                  }}
+                >
                   <button
-                    className="btn btn-edit"
                     onClick={() => openEditModal(event)}
+                    style={{
+                      backgroundColor: "#0d6efd",
+                      color: "white",
+                      border: "none",
+                      padding: "0.375rem 0.75rem",
+                      borderRadius: "0.25rem",
+                      cursor: "pointer",
+                      flex: 1,
+                    }}
                   >
                     Edit
                   </button>
 
-                  {/* Replace the existing dropdown with this updated version */}
                   <select
-                    className="status-select"
                     onChange={(e) => {
                       if (e.target.value) {
                         setEventToUpdate(event.id);
@@ -543,6 +528,14 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
                       }
                     }}
                     value=""
+                    style={{
+                      padding: "0.375rem 0.75rem",
+                      borderRadius: "0.25rem",
+                      border: "1px solid #ced4da",
+                      backgroundColor: "white",
+                      cursor: "pointer",
+                      flex: 1,
+                    }}
                   >
                     <option value="" disabled>
                       Change Status
@@ -554,10 +547,18 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
                   </select>
 
                   <button
-                    className="btn btn-delete"
                     onClick={() => {
                       setItemToDelete(event.id);
                       setDeleteModalOpen(true);
+                    }}
+                    style={{
+                      backgroundColor: "#dc3545",
+                      color: "white",
+                      border: "none",
+                      padding: "0.375rem 0.75rem",
+                      borderRadius: "0.25rem",
+                      cursor: "pointer",
+                      flex: 1,
                     }}
                   >
                     Delete
@@ -573,199 +574,332 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
       <Modal
         isOpen={isEditModalOpen}
         onRequestClose={closeEditModal}
-        className="modal-content"
-        overlayClassName="modal-overlay"
-        ariaHideApp={false}
-        contentLabel="Edit Event Modal"
         style={{
           overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.75)", // Darker background for better contrast
-            zIndex: 1000,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            padding: "1rem",
+            zIndex: 1000,
           },
           content: {
             position: "relative",
-            inset: "auto", // Removes default positioning
-            background: "white", // Explicit white background
-            borderRadius: "var(--border-radius)",
-            padding: 0,
-            maxWidth: "550px",
+            inset: "auto",
+            border: "none",
+            background: "white",
+            borderRadius: "0.5rem",
+            padding: "0",
             width: "100%",
+            maxWidth: "600px",
             maxHeight: "90vh",
             overflow: "auto",
-            margin: "0",
-            border: "none",
-            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.5)", // Stronger shadow for depth
           },
         }}
+        ariaHideApp={false}
       >
-        <div className="modal-header">
-          <h2>Edit Event</h2>
-          <button onClick={closeEditModal} className="close-button">
-            ×
-          </button>
-        </div>
-
-        <div className="modal-body">
-          <div className="form-group">
-            <label htmlFor="event-name">Event Name</label>
-            <input
-              type="text"
-              id="event-name"
-              name="name"
-              value={editingEvent?.name || ""}
-              onChange={handleEditChange}
-              placeholder="Enter event name"
-            />
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="event-start">Start Date & Time</label>
-              <input
-                type="datetime-local"
-                id="event-start"
-                name="start_datetime"
-                value={
-                  editingEvent?.start_datetime
-                    ? new Date(editingEvent.start_datetime)
-                        .toISOString()
-                        .slice(0, 16)
-                    : ""
-                }
-                onChange={handleEditChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="event-end">End Date & Time</label>
-              <input
-                type="datetime-local"
-                id="event-end"
-                name="end_datetime"
-                value={
-                  editingEvent?.end_datetime
-                    ? new Date(editingEvent.end_datetime)
-                        .toISOString()
-                        .slice(0, 16)
-                    : ""
-                }
-                onChange={handleEditChange}
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="event-location">Location</label>
-            <input
-              type="text"
-              id="event-location"
-              name="location"
-              value={editingEvent?.location || ""}
-              onChange={handleEditChange}
-              placeholder="Enter event location"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Departments</label>
-            <select
-              multiple
-              className="select-multiple"
-              value={editingEvent?.department_ids?.map(String) || []}
-              onChange={(e) => {
-                const options = Array.from(e.target.selectedOptions, (option) =>
-                  Number(option.value)
-                );
-                setEditingEvent((prev) =>
-                  prev ? { ...prev, department_ids: options } : null
-                );
-              }}
-            >
-              {departments.map((dept) => (
-                <option key={dept.id} value={String(dept.id)}>
-                  {dept.name}
-                </option>
-              ))}
-            </select>
-            <small>Hold Ctrl/Cmd to select multiple</small>
-          </div>
-
-          <div className="form-group">
-            <label>Programs</label>
-            <select
-              multiple
-              className="select-multiple"
-              value={editingEvent?.program_ids?.map(String) || []}
-              onChange={(e) => {
-                const options = Array.from(e.target.selectedOptions, (option) =>
-                  Number(option.value)
-                );
-                setEditingEvent((prev) =>
-                  prev ? { ...prev, program_ids: options } : null
-                );
-              }}
-            >
-              {programs.map((program) => (
-                <option key={program.id} value={String(program.id)}>
-                  {program.name}
-                </option>
-              ))}
-            </select>
-            <small>Hold Ctrl/Cmd to select multiple</small>
-          </div>
-
-          <div className="form-group">
-            <label>Assign SSG Members</label>
-            <select
-              multiple
-              className="select-multiple"
-              value={editingEvent?.ssg_member_ids?.map(String) || []}
-              onChange={(e) => {
-                const options = Array.from(e.target.selectedOptions, (option) =>
-                  Number(option.value)
-                );
-                setEditingEvent((prev) =>
-                  prev ? { ...prev, ssg_member_ids: options } : null
-                );
-              }}
+        <div style={{ padding: "1.5rem" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <h2 style={{ margin: 0 }}>Edit Event</h2>
+            <button
+              onClick={closeEditModal}
               style={{
-                maxHeight: "200px",
-                overflow: "auto",
+                background: "none",
+                border: "none",
+                fontSize: "1.5rem",
+                cursor: "pointer",
+                color: "#6c757d",
               }}
             >
-              {ssgMembers.map((member) => {
-                // Check if this member is selected
-                const isSelected = editingEvent?.ssg_member_ids?.includes(
-                  member.user_id
-                );
-
-                return (
-                  <option
-                    key={member.user_id}
-                    value={member.user_id}
-                    className={isSelected ? "selected-option" : ""}
-                  >
-                    {member.user.first_name} {member.user.last_name}
-                    {member.position && ` (${member.position})`}
-                  </option>
-                );
-              })}
-            </select>
-            <small>Hold Ctrl/Cmd to select multiple members</small>
+              ×
+            </button>
           </div>
-        </div>
 
-        <div className="modal-footer">
-          <button className="btn btn-cancel" onClick={closeEditModal}>
-            Cancel
-          </button>
-          <button className="btn btn-save" onClick={saveEditedEvent}>
-            Save Changes
-          </button>
+          <div
+            style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+          >
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "0.5rem",
+                  fontWeight: "bold",
+                }}
+              >
+                Event Name
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={editingEvent?.name || ""}
+                onChange={handleEditChange}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  borderRadius: "0.25rem",
+                  border: "1px solid #ced4da",
+                }}
+              />
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "1rem",
+              }}
+            >
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "0.5rem",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Start Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  name="start_datetime"
+                  value={
+                    editingEvent?.start_datetime
+                      ? new Date(editingEvent.start_datetime)
+                          .toISOString()
+                          .slice(0, 16)
+                      : ""
+                  }
+                  onChange={handleEditChange}
+                  style={{
+                    width: "100%",
+                    padding: "0.5rem",
+                    borderRadius: "0.25rem",
+                    border: "1px solid #ced4da",
+                  }}
+                />
+              </div>
+
+              <div>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "0.5rem",
+                    fontWeight: "bold",
+                  }}
+                >
+                  End Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  name="end_datetime"
+                  value={
+                    editingEvent?.end_datetime
+                      ? new Date(editingEvent.end_datetime)
+                          .toISOString()
+                          .slice(0, 16)
+                      : ""
+                  }
+                  onChange={handleEditChange}
+                  style={{
+                    width: "100%",
+                    padding: "0.5rem",
+                    borderRadius: "0.25rem",
+                    border: "1px solid #ced4da",
+                  }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "0.5rem",
+                  fontWeight: "bold",
+                }}
+              >
+                Location
+              </label>
+              <input
+                type="text"
+                name="location"
+                value={editingEvent?.location || ""}
+                onChange={handleEditChange}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  borderRadius: "0.25rem",
+                  border: "1px solid #ced4da",
+                }}
+              />
+            </div>
+
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "0.5rem",
+                  fontWeight: "bold",
+                }}
+              >
+                Departments
+              </label>
+              <select
+                multiple
+                value={editingEvent?.department_ids?.map(String) || []}
+                onChange={(e) => {
+                  const options = Array.from(
+                    e.target.selectedOptions,
+                    (option) => Number(option.value)
+                  );
+                  setEditingEvent((prev) =>
+                    prev ? { ...prev, department_ids: options } : null
+                  );
+                }}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  borderRadius: "0.25rem",
+                  border: "1px solid #ced4da",
+                  minHeight: "100px",
+                }}
+              >
+                {departments.map((dept) => (
+                  <option key={dept.id} value={String(dept.id)}>
+                    {dept.name}
+                  </option>
+                ))}
+              </select>
+              <small style={{ color: "#6c757d" }}>
+                Hold Ctrl/Cmd to select multiple
+              </small>
+            </div>
+
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "0.5rem",
+                  fontWeight: "bold",
+                }}
+              >
+                Programs
+              </label>
+              <select
+                multiple
+                value={editingEvent?.program_ids?.map(String) || []}
+                onChange={(e) => {
+                  const options = Array.from(
+                    e.target.selectedOptions,
+                    (option) => Number(option.value)
+                  );
+                  setEditingEvent((prev) =>
+                    prev ? { ...prev, program_ids: options } : null
+                  );
+                }}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  borderRadius: "0.25rem",
+                  border: "1px solid #ced4da",
+                  minHeight: "100px",
+                }}
+              >
+                {programs.map((program) => (
+                  <option key={program.id} value={String(program.id)}>
+                    {program.name}
+                  </option>
+                ))}
+              </select>
+              <small style={{ color: "#6c757d" }}>
+                Hold Ctrl/Cmd to select multiple
+              </small>
+            </div>
+
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "0.5rem",
+                  fontWeight: "bold",
+                }}
+              >
+                Assign SSG Members
+              </label>
+              <select
+                multiple
+                value={editingEvent?.ssg_member_ids?.map(String) || []}
+                onChange={(e) => {
+                  const options = Array.from(
+                    e.target.selectedOptions,
+                    (option) => Number(option.value)
+                  );
+                  setEditingEvent((prev) =>
+                    prev ? { ...prev, ssg_member_ids: options } : null
+                  );
+                }}
+                style={{
+                  width: "100%",
+                  padding: "0.5rem",
+                  borderRadius: "0.25rem",
+                  border: "1px solid #ced4da",
+                  minHeight: "100px",
+                }}
+              >
+                {ssgMembers.map((member) => (
+                  <option key={member.user_id} value={member.user_id}>
+                    {member.user.first_name} {member.user.last_name} (
+                    {member.position})
+                  </option>
+                ))}
+              </select>
+              <small style={{ color: "#6c757d" }}>
+                Hold Ctrl/Cmd to select multiple
+              </small>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "0.5rem",
+              marginTop: "1.5rem",
+            }}
+          >
+            <button
+              onClick={closeEditModal}
+              style={{
+                backgroundColor: "#6c757d",
+                color: "white",
+                border: "none",
+                padding: "0.5rem 1rem",
+                borderRadius: "0.25rem",
+                cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={saveEditedEvent}
+              style={{
+                backgroundColor: "#0d6efd",
+                color: "white",
+                border: "none",
+                padding: "0.5rem 1rem",
+                borderRadius: "0.25rem",
+                cursor: "pointer",
+              }}
+            >
+              Save Changes
+            </button>
+          </div>
         </div>
       </Modal>
 
@@ -773,60 +907,90 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
       <Modal
         isOpen={isStatusModalOpen}
         onRequestClose={() => setStatusModalOpen(false)}
-        className="modal-content modal-sm"
-        overlayClassName="modal-overlay"
-        ariaHideApp={false}
-        contentLabel="Status Update Modal"
         style={{
           overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.75)",
-            zIndex: 1000,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            padding: "1rem",
+            zIndex: 1000,
           },
           content: {
             position: "relative",
             inset: "auto",
-            background: "white",
-            borderRadius: "var(--border-radius)",
-            padding: 0,
-            maxWidth: "400px",
-            width: "100%",
-            margin: "0",
             border: "none",
-            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.5)",
+            background: "white",
+            borderRadius: "0.5rem",
+            padding: "1.5rem",
+            width: "100%",
+            maxWidth: "400px",
           },
         }}
+        ariaHideApp={false}
       >
-        <div className="modal-header">
-          <h2>Update Status</h2>
-          <button
-            onClick={() => setStatusModalOpen(false)}
-            className="close-button"
+        <div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "1rem",
+            }}
           >
-            ×
-          </button>
-        </div>
+            <h2 style={{ margin: 0 }}>Update Status</h2>
+            <button
+              onClick={() => setStatusModalOpen(false)}
+              style={{
+                background: "none",
+                border: "none",
+                fontSize: "1.5rem",
+                cursor: "pointer",
+                color: "#6c757d",
+              }}
+            >
+              ×
+            </button>
+          </div>
 
-        <div className="modal-body">
-          <p>
+          <p style={{ marginBottom: "1.5rem" }}>
             Are you sure you want to change this event's status to{" "}
             <strong>{statusToUpdate?.toLowerCase()}</strong>?
           </p>
-        </div>
 
-        <div className="modal-footer">
-          <button
-            className="btn btn-cancel"
-            onClick={() => setStatusModalOpen(false)}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "0.5rem",
+            }}
           >
-            Cancel
-          </button>
-          <button className="btn btn-save" onClick={updateEventStatus}>
-            Update Status
-          </button>
+            <button
+              onClick={() => setStatusModalOpen(false)}
+              style={{
+                backgroundColor: "#6c757d",
+                color: "white",
+                border: "none",
+                padding: "0.5rem 1rem",
+                borderRadius: "0.25rem",
+                cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={updateEventStatus}
+              style={{
+                backgroundColor: "#0d6efd",
+                color: "white",
+                border: "none",
+                padding: "0.5rem 1rem",
+                borderRadius: "0.25rem",
+                cursor: "pointer",
+              }}
+            >
+              Update Status
+            </button>
+          </div>
         </div>
       </Modal>
 
@@ -834,60 +998,90 @@ export const ManageEvent: React.FC<ManageEventProps> = ({ role }) => {
       <Modal
         isOpen={isDeleteModalOpen}
         onRequestClose={() => setDeleteModalOpen(false)}
-        className="modal-content modal-sm"
-        overlayClassName="modal-overlay"
-        ariaHideApp={false}
-        contentLabel="Delete Confirmation Modal"
         style={{
           overlay: {
-            backgroundColor: "rgba(0, 0, 0, 0.75)",
-            zIndex: 1000,
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            padding: "1rem",
+            zIndex: 1000,
           },
           content: {
             position: "relative",
             inset: "auto",
-            background: "white",
-            borderRadius: "var(--border-radius)",
-            padding: 0,
-            maxWidth: "400px",
-            width: "100%",
-            margin: "0",
             border: "none",
-            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.5)",
+            background: "white",
+            borderRadius: "0.5rem",
+            padding: "1.5rem",
+            width: "100%",
+            maxWidth: "400px",
           },
         }}
+        ariaHideApp={false}
       >
-        <div className="modal-header">
-          <h2>Delete Event</h2>
-          <button
-            onClick={() => setDeleteModalOpen(false)}
-            className="close-button"
+        <div>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "1rem",
+            }}
           >
-            ×
-          </button>
-        </div>
+            <h2 style={{ margin: 0 }}>Delete Event</h2>
+            <button
+              onClick={() => setDeleteModalOpen(false)}
+              style={{
+                background: "none",
+                border: "none",
+                fontSize: "1.5rem",
+                cursor: "pointer",
+                color: "#6c757d",
+              }}
+            >
+              ×
+            </button>
+          </div>
 
-        <div className="modal-body">
-          <p>
+          <p style={{ marginBottom: "1.5rem" }}>
             Are you sure you want to delete this event? This action cannot be
             undone.
           </p>
-        </div>
 
-        <div className="modal-footer">
-          <button
-            className="btn btn-cancel"
-            onClick={() => setDeleteModalOpen(false)}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "0.5rem",
+            }}
           >
-            Cancel
-          </button>
-          <button className="btn btn-delete" onClick={handleDelete}>
-            Delete
-          </button>
+            <button
+              onClick={() => setDeleteModalOpen(false)}
+              style={{
+                backgroundColor: "#6c757d",
+                color: "white",
+                border: "none",
+                padding: "0.5rem 1rem",
+                borderRadius: "0.25rem",
+                cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDelete}
+              style={{
+                backgroundColor: "#dc3545",
+                color: "white",
+                border: "none",
+                padding: "0.5rem 1rem",
+                borderRadius: "0.25rem",
+                cursor: "pointer",
+              }}
+            >
+              Delete
+            </button>
+          </div>
         </div>
       </Modal>
     </div>

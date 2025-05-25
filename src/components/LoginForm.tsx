@@ -70,10 +70,6 @@ const LoginForm = () => {
     }
   };
 
-  const handleForgotPassword = () => {
-    navigate(`/forgot-password?email=${encodeURIComponent(email)}`);
-  };
-
   return (
     <div className="login-form-container">
       <h4 className="user-login-title">
@@ -132,14 +128,6 @@ const LoginForm = () => {
             />
             <label htmlFor="rememberMe">Remember me</label>
           </div>
-
-          <button
-            type="button"
-            onClick={handleForgotPassword}
-            className="forgot-password"
-          >
-            Forgot Password?
-          </button>
         </div>
 
         <motion.button
@@ -152,12 +140,6 @@ const LoginForm = () => {
           {isLoading ? <span className="spinner"></span> : "Login"}
         </motion.button>
       </form>
-
-      <div className="login-footer">
-        <p>
-          Don't have an account? <a href="/register">Register here</a>
-        </p>
-      </div>
     </div>
   );
 };

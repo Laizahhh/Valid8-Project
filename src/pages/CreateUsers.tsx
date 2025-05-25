@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { NavbarAdmin } from "../components/NavbarAdmin";
 import { Link, useNavigate } from "react-router-dom";
 import {} from "../css/CreateUsers.css";
@@ -63,7 +63,6 @@ export const CreateUsers: React.FC = () => {
     Record<string, string>
   >({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // User state with properly named fields to match backend
   const [user, setUser] = useState<UserCreate>({
@@ -84,8 +83,6 @@ export const CreateUsers: React.FC = () => {
   const [departmentId, setDepartmentId] = useState<number | null>(null);
   const [programId, setProgramId] = useState<number | null>(null);
   const [ssgPosition, setSSGPosition] = useState("");
-  const [profileImage, setProfileImage] = useState<File | null>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // Data from API
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -259,22 +256,6 @@ export const CreateUsers: React.FC = () => {
     setUser({ ...user, roles: newRoles });
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setProfileImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -320,9 +301,6 @@ export const CreateUsers: React.FC = () => {
           });
 
           // Handle face encoding with image if available
-          if (profileImage) {
-            console.log("Face encoding would be processed here");
-          }
         } catch (err) {
           console.error("Error creating student profile:", err);
           hasErrors = true;
@@ -373,8 +351,6 @@ export const CreateUsers: React.FC = () => {
         setDepartmentId(null);
         setProgramId(null);
         setSSGPosition("");
-        setProfileImage(null);
-        setPreviewImage(null);
       }
     } catch (err) {
       console.error("Create user error:", err);
@@ -587,39 +563,6 @@ export const CreateUsers: React.FC = () => {
           {user.roles.includes("student") && (
             <section className="form-section compact-section">
               <h3 className="section-title">Student Details</h3>
-
-              <div className="form-group compact-group">
-                <label>
-                  Profile Image <span className="required">*</span>
-                </label>
-                <div className="image-upload-container compact-upload">
-                  <div
-                    className="image-preview compact-preview"
-                    onClick={triggerFileInput}
-                  >
-                    {previewImage ? (
-                      <img src={previewImage} alt="Preview" />
-                    ) : (
-                      <div className="upload-placeholder">
-                        Click to upload image
-                      </div>
-                    )}
-                  </div>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageChange}
-                    accept="image/*"
-                    style={{ display: "none" }}
-                  />
-                  {validationErrors.profileImage && (
-                    <div className="error-message compact-error">
-                      {validationErrors.profileImage}
-                    </div>
-                  )}
-                </div>
-              </div>
-
               <div className="form-group compact-group">
                 <label htmlFor="studentId">
                   Student ID <span className="required">*</span>

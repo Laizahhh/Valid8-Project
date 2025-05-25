@@ -7,6 +7,7 @@ import {
   FaCheckCircle,
   FaClipboardList,
   FaChartBar,
+  FaPlus,
 } from "react-icons/fa";
 
 export const StudentSsgDashboard = () => {
@@ -35,6 +36,12 @@ export const StudentSsgDashboard = () => {
       description: "Access records and event history.",
       icon: <FaChartBar style={{ color: "#6c757d" }} />,
       link: "/studentssg_records",
+    },
+    {
+      title: "Manual Attendance",
+      description: "Record Attendance",
+      icon: <FaPlus style={{ color: "#17a2b8" }} />, // Teal color
+      link: "/studentssg_manual_attendance",
     },
   ];
 

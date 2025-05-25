@@ -12,6 +12,7 @@ import {
   FaBars,
   FaTimes,
   FaThList,
+  FaPlus,
 } from "react-icons/fa";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
 import userprofile from "../assets/images/userprofile.png";
@@ -69,6 +70,11 @@ export const NavbarStudentSSGEventOrganizer = () => {
       path: "/student_ssg_eventorganizer_manage_event",
       icon: <FaClipboardList />,
       text: "Manage Event",
+    },
+    {
+      path: "/student_ssg_eventorganizer_manual_attendance",
+      icon: <FaPlus />,
+      text: "Manage Attendance",
     },
   ];
 

@@ -45,6 +45,8 @@ export const ManualAttendance: React.FC<ManualAttendanceProps> = ({ role }) => {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [activeAttendances, setActiveAttendances] = useState<Attendance[]>([]);
+  // Add new state for mark absent functionality
+  const [markingAbsent, setMarkingAbsent] = useState(false);
 
   const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -118,8 +120,8 @@ export const ManualAttendance: React.FC<ManualAttendanceProps> = ({ role }) => {
 
   const fetchEvents = async () => {
     try {
-      console.log("Fetching events from:", `${BASE_URL}/events/`);
-      const response = await fetchWithAuth(`${BASE_URL}/events/`);
+      console.log("Fetching events from:", `${BASE_URL}/events`);
+      const response = await fetchWithAuth(`${BASE_URL}/events`);
       if (!response.ok) {
         console.error("Failed to fetch events, status:", response.status);
         const errorText = await response.text();
@@ -232,6 +234,48 @@ export const ManualAttendance: React.FC<ManualAttendanceProps> = ({ role }) => {
     }
   };
 
+  // NEW: Handle mark absent functionality
+  const handleMarkAbsent = async () => {
+    if (!selectedEventId) {
+      showMessage("Please select an event first", "error");
+      return;
+    }
+
+    const confirmMessage = `This will mark all students who timed in but didn't time out as ABSENT for the selected event. Are you sure?`;
+
+    if (!window.confirm(confirmMessage)) {
+      return;
+    }
+
+    setMarkingAbsent(true);
+    try {
+      // Fixed: Send event_id as query parameter instead of request body
+      const response = await fetchWithAuth(
+        `${BASE_URL}/attendance/mark-absent-no-timeout?event_id=${selectedEventId}`,
+        {
+          method: "POST",
+          // Remove the body since event_id is now in query params
+        }
+      );
+
+      const result = await response.json();
+      showMessage(
+        `Successfully marked ${result.updated_count} students as absent`,
+        "success"
+      );
+      fetchActiveAttendances(); // Refresh active attendances
+    } catch (error) {
+      showMessage(
+        error instanceof Error
+          ? error.message
+          : "Failed to mark students absent",
+        "error"
+      );
+    } finally {
+      setMarkingAbsent(false);
+    }
+  };
+
   const formatTime = (timeString: string) => {
     return new Date(timeString).toLocaleTimeString("en-US", {
       hour: "2-digit",
@@ -247,6 +291,9 @@ export const ManualAttendance: React.FC<ManualAttendanceProps> = ({ role }) => {
       year: "numeric",
     });
   };
+
+  // Get selected event details for display
+  const selectedEvent = events.find((event) => event.id === selectedEventId);
 
   return (
     <div className="attendance-container">
@@ -329,8 +376,32 @@ export const ManualAttendance: React.FC<ManualAttendanceProps> = ({ role }) => {
         {/* Active Attendances */}
         {selectedEventId && (
           <div className="attendance-card">
-            <h2>Active Attendances</h2>
-            <p className="card-subtitle">Students who haven't timed out yet</p>
+            <div className="card-header-with-action">
+              <div>
+                <h2>Active Attendances</h2>
+                <p className="card-subtitle">
+                  Students who haven't timed out yet
+                </p>
+              </div>
+              {/* NEW: Mark Absent Button */}
+              {activeAttendances.length > 0 && (
+                <button
+                  onClick={handleMarkAbsent}
+                  disabled={markingAbsent}
+                  className="btn btn-warning btn-mark-absent"
+                  title="Mark all active attendances as absent (for students who didn't time out)"
+                >
+                  {markingAbsent ? "Marking Absent..." : "Mark All as Absent"}
+                </button>
+              )}
+            </div>
+
+            {selectedEvent && (
+              <div className="event-info">
+                <strong>Event:</strong> {selectedEvent.name} (
+                {activeAttendances.length} active)
+              </div>
+            )}
 
             {activeAttendances.length === 0 ? (
               <div className="empty-state">
@@ -455,6 +526,40 @@ export const ManualAttendance: React.FC<ManualAttendanceProps> = ({ role }) => {
           font-size: 0.9rem;
         }
 
+        /* NEW: Card header with action button */
+        .card-header-with-action {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 15px;
+        }
+
+        .card-header-with-action h2 {
+          margin: 0 0 5px 0;
+        }
+
+        .card-header-with-action .card-subtitle {
+          margin-bottom: 0;
+        }
+
+        .btn-mark-absent {
+          flex-shrink: 0;
+          margin-left: 15px;
+          font-size: 0.9rem;
+          padding: 8px 16px;
+        }
+
+        /* NEW: Event info section */
+        .event-info {
+          background-color: #f8f9fa;
+          padding: 10px 15px;
+          border-radius: 6px;
+          margin-bottom: 15px;
+          font-size: 0.9rem;
+          color: #495057;
+          border-left: 4px solid #007bff;
+        }
+
         .attendance-form {
           display: flex;
           flex-direction: column;
@@ -523,6 +628,17 @@ export const ManualAttendance: React.FC<ManualAttendanceProps> = ({ role }) => {
           transform: translateY(-1px);
         }
 
+        /* NEW: Warning button style */
+        .btn-warning {
+          background-color: #ffc107;
+          color: #212529;
+        }
+
+        .btn-warning:hover:not(:disabled) {
+          background-color: #e0a800;
+          transform: translateY(-1px);
+        }
+
         .empty-state {
           text-align: center;
           padding: 40px 20px;
@@ -570,6 +686,19 @@ export const ManualAttendance: React.FC<ManualAttendanceProps> = ({ role }) => {
           color: #666;
           font-size: 0.85rem;
           font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+          .card-header-with-action {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 15px;
+          }
+
+          .btn-mark-absent {
+            margin-left: 0;
+            width: 100%;
+          }
         }
 
         @media (max-width: 480px) {

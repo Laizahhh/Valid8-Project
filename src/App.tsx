@@ -208,6 +208,10 @@ const App = () => {
             element={<ManageEvent role="student-ssg-eventorganizer" />}
           />
           <Route
+            path="/student_ssg_eventorganizer_manual_attendance"
+            element={<ManageEvent role="student-ssg-eventorganizer" />}
+          />
+          <Route
             path="/student_ssg_eventorganizer_profile"
             element={<Profile role="student-ssg-eventorganizer" />}
           />

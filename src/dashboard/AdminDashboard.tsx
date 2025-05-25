@@ -3,7 +3,12 @@ import { Link } from "react-router-dom";
 import { NavbarAdmin } from "../components/NavbarAdmin";
 
 // Import colorful icons
-import { FaClipboardList, FaUserShield, FaCheckCircle } from "react-icons/fa";
+import {
+  FaClipboardList,
+  FaUserShield,
+  FaCheckCircle,
+  FaPlus,
+} from "react-icons/fa";
 
 export const AdminDashboard: React.FC = () => {
   // Define card data with colorful icons - exactly as in HomeUser
@@ -25,6 +30,12 @@ export const AdminDashboard: React.FC = () => {
       description: "Create, update, and manage user accounts and roles.",
       icon: <FaCheckCircle style={{ color: "#dc3545" }} />, // Red color
       link: "/admin_create_users",
+    },
+    {
+      title: "Create Department & Programm",
+      description: "Create, update, and manage departments & programs.",
+      icon: <FaPlus style={{ color: "#dc3545" }} />, // Red color
+      link: "/admin_create_department_program",
     },
   ];
 

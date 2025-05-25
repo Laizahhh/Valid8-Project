@@ -8,6 +8,7 @@ import {
   FaTimes,
   FaThList,
   FaEdit,
+  FaPlus,
 } from "react-icons/fa";
 import { useUser } from "../context/UserContext";
 import logoValid8 from "../assets/images/logo-valid83_transparent.png";
@@ -134,9 +135,9 @@ export const NavbarAdmin = () => {
                   isActive ? "admin-nav-link active" : "admin-nav-link"
                 }
                 onClick={() => setSidebarOpen(false)}
-                title="Create Users"
+                title="Create Department & Program"
               >
-                <FaPlusCircle className="nav-icon" />
+                <FaPlus className="nav-icon" />
                 <span className="nav-text">Create Department & Program</span>
               </NavLink>
             </li>

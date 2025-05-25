@@ -105,6 +105,12 @@ export const HomeUser: React.FC<HomeUserProps> = ({ role }) => {
         icon: <FaCheckCircle style={{ color: "#dc3545" }} />, // Red color
         link: "/admin_create_users",
       },
+      {
+        title: "Create Department & Programm",
+        description: "Create, update, and manage departments & programs.",
+        icon: <FaPlus style={{ color: "#dc3545" }} />, // Red color
+        link: "/admin_create_department_program",
+      },
     ],
     "student-ssg": [
       {
@@ -160,8 +166,8 @@ export const HomeUser: React.FC<HomeUserProps> = ({ role }) => {
       {
         title: "Manual Attendance",
         description: "Record Attendance.",
-        icon: <FaUsers style={{ color: "#17a2b8" }} />, // Teal color
-        link: "/student_ssg_eventorganizer_manua_attendance",
+        icon: <FaPlus style={{ color: "#17a2b8" }} />, // Teal color
+        link: "/student_ssg_eventorganizer_manual_attendance",
       },
       {
         title: "Records",
