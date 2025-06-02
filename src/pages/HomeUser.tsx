@@ -88,12 +88,6 @@ export const HomeUser: React.FC<HomeUserProps> = ({ role }) => {
         link: "/admin_events",
       },
       {
-        title: "Reports",
-        description: "Generate and analyze event attendance and statistics.",
-        icon: <FaFileAlt style={{ color: "#007bff" }} />, // Blue color
-        link: "/admin_reports",
-      },
-      {
         title: "Manage Users",
         description: "Create, update, and manage user accounts and roles.",
         icon: <FaUserShield style={{ color: "#dc3545" }} />, // Red color
